@@ -1,0 +1,25 @@
+[36mvite v5.4.21 [32mbuilding for production...[36m[39m
+transforming...
+[32mG£ô[39m 460 modules transformed.
+[31mx[39m Build failed in 1.40s
+[31merror during build:
+[31msrc/pages/EMICalculatorPage.jsx (6:9): "FiCalculator" is not exported by "node_modules/react-icons/fi/index.esm.js", imported by "src/pages/EMICalculatorPage.jsx".[31m
+file: [36mD:/Projects/PVR Groups/frontend/src/pages/EMICalculatorPage.jsx:6:9[31m
+[33m
+4: import Footer from '../components/Footer';
+5: import HeroBanner from '../components/HeroBanner';
+6: import { FiCalculator } from 'react-icons/fi';
+            ^
+7: 
+8: const EMICalculatorPage = () => {
+[31m
+    at getRollupError (file:///D:/Projects/PVR%20Groups/frontend/node_modules/rollup/dist/es/shared/parseAst.js:402:41)
+    at error (file:///D:/Projects/PVR%20Groups/frontend/node_modules/rollup/dist/es/shared/parseAst.js:398:42)
+    at Module.error (file:///D:/Projects/PVR%20Groups/frontend/node_modules/rollup/dist/es/shared/node-entry.js:17040:16)
+    at Module.traceVariable (file:///D:/Projects/PVR%20Groups/frontend/node_modules/rollup/dist/es/shared/node-entry.js:17452:29)
+    at ModuleScope.findVariable (file:///D:/Projects/PVR%20Groups/frontend/node_modules/rollup/dist/es/shared/node-entry.js:15070:39)
+    at ReturnValueScope.findVariable (file:///D:/Projects/PVR%20Groups/frontend/node_modules/rollup/dist/es/shared/node-entry.js:5673:38)
+    at FunctionBodyScope.findVariable (file:///D:/Projects/PVR%20Groups/frontend/node_modules/rollup/dist/es/shared/node-entry.js:5673:38)
+    at Identifier.bind (file:///D:/Projects/PVR%20Groups/frontend/node_modules/rollup/dist/es/shared/node-entry.js:5447:40)
+    at CallExpression.bind (file:///D:/Projects/PVR%20Groups/frontend/node_modules/rollup/dist/es/shared/node-entry.js:2825:28)
+    at CallExpression.bind (file:///D:/Projects/PVR%20Groups/frontend/node_modules/rollup/dist/es/shared/node-entry.js:12179:15)[39m
