@@ -14,7 +14,7 @@ router.post('/book', async (req, res) => {
 
         // Notify admin
         await sendEmail({
-            to: 'raintreepark02@gmail.com',
+            to: process.env.EMAIL_USER || 'pvrgroupsvijayawada@gmail.com',
             subject: 'New Site Visit Booking - PVR Groups',
             html: `<h2>New Site Visit Request</h2><p>Name: ${name}</p><p>Email: ${email}</p><p>Phone: ${phone}</p><p>Date: ${preferredDate}</p><p>Message: ${message || 'N/A'}</p>`
         });

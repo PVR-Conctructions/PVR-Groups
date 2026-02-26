@@ -199,8 +199,8 @@ const ProjectDetailPage = () => {
                         </div>
 
                         {/* Sidebar */}
-                        <div className="space-y-6">
-                            <div className="bg-white dark:bg-dark-card rounded-2xl p-6 border border-gray-100 dark:border-dark-border sticky top-24">
+                        <div className="space-y-6 sticky top-24 self-start max-h-[calc(100vh-8rem)] overflow-y-auto pr-2 custom-scrollbar">
+                            <div className="bg-white dark:bg-dark-card rounded-2xl p-6 border border-gray-100 dark:border-dark-border">
                                 {project.price && (
                                     <div className="mb-4">
                                         <span className="text-sm text-gray-500">Starting from</span>
@@ -241,13 +241,28 @@ const ProjectDetailPage = () => {
                             {showBooking && (
                                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-white dark:bg-dark-card rounded-2xl p-6 border border-gray-100 dark:border-dark-border">
                                     <h3 className="text-lg font-heading font-bold text-gray-900 dark:text-white mb-4">Book a Site Visit</h3>
-                                    <form onSubmit={handleBooking} className="space-y-3">
-                                        {['name', 'email', 'phone'].map(f => (
-                                            <input key={f} type={f === 'email' ? 'email' : 'text'} value={bookingForm[f]} onChange={(e) => setBookingForm({ ...bookingForm, [f]: e.target.value })} placeholder={f.charAt(0).toUpperCase() + f.slice(1)} className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-dark-border border border-gray-200 dark:border-dark-border text-gray-800 dark:text-white text-sm" required />
-                                        ))}
-                                        <input type="date" value={bookingForm.preferredDate} onChange={(e) => setBookingForm({ ...bookingForm, preferredDate: e.target.value })} className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-dark-border border border-gray-200 dark:border-dark-border text-gray-800 dark:text-white text-sm" required />
-                                        <textarea value={bookingForm.message} onChange={(e) => setBookingForm({ ...bookingForm, message: e.target.value })} rows={2} placeholder="Message (optional)" className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-dark-border border border-gray-200 dark:border-dark-border text-gray-800 dark:text-white text-sm" />
-                                        <button type="submit" className="w-full py-2.5 rounded-xl btn-shimmer text-white font-medium text-sm">Confirm Booking</button>
+                                    <form onSubmit={handleBooking} className="space-y-4">
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-500 mb-1 ml-1">Full Name</label>
+                                            <input type="text" value={bookingForm.name} onChange={(e) => setBookingForm({ ...bookingForm, name: e.target.value })} placeholder="Enter your full name" className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-dark-border border border-gray-200 dark:border-dark-border text-gray-800 dark:text-white text-sm" required />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-500 mb-1 ml-1">Email Address</label>
+                                            <input type="email" value={bookingForm.email} onChange={(e) => setBookingForm({ ...bookingForm, email: e.target.value })} placeholder="Enter your email address" className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-dark-border border border-gray-200 dark:border-dark-border text-gray-800 dark:text-white text-sm" required />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-500 mb-1 ml-1">Phone Number</label>
+                                            <input type="tel" value={bookingForm.phone} onChange={(e) => setBookingForm({ ...bookingForm, phone: e.target.value })} placeholder="Enter your phone number" className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-dark-border border border-gray-200 dark:border-dark-border text-gray-800 dark:text-white text-sm" required />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-500 mb-1 ml-1">Date of Visit</label>
+                                            <input type="date" value={bookingForm.preferredDate} onChange={(e) => setBookingForm({ ...bookingForm, preferredDate: e.target.value })} className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-dark-border border border-gray-200 dark:border-dark-border text-gray-800 dark:text-white text-sm" required />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-500 mb-1 ml-1">Message (Optional)</label>
+                                            <textarea value={bookingForm.message} onChange={(e) => setBookingForm({ ...bookingForm, message: e.target.value })} rows={2} placeholder="Any specific requirements?" className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-dark-border border border-gray-200 dark:border-dark-border text-gray-800 dark:text-white text-sm" />
+                                        </div>
+                                        <button type="submit" className="w-full py-2.5 rounded-xl btn-shimmer text-white font-medium text-sm mt-2">Confirm Booking</button>
                                     </form>
                                 </motion.div>
                             )}

@@ -13,13 +13,13 @@ router.post('/campaign', auth, adminAuth, async (req, res) => {
 
         let recipients = [];
         if (targetGroup === 'all') {
-            recipients = await User.find({ role: 'user' }).select('email name');
+            recipients = await User.find({}).select('email name');
         } else if (targetGroup === 'newsletter') {
             const Newsletter = require('../models/Newsletter');
             const subs = await Newsletter.find();
             recipients = subs.map(s => ({ email: s.email, name: 'Subscriber' }));
         } else {
-            recipients = await User.find({ role: 'user' }).select('email name');
+            recipients = await User.find({}).select('email name');
         }
 
         let sent = 0;
@@ -28,8 +28,9 @@ router.post('/campaign', auth, adminAuth, async (req, res) => {
         for (const user of recipients) {
             try {
                 const personalized = htmlContent.replace(/{{name}}/g, user.name || 'Valued Customer');
-                await sendEmail({ to: user.email, subject, html: personalized });
-                sent++;
+                const result = await sendEmail({ to: user.email, subject, html: personalized });
+                if (result.success) sent++;
+                else failed++;
             } catch (err) { failed++; }
         }
 
