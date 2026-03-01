@@ -36,4 +36,30 @@ router.get('/my', auth, async (req, res) => {
     }
 });
 
+// Admin: Get all site visits
+const adminAuth = require('../middleware/adminAuth');
+router.get('/admin/all', auth, adminAuth, async (req, res) => {
+    try {
+        const visits = await SiteVisit.find()
+            .populate('projectId', 'name')
+            .sort({ createdAt: -1 });
+        res.json(visits);
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
+
+// Admin: Delete a site visit
+router.delete('/admin/:id', auth, adminAuth, async (req, res) => {
+    try {
+        const visit = await SiteVisit.findByIdAndDelete(req.params.id);
+        if (!visit) {
+            return res.status(404).json({ message: 'Site visit not found' });
+        }
+        res.json({ message: 'Site visit deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
+
 module.exports = router;

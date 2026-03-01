@@ -25,14 +25,17 @@ router.post('/campaign', auth, adminAuth, async (req, res) => {
         let sent = 0;
         let failed = 0;
 
-        for (const user of recipients) {
+        // Process all email sending currently to drastically speed up completion time
+        const sendPromises = recipients.map(async (user) => {
             try {
                 const personalized = htmlContent.replace(/{{name}}/g, user.name || 'Valued Customer');
                 const result = await sendEmail({ to: user.email, subject, html: personalized });
                 if (result.success) sent++;
                 else failed++;
             } catch (err) { failed++; }
-        }
+        });
+
+        await Promise.all(sendPromises);
 
         res.json({ message: 'Campaign sent', sent, failed, total: recipients.length });
     } catch (error) {
