@@ -90,7 +90,7 @@ const AdminProjects = () => {
                                 <option value="ongoing">Ongoing</option>
                                 <option value="completed">Completed</option>
                             </select>
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <input type="text" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} placeholder="Price (e.g., ₹45L)" className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-dark-border border border-gray-200 dark:border-dark-border text-gray-800 dark:text-white text-sm" />
                                 <input type="text" value={form.area} onChange={(e) => setForm({ ...form, area: e.target.value })} placeholder="Area (e.g., 1200 sq.ft)" className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-dark-border border border-gray-200 dark:border-dark-border text-gray-800 dark:text-white text-sm" />
                             </div>

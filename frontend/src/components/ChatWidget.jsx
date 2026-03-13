@@ -34,7 +34,10 @@ const ChatWidget = () => {
 
         // Socket.io connection
         if (!socket) {
-            socket = io('http://localhost:5000', { transports: ['websocket'] });
+            const socketUrl = import.meta.env.PROD
+                ? 'https://pvr-groups-1.onrender.com'
+                : 'http://localhost:5000';
+            socket = io(socketUrl, { transports: ['websocket'] });
         }
         socket.emit('register', user._id);
 
@@ -191,10 +194,10 @@ const ChatWidget = () => {
                                     ) : (
                                         <div className="flex flex-col gap-1" style={{ maxWidth: '82%' }}>
                                             <div className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed whitespace-pre-line ${msg.from === 'user'
-                                                    ? 'bg-primary-700 text-white rounded-br-md'
-                                                    : msg.isReal
-                                                        ? 'bg-gold-400/20 border border-gold-400/40 text-gray-800 dark:text-gray-200 rounded-bl-md'
-                                                        : 'bg-gray-100 dark:bg-dark-border text-gray-800 dark:text-gray-200 rounded-bl-md'
+                                                ? 'bg-primary-700 text-white rounded-br-md'
+                                                : msg.isReal
+                                                    ? 'bg-gold-400/20 border border-gold-400/40 text-gray-800 dark:text-gray-200 rounded-bl-md'
+                                                    : 'bg-gray-100 dark:bg-dark-border text-gray-800 dark:text-gray-200 rounded-bl-md'
                                                 }`}>
                                                 {msg.isReal && <span className="text-gold-400 text-xs font-bold block mb-1">👤 Admin Reply</span>}
                                                 {msg.text}

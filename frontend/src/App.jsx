@@ -28,6 +28,7 @@ import AdminAnnouncements from './pages/admin/AdminAnnouncements';
 import AdminMessages from './pages/admin/AdminMessages';
 import AdminPayments from './pages/admin/AdminPayments';
 import AdminEmailCampaign from './pages/admin/AdminEmailCampaign';
+import AdminBookings from './pages/admin/AdminBookings';
 
 // Components
 import ProtectedRoute from './components/ProtectedRoute';
@@ -81,6 +82,7 @@ function App() {
                     <Route path="announcements" element={<AdminAnnouncements />} />
                     <Route path="messages" element={<AdminMessages />} />
                     <Route path="email-campaign" element={<AdminEmailCampaign />} />
+                    <Route path="bookings" element={<AdminBookings />} />
                 </Route>
 
                 <Route path="*" element={<Navigate to="/" />} />
