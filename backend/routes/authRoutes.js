@@ -41,19 +41,19 @@ router.post('/register', [
             } catch (refErr) { console.error('Referral processing error:', refErr.message); }
         }
 
-        // Send verification email (stubbed in dev)
-        await sendEmail({
+        // Send verification email in background (non-blocking to avoid slow response)
+        sendEmail({
             to: email,
             subject: 'Welcome to PVR Groups - Verify Your Email',
             html: `<h1>Welcome to PVR Groups, ${name}!</h1><p>Click <a href="${process.env.FRONTEND_URL}/verify/${verificationToken}">here</a> to verify your email.</p>`
-        });
+        }).catch(err => console.error('Verification email failed:', err.message));
 
-        // Notify admin
-        await sendEmail({
+        // Notify admin in background (non-blocking)
+        sendEmail({
             to: 'raintreepark02@gmail.com',
             subject: 'New User Registration - PVR Groups',
             html: `<h2>New User Registered</h2><p>Name: ${name}</p><p>Email: ${email}</p><p>Phone: ${phone}</p>`
-        });
+        }).catch(err => console.error('Admin notification email failed:', err.message));
 
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
 

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../hooks/useApi';
 
 const AuthContext = createContext(null);
 
@@ -18,21 +18,35 @@ export const AuthProvider = ({ children }) => {
         }
     }, [token]);
 
-    const fetchUser = async () => {
-        try {
-            const res = await axios.get('/api/auth/me', {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            setUser(res.data.user);
-        } catch (err) {
-            logout();
-        } finally {
-            setLoading(false);
+    const fetchUser = async (retries = 3) => {
+        for (let attempt = 1; attempt <= retries; attempt++) {
+            try {
+                const res = await api.get('/auth/me');
+                setUser(res.data.user);
+                setLoading(false);
+                return;
+            } catch (err) {
+                // If it's a real 401 (invalid/expired token), logout immediately
+                if (err.response?.status === 401) {
+                    logout();
+                    setLoading(false);
+                    return;
+                }
+                // Network error or timeout — retry if attempts remain
+                if (attempt < retries) {
+                    await new Promise(r => setTimeout(r, 1000 * attempt));
+                    continue;
+                }
+                // All retries exhausted — keep existing token, don't log out
+                // User can still navigate; API calls will re-check auth
+                console.error('Failed to fetch user after retries:', err.message);
+                setLoading(false);
+            }
         }
     };
 
     const login = async (email, password) => {
-        const res = await axios.post('/api/auth/login', { email, password });
+        const res = await api.post('/auth/login', { email, password });
         const { token: newToken, user: userData } = res.data;
         localStorage.setItem('pvr_token', newToken);
         setToken(newToken);
@@ -41,7 +55,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     const register = async (name, email, phone, password) => {
-        const res = await axios.post('/api/auth/register', { name, email, phone, password });
+        const res = await api.post('/auth/register', { name, email, phone, password });
         const { token: newToken, user: userData } = res.data;
         localStorage.setItem('pvr_token', newToken);
         setToken(newToken);
