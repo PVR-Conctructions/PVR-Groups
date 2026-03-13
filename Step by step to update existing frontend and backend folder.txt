@@ -1,0 +1,109 @@
+Perfect ✅ Here is your exact step-by-step update process.
+
+🟢 🔧 Updating Backend (Render + Bitbucket)
+1️⃣ Make changes in VS Code
+
+Edit backend code.
+
+2️⃣ Push to Bitbucket
+
+From project root:
+
+git add .
+git commit -m "update backend features"
+git push
+3️⃣ Deploy on Render
+
+Go to:
+
+Render → Your Backend Service
+
+If Auto Deploy ON → it redeploys automatically.
+
+If not:
+
+Click → Manual Deploy → Deploy latest commit
+
+✅ Backend updated.
+
+🔵 🎨 Updating Frontend (Manual Netlify Deploy)
+1️⃣ Make changes in VS Code
+
+Edit frontend code.
+
+2️⃣ Build again
+cd frontend
+npm run build
+
+This updates the dist folder.
+
+3️⃣ Upload to Netlify
+
+Go to Netlify → Deploys
+Drag & drop the NEW dist folder.
+
+✅ Frontend updated.
+
+⚡ Full Update Flow (Both)
+
+Change code
+
+Push backend → Render deploy
+
+Rebuild frontend
+
+Upload new dist
+
+Done 🚀
+
+⭐ Pro Tip (Future Improvement)
+
+If you connect Netlify directly to Bitbucket:
+
+Then updates become just:
+
+git push
+
+And everything auto deploys.
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+VERCEL
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Since both are connected to Bitbucket, updates are automatic.
+
+✅ Normal Update Flow (Recommended)
+1️⃣ Make changes locally
+
+Edit frontend
+
+Edit backend
+
+2️⃣ From project root folder
+
+Go to:
+
+D:\Projects\PVR Groups
+
+Then run:
+
+git add .
+git commit -m "update frontend and backend"
+git push
+🔄 What Happens Automatically
+git push
+   ↓
+Bitbucket
+   ↓
+Render → backend redeploy
+Vercel → frontend redeploy
+
+You don’t need to manually deploy again.
+-----------------------------------------------
+
+If You Changed ONLY Frontend
+
+cd D:\Projects\PVR Groups
+cd frontend
+git add .
+git commit -m "frontend update"
+git push
