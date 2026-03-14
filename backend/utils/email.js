@@ -21,17 +21,23 @@ const sendEmail = async ({ to, subject, html }) => {
             },
         });
 
-        await transporter.sendMail({
+        const info = await transporter.sendMail({
             from: `"PVR Groups" <${process.env.EMAIL_USER}>`,
             to,
             subject,
             html,
         });
 
+        // Check if the recipient was rejected by the SMTP server
+        if (info.rejected && info.rejected.length > 0) {
+            console.error(`Email rejected for: ${info.rejected.join(', ')}`);
+            return { success: false, error: 'Recipient rejected' };
+        }
+
         return { success: true };
     } catch (error) {
-        console.error('Email send error:', error);
-        return { success: false, error };
+        console.error('Email send error:', error.message || error);
+        return { success: false, error: error.message || error };
     }
 };
 

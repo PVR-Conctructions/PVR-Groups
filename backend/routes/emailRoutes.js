@@ -5,14 +5,35 @@ const auth = require('../middleware/auth');
 const adminAuth = require('../middleware/adminAuth');
 const router = express.Router();
 
-// Send bulk email campaign
+// In-memory campaign status tracker
+let campaignStatus = {
+    running: false,
+    sent: 0,
+    failed: 0,
+    total: 0,
+    message: '',
+    lastUpdated: null
+};
+
+// Get campaign status
+router.get('/campaign/status', auth, adminAuth, (req, res) => {
+    res.json(campaignStatus);
+});
+
+// Send bulk email campaign (fire-and-forget)
 router.post('/campaign', auth, adminAuth, async (req, res) => {
     try {
-        const { subject, htmlContent, targetGroup } = req.body;
+        const { subject, htmlContent, targetGroup, selectedUserIds } = req.body;
         if (!subject || !htmlContent) return res.status(400).json({ message: 'Subject and content required' });
 
+        if (campaignStatus.running) {
+            return res.status(409).json({ message: 'A campaign is already in progress', ...campaignStatus });
+        }
+
         let recipients = [];
-        if (targetGroup === 'all') {
+        if (targetGroup === 'selected' && selectedUserIds && selectedUserIds.length > 0) {
+            recipients = await User.find({ _id: { $in: selectedUserIds } }).select('email name');
+        } else if (targetGroup === 'all') {
             recipients = await User.find({}).select('email name');
         } else if (targetGroup === 'newsletter') {
             const Newsletter = require('../models/Newsletter');
@@ -22,23 +43,49 @@ router.post('/campaign', auth, adminAuth, async (req, res) => {
             recipients = await User.find({}).select('email name');
         }
 
-        let sent = 0;
-        let failed = 0;
+        if (recipients.length === 0) {
+            return res.json({ message: 'No recipients found', sent: 0, failed: 0, total: 0 });
+        }
 
-        // Process all email sending currently to drastically speed up completion time
-        const sendPromises = recipients.map(async (user) => {
-            try {
-                const personalized = htmlContent.replace(/{{name}}/g, user.name || 'Valued Customer');
-                const result = await sendEmail({ to: user.email, subject, html: personalized });
-                if (result.success) sent++;
-                else failed++;
-            } catch (err) { failed++; }
-        });
+        // Initialize campaign status
+        campaignStatus = {
+            running: true,
+            sent: 0,
+            failed: 0,
+            total: recipients.length,
+            message: 'Sending...',
+            lastUpdated: new Date()
+        };
 
-        await Promise.all(sendPromises);
+        // Respond immediately to the frontend
+        res.json({ message: 'Campaign started', sent: 0, failed: 0, total: recipients.length, started: true });
 
-        res.json({ message: 'Campaign sent', sent, failed, total: recipients.length });
+        // Process emails in the background
+        (async () => {
+            for (const user of recipients) {
+                try {
+                    const personalized = htmlContent.replace(/{{name}}/g, user.name || 'Valued Customer');
+                    const result = await sendEmail({ to: user.email, subject, html: personalized });
+                    if (result.success) {
+                        campaignStatus.sent++;
+                    } else {
+                        campaignStatus.failed++;
+                    }
+                } catch (err) {
+                    console.error("Failed to send to:", user.email, err.message);
+                    campaignStatus.failed++;
+                }
+                campaignStatus.lastUpdated = new Date();
+            }
+            campaignStatus.running = false;
+            campaignStatus.message = 'Campaign completed';
+            console.log(`✅ Campaign finished. Sent: ${campaignStatus.sent}, Failed: ${campaignStatus.failed}`);
+        })();
+
     } catch (error) {
+        console.error("Campaign send error:", error);
+        campaignStatus.running = false;
+        campaignStatus.message = 'Campaign failed';
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 });
