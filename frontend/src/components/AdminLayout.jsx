@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { FiGrid, FiFolder, FiUsers, FiMessageSquare, FiBell, FiLogOut, FiArrowLeft, FiSun, FiMoon, FiMail, FiDollarSign, FiMenu, FiX } from 'react-icons/fi';
+import { FiGrid, FiFolder, FiUsers, FiMessageSquare, FiBell, FiLogOut, FiArrowLeft, FiSun, FiMoon, FiMail, FiDollarSign, FiMenu, FiX, FiPhoneCall } from 'react-icons/fi';
 
 const AdminLayout = () => {
     const { logout } = useAuth();
@@ -19,6 +19,7 @@ const AdminLayout = () => {
         { to: '/admin/feedback', icon: FiMessageSquare, label: 'Feedback' },
         { to: '/admin/announcements', icon: FiBell, label: 'Announcements' },
         { to: '/admin/messages', icon: FiMail, label: 'Messages' },
+        { to: '/admin/contacts', icon: FiPhoneCall, label: 'Contacts' },
         { to: '/admin/email-campaign', icon: FiMail, label: 'Email Campaigns' },
     ];
 

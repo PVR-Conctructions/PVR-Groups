@@ -65,6 +65,7 @@ app.use('/api/analytics', require('./routes/analyticsRoutes'));
 app.use('/api/email', require('./routes/emailRoutes'));
 app.use('/api/recommendations', require('./routes/recommendationRoutes'));
 app.use('/api/chat', require('./routes/chatRoutes'));
+app.use('/api/contacts', require('./routes/contactRoutes'));
 
 // Health check
 app.get('/api/health', (req, res) => res.json({ status: 'OK', timestamp: new Date() }));

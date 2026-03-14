@@ -12,11 +12,13 @@ router.post('/book', async (req, res) => {
 
         const visit = await SiteVisit.create({ name, email, phone, projectId, preferredDate, message });
 
-        // Notify admin
-        await sendEmail({
+        // Notify admin asynchronously so it doesn't block the request
+        sendEmail({
             to: process.env.EMAIL_USER || 'pvrgroupsvijayawada@gmail.com',
             subject: 'New Site Visit Booking - PVR Groups',
             html: `<h2>New Site Visit Request</h2><p>Name: ${name}</p><p>Email: ${email}</p><p>Phone: ${phone}</p><p>Date: ${preferredDate}</p><p>Message: ${message || 'N/A'}</p>`
+        }).catch(emailErr => {
+            console.error('Failed to send email notification:', emailErr);
         });
 
         res.status(201).json({ message: 'Site visit booked successfully!', visit });

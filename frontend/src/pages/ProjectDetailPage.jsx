@@ -23,6 +23,7 @@ const ProjectDetailPage = () => {
     const [bookingForm, setBookingForm] = useState({ name: user?.name || '', email: user?.email || '', phone: user?.phone || '', preferredDate: '', message: 'I am interested in this project and would like to learn more.' });
     const [bookingMsg, setBookingMsg] = useState('');
     const [bookingSuccess, setBookingSuccess] = useState(false);
+    const [bookingLoading, setBookingLoading] = useState(false);
     const [showBooking, setShowBooking] = useState(false);
     const [isFav, setIsFav] = useState(false);
 
@@ -64,13 +65,24 @@ const ProjectDetailPage = () => {
 
     const handleBooking = async (e) => {
         e.preventDefault();
+        
+        if (!bookingForm.preferredDate) {
+            setBookingMsg('Please select a Date of Visit.');
+            return;
+        }
+
+        setBookingMsg('');
+        setBookingLoading(true);
         try {
             await api.post('/site-visit/book', { ...bookingForm, projectId: id });
+            setBookingMsg('');
             setBookingSuccess(true);
             setBookingForm({ name: user?.name || '', email: user?.email || '', phone: user?.phone || '', preferredDate: '', message: 'I am interested in this project and would like to learn more.' });
             setShowBooking(false);
         } catch (err) {
             setBookingMsg(err.response?.data?.message || 'Failed to book visit');
+        } finally {
+            setBookingLoading(false);
         }
     };
 
@@ -297,7 +309,9 @@ const ProjectDetailPage = () => {
                                             <label className="block text-xs font-medium text-gray-500 mb-1 ml-1">Message (Optional)</label>
                                             <textarea value={bookingForm.message} onChange={(e) => setBookingForm({ ...bookingForm, message: e.target.value })} rows={2} placeholder="Any specific requirements?" className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-dark-border border border-gray-200 dark:border-dark-border text-gray-800 dark:text-white text-sm" />
                                         </div>
-                                        <button type="submit" className="w-full py-2.5 rounded-xl btn-shimmer text-white font-medium text-sm mt-2">Confirm Booking</button>
+                                        <button type="submit" disabled={bookingLoading} className="w-full py-2.5 rounded-xl btn-shimmer text-white font-medium text-sm mt-2 disabled:opacity-50">
+                                            {bookingLoading ? 'Processing...' : 'Confirm Booking'}
+                                        </button>
                                         {bookingMsg && <p className="text-red-400 text-sm mt-2 text-center">{bookingMsg}</p>}
                                     </form>
                                 </motion.div>

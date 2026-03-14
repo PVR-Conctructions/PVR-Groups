@@ -4,16 +4,36 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import HeroBanner from '../components/HeroBanner';
 import { FiMail, FiPhone, FiMapPin, FiSend, FiClock, FiNavigation } from 'react-icons/fi';
+import api from '../hooks/useApi';
+import { useAuth } from '../context/AuthContext';
 
 const ContactPage = () => {
-    const [form, setForm] = useState({ name: '', email: '', phone: '', subject: '', message: '' });
+    const { user } = useAuth();
+    const [form, setForm] = useState({ 
+        name: user?.name || '', 
+        email: user?.email || '', 
+        phone: user?.phone || '', 
+        subject: '', 
+        message: '' 
+    });
     const [sent, setSent] = useState(false);
 
-    const handleSubmit = (e) => {
+    const [loading, setLoading] = useState(false);
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        setSent(true);
-        setTimeout(() => setSent(false), 5000);
-        setForm({ name: '', email: '', phone: '', subject: '', message: '' });
+        setLoading(true);
+        try {
+            await api.post('/contacts', form);
+            setSent(true);
+            setTimeout(() => setSent(false), 5000);
+            setForm({ name: user?.name || '', email: user?.email || '', phone: user?.phone || '', subject: '', message: '' });
+        } catch (error) {
+            console.error('Failed to send message:', error);
+            alert('Failed to send message. Please try again.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     const openDirections = () => {
@@ -104,8 +124,8 @@ const ContactPage = () => {
                                         <input type="text" value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })} placeholder="Subject" className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-dark-border border border-gray-200 dark:border-dark-border text-gray-800 dark:text-white text-sm" required />
                                     </div>
                                     <textarea value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} rows={5} placeholder="Your Message" className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-dark-border border border-gray-200 dark:border-dark-border text-gray-800 dark:text-white text-sm" required />
-                                    <button type="submit" className="px-8 py-3 rounded-xl btn-shimmer text-white font-semibold flex items-center gap-2">
-                                        <FiSend size={16} /> Send Message
+                                    <button type="submit" disabled={loading} className="px-8 py-3 rounded-xl btn-shimmer text-white font-semibold flex items-center gap-2 disabled:opacity-50">
+                                        <FiSend size={16} /> {loading ? 'Sending...' : 'Send Message'}
                                     </button>
                                 </form>
                             </motion.div>
@@ -127,7 +147,7 @@ const ContactPage = () => {
                         </div>
                         <div className="rounded-2xl overflow-hidden border border-gray-200 dark:border-dark-border">
                             <iframe
-                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3826.0!2d80.6480!3d16.5062!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a35eff9482d944b%3A0x939b7e84ab4a0265!2sVijayawada%2C%20Andhra%20Pradesh!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin"
+                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d578.5030635196644!2d80.66769211914594!3d16.50312107156064!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a35fb001f99057f%3A0x9389fcfcf2f700f7!2sPVR%20GROUP%20%26%20SSBC%20CENTRAL%20OFFICE!5e0!3m2!1sen!2sin!4v1773464191204!5m2!1sen!2sin"
                                 width="100%" height="400" style={{ border: 0 }} allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade"
                                 title="PVR GROUP & SSBC Central Office"
                             />
