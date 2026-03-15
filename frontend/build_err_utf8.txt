@@ -1,0 +1,121 @@
+﻿
+> pvr-groups-frontend@1.0.0 build
+> vite build
+
+[36mvite v5.4.21 [32mbuilding for production...[36m[39m
+transforming...
+[32mΓ£ô[39m 31 modules transformed.
+node.exe : [31mx[39m 
+Build failed in 941ms
+At line:1 char:1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo 
+...
++ ~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~
+    + CategoryInfo     
+         : 
+NotSpecified: ([3    
+1mx[39m Build failed  
+   in 941ms:String) 
+[], R    emoteException
+    + 
+FullyQualifiedErrorI   
+ d : NativeCommandError
+ 
+[31merror during 
+build:
+[31m[vite:esbuild] 
+Transform failed with 
+1 error:
+D:/Projects/PVR Groups/
+frontend/src/pages/Land
+ingPage.jsx:339:71: 
+ERROR: Syntax error 
+"`"[31m
+file: 
+[36mD:/Projects/PVR Gr
+oups/frontend/src/pages
+/LandingPage.jsx:339:71
+[31m
+[33m
+[33mSyntax error 
+"`"[33m
+337|                   
+                       
+    <motion.div 
+338|                   
+                       
+        initial={{ 
+width: 0 }}
+339|                   
+                       
+        whileInView={{ 
+width: 
+\`\${proj.progress}%\` 
+}}
+   |                   
+                       
+                       
+        ^
+340|                   
+                       
+        transition={{ 
+duration: 1.5, delay: 
+0.5 }}
+341|                   
+                       
+        className="bg-g
+radient-to-r 
+from-[#bf953f] 
+to-[#fcf6ba] h-1.5 
+rounded-full"
+[31m
+    at 
+failureErrorWithLog 
+(D:\Projects\PVR Groups
+\frontend\node_modules\
+esbuild\lib\main.js:147
+2:15)
+    at D:\Projects\PVR 
+Groups\frontend\node_mo
+dules\esbuild\lib\main.
+js:755:50
+    at responseCallback
+s.<computed> 
+(D:\Projects\PVR Groups
+\frontend\node_modules\
+esbuild\lib\main.js:622
+:9)
+    at 
+handleIncomingPacket 
+(D:\Projects\PVR Groups
+\frontend\node_modules\
+esbuild\lib\main.js:677
+:12)
+    at 
+Socket.readFromStdout 
+(D:\Projects\PVR Groups
+\frontend\node_modules\
+esbuild\lib\main.js:600
+:7)
+    at Socket.emit 
+(node:events:508:28)
+    at addChunk (node:i
+nternal/streams/readabl
+e:559:12)
+    at readableAddChunk
+PushByteMode (node:inte
+rnal/streams/readable:5
+10:3)
+    at Readable.push (n
+ode:internal/streams/re
+adable:390:5)
+    at 
+Pipe.onStreamRead (node
+:internal/stream_base_c
+ommons:189:23)[39m

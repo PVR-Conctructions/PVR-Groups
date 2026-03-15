@@ -1,36 +1,53 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FiFilm, FiHome, FiShield, FiDroplet, FiTruck, FiActivity, FiZap, FiWifi } from 'react-icons/fi';
+import {
+    FiDroplet, FiActivity, FiHome, FiMonitor, FiSun, FiShield, FiVideo,
+    FiZap, FiTruck, FiWifi, FiPackage, FiDollarSign, FiHeart, FiSmile,
+    FiTarget, FiFlag, FiAward, FiCloud, FiFeather, FiClock, FiSettings,
+    FiPlay, FiBox, FiBattery, FiTrash2, FiCircle, FiStar, FiCrosshair
+} from 'react-icons/fi';
 
 const iconMap = {
-    'Theater': FiFilm,
-    'Clubhouse': FiHome,
-    'Security': FiShield,
     'Swimming Pool': FiDroplet,
+    'Gym / Fitness Center': FiActivity,
+    'Clubhouse': FiHome,
+    'Indoor Games': FiMonitor,
+    'Jogging Track': FiSun,
+    'Yoga & Meditation': FiFeather,
+    'Party Hall': FiAward,
+    'Mini Theater': FiPlay,
     'Parking': FiTruck,
-    'Gym': FiActivity,
-    'Power Backup': FiZap,
-    'Wi-Fi': FiWifi,
+    'EV Charging Station': FiBattery,
+    'Elevator / Lift': FiBox,
+    'Shopping Complex': FiPackage,
+    'ATM': FiDollarSign,
+    'Pharmacy': FiHeart,
+    'Laundry Service': FiSettings,
+    'Intercom Facility': FiWifi,
+    '24/7 Security': FiShield,
+    'CCTV Surveillance': FiVideo,
+    'Fire Safety System': FiZap,
+    'Gated Community': FiTarget,
+    'Landscaped Gardens': FiCloud,
+    'Rainwater Harvesting': FiDroplet,
+    'Solar Power': FiSun,
+    'Sewage Treatment Plant': FiSmile,
+    'Waste Management': FiTrash2,
+    "Children's Play Area": FiSmile,
+    'Basketball Court': FiCircle,
+    'Tennis Court': FiCrosshair,
+    'Cricket Pitch': FiFlag,
+    'Badminton Court': FiStar,
 };
 
-const defaultAmenities = [
-    { name: 'Theater', icon: 'Theater' },
-    { name: 'Clubhouse', icon: 'Clubhouse' },
-    { name: '24/7 Security', icon: 'Security' },
-    { name: 'Swimming Pool', icon: 'Swimming Pool' },
-    { name: 'Parking', icon: 'Parking' },
-    { name: 'Gym', icon: 'Gym' },
-    { name: 'Power Backup', icon: 'Power Backup' },
-    { name: 'Wi-Fi', icon: 'Wi-Fi' },
-];
-
 const AmenitiesGrid = ({ amenities }) => {
-    const items = amenities?.length ? amenities : defaultAmenities;
+    if (!amenities || amenities.length === 0) return null;
 
     return (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-            {items.map((amenity, i) => {
-                const Icon = iconMap[amenity.icon] || FiHome;
+            {amenities.map((amenity, i) => {
+                const name = typeof amenity === 'string' ? amenity : amenity.name;
+                const Icon = iconMap[name] || FiHome;
                 return (
                     <motion.div
                         key={i}
@@ -43,7 +60,7 @@ const AmenitiesGrid = ({ amenities }) => {
                         <div className="w-12 h-12 rounded-xl bg-gold-400/10 flex items-center justify-center mb-3 group-hover:bg-gold-400/20 transition-colors">
                             <Icon size={22} className="text-gold-400" />
                         </div>
-                        <span className="text-sm text-gray-700 dark:text-gray-300 text-center font-medium">{amenity.name}</span>
+                        <span className="text-sm text-gray-700 dark:text-gray-300 text-center font-medium">{name}</span>
                     </motion.div>
                 );
             })}
