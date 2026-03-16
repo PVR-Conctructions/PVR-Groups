@@ -26,8 +26,8 @@
 export function optimizeCloudinaryUrl(url, width = 3840) {
     if (!url || !url.includes('res.cloudinary.com')) return url;
     // Avoid double-inserting transformations if already optimized
-    if (url.includes('/upload/f_auto')) return url;
-    return url.replace('/upload/', `/upload/f_auto,q_auto,dpr_auto,w_${width}/`);
+    if (url.includes('/upload/f_auto') || url.includes('/upload/q_100')) return url;
+    return url.replace('/upload/', `/upload/f_auto,q_100,dpr_auto,w_${width}/`);
 }
 
 /**
