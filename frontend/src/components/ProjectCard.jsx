@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FiMapPin, FiArrowRight, FiHeart, FiCheckSquare, FiSquare } from 'react-icons/fi';
 import api from '../hooks/useApi';
+import { optimizeCloudinaryUrl, cloudinarySrcSet } from '../utils/cloudinary';
 
 const ProjectCard = ({ project, index, compareSelected = [], onToggleCompare, showCompare = false }) => {
     const [isFav, setIsFav] = useState(false);
@@ -54,9 +55,12 @@ const ProjectCard = ({ project, index, compareSelected = [], onToggleCompare, sh
                     {/* Image */}
                     <div className="relative h-56 overflow-hidden">
                         <img
-                            src={project.images?.[0] || 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=600'}
+                            src={optimizeCloudinaryUrl(project.images?.[0], 600) || 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=600'}
+                            srcSet={cloudinarySrcSet(project.images?.[0])}
+                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                             alt={project.name}
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                            loading="lazy"
                         />
                         <div className="absolute top-4 left-4">
                             <span className={`px-3 py-1 rounded-full text-xs font-semibold ${project.status === 'ongoing'

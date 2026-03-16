@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiChevronLeft, FiChevronRight, FiX } from 'react-icons/fi';
+import { cloudinaryGallery, cloudinaryThumb, cloudinaryHero, cloudinarySrcSet } from '../utils/cloudinary';
 
 const placeholderImages = [
     'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800',
@@ -73,10 +74,13 @@ const ImageGallery = ({ images, categorizedImages }) => {
             <div className="relative rounded-2xl overflow-hidden group bg-gray-100 dark:bg-dark-card border border-gray-100 dark:border-dark-border">
                 <div className="aspect-video relative">
                     <img
-                        src={currentImg.url}
+                        src={cloudinaryGallery(currentImg.url)}
+                        srcSet={cloudinarySrcSet(currentImg.url)}
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 75vw, 800px"
                         alt={`${currentImg.category} - ${currentImg.label}`}
                         className="w-full h-full object-cover cursor-pointer transition-transform duration-500 hover:scale-[1.02]"
                         onClick={() => setLightbox(true)}
+                        loading="lazy"
                     />
                     
                     {/* Image Label Overlay */}
@@ -122,7 +126,14 @@ const ImageGallery = ({ images, categorizedImages }) => {
                                 i === current ? 'border-gold-400 scale-[1.02] shadow-md' : 'border-transparent opacity-60 hover:opacity-100'
                             }`}
                         >
-                            <img src={img.url} alt={`Thumb ${i + 1}`} className="w-full h-full object-cover" />
+                            <img
+                                src={cloudinaryThumb(img.url)}
+                                srcSet={cloudinarySrcSet(img.url, [300, 600])}
+                                sizes="96px"
+                                alt={`Thumb ${i + 1}`}
+                                className="w-full h-full object-cover"
+                                loading="lazy"
+                            />
                         </button>
                     ))}
                 </div>
@@ -167,10 +178,13 @@ const ImageGallery = ({ images, categorizedImages }) => {
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ duration: 0.2 }}
-                            src={currentImg.url} 
+                            src={cloudinaryHero(currentImg.url)}
+                            srcSet={cloudinarySrcSet(currentImg.url, [600, 1200])}
+                            sizes="(max-width: 768px) 100vw, 1200px"
                             alt="" 
                             className="max-w-full max-h-[80vh] object-contain rounded-lg shadow-2xl" 
-                            onClick={(e) => e.stopPropagation()} 
+                            onClick={(e) => e.stopPropagation()}
+                            loading="lazy"
                         />
                         
                         {filteredImages.length > 1 && (
