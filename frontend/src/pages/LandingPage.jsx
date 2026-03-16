@@ -52,13 +52,13 @@ const LandingPage = () => {
                     <div className="absolute inset-0 bg-black/40 mix-blend-multiply" />
                 </div>
 
-                <div className="relative z-10 flex flex-col items-center text-center px-4 mt-20 max-w-5xl mx-auto">
+                <div className="relative z-10 flex flex-col items-center text-center px-6 mt-16 sm:mt-20 max-w-5xl mx-auto">
                     <motion.div
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 1.2, ease: "easeOut" }}
                     >
-                        <h1 className="text-6xl md:text-8xl font-black mb-6 tracking-tighter leading-tight drop-shadow-2xl">
+                        <h1 className="text-4xl sm:text-6xl md:text-8xl font-black mb-4 sm:mb-6 tracking-tighter leading-tight drop-shadow-2xl">
                             <span className="text-white">PVR</span> <br className="md:hidden"/>
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#bf953f] via-[#fcf6ba] to-[#b38728]">CONSTRUCTIONS</span>
                         </h1>
@@ -68,7 +68,7 @@ const LandingPage = () => {
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 1, delay: 0.3 }}
-                        className="text-xl md:text-3xl text-gray-300 font-light tracking-wide mb-10 max-w-3xl drop-shadow-lg"
+                        className="text-base sm:text-xl md:text-3xl text-gray-300 font-light tracking-wide mb-6 sm:mb-10 max-w-3xl drop-shadow-lg px-2"
                     >
                         Building Andhra Pradesh's Future with Trust and Innovation.
                     </motion.p>
@@ -77,11 +77,11 @@ const LandingPage = () => {
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 1, delay: 0.6 }}
-                        className="flex flex-col sm:flex-row gap-6 mt-8"
+                        className="flex flex-col sm:flex-row gap-4 sm:gap-6 mt-4 sm:mt-8 w-full sm:w-auto px-2 sm:px-0"
                     >
                         <button
                             onClick={handleEnter}
-                            className="group relative px-10 py-4 rounded-full bg-gradient-to-r from-[#bf953f] via-[#fcf6ba] to-[#b38728] text-black font-bold text-lg tracking-wider uppercase overflow-hidden shadow-[0_0_30px_rgba(222,184,104,0.4)] transition-all hover:scale-105 hover:shadow-[0_0_50px_rgba(222,184,104,0.6)]"
+                            className="group relative px-6 py-3 sm:px-10 sm:py-4 rounded-full bg-gradient-to-r from-[#bf953f] via-[#fcf6ba] to-[#b38728] text-black font-bold text-sm sm:text-lg tracking-wider uppercase overflow-hidden shadow-[0_0_30px_rgba(222,184,104,0.4)] transition-all hover:scale-105 hover:shadow-[0_0_50px_rgba(222,184,104,0.6)]"
                         >
                             <span className="relative z-10 flex items-center gap-3">
                                 Explore Projects
@@ -91,7 +91,7 @@ const LandingPage = () => {
                         
                         <button
                             onClick={handleContact}
-                            className="group px-10 py-4 rounded-full bg-transparent border-2 border-[#deb868] text-[#deb868] font-bold text-lg tracking-wider uppercase transition-all hover:bg-[#deb868] hover:text-black hover:shadow-[0_0_30px_rgba(222,184,104,0.3)] backdrop-blur-sm"
+                            className="group px-6 py-3 sm:px-10 sm:py-4 rounded-full bg-transparent border-2 border-[#deb868] text-[#deb868] font-bold text-sm sm:text-lg tracking-wider uppercase transition-all hover:bg-[#deb868] hover:text-black hover:shadow-[0_0_30px_rgba(222,184,104,0.3)] backdrop-blur-sm"
                         >
                             Contact Us
                         </button>
@@ -111,38 +111,33 @@ const LandingPage = () => {
             </section>
 
             {/* SECTION 2 - ABOUT THE FOUNDER */}
-            <section className="relative py-28 px-6 lg:px-20 max-w-7xl mx-auto">
+            <section className="relative py-16 sm:py-28 px-4 sm:px-6 lg:px-20 max-w-7xl mx-auto">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-gray-800 to-transparent" />
                 
-                <div className="flex flex-col lg:flex-row gap-16 items-center">
+                <div className="flex flex-col lg:flex-row gap-10 sm:gap-16 items-center">
                     <motion.div 
                         {...fadeInUp}
                         className="w-full lg:w-5/12 relative group"
                     >
                         <div className="absolute -inset-4 bg-gradient-to-tr from-[#deb868]/20 to-transparent rounded-2xl blur-xl transition-all duration-500 group-hover:bg-[#deb868]/30" />
-                        <div className="relative rounded-2xl overflow-hidden border border-gray-800 aspect-[4/5] shadow-2xl">
+                        <div className="relative rounded-2xl overflow-hidden border border-gray-800 shadow-2xl">
                             <img 
                                 src="/images/landing/owner_hero_bg.png" 
                                 alt="Bandi Pavan Kumar" 
-                                className="w-full h-full object-cover object-top scale-105 transition-transform duration-700 group-hover:scale-100 grayscale hover:grayscale-0"
+                                className="w-full h-auto object-contain transition-transform duration-700 group-hover:scale-105"
                             />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-                            <div className="absolute bottom-6 left-6 right-6">
-                                <h3 className="text-3xl font-bold text-white tracking-wide">Bandi Pavan Kumar</h3>
-                                <p className="text-[#deb868] font-medium tracking-wider uppercase text-sm mt-1">Founder & Managing Director</p>
-                            </div>
                         </div>
                     </motion.div>
                     
                     <motion.div {...fadeInUp} className="w-full lg:w-7/12 space-y-8">
                         <div>
                             <h4 className="text-[#deb868] text-sm font-bold tracking-widest uppercase mb-2">Leadership & Vision</h4>
-                            <h2 className="text-4xl md:text-5xl font-bold text-white leading-tight">
+                            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white leading-tight">
                                 Delivering Excellence For Over <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#bf953f] to-[#fcf6ba] italic">15 Years</span>
                             </h2>
                         </div>
                         
-                        <div className="space-y-6 text-gray-400 text-lg leading-relaxed font-light">
+                        <div className="space-y-4 sm:space-y-6 text-gray-400 text-base sm:text-lg leading-relaxed font-light">
                             <p>
                                 Under the visionary leadership of Bandi Pavan Kumar, PVR Constructions has emerged as one of the <strong>Top 10 Construction Companies in Andhra Pradesh</strong>. Our commitment goes beyond building structures; we craft lifestyles.
                             </p>
@@ -166,11 +161,11 @@ const LandingPage = () => {
             </section>
 
             {/* SECTION 3 - FLAGSHIP PROJECT */}
-            <section className="py-24 bg-[#0a0a0f] border-y border-gray-800/50">
-                <div className="max-w-7xl mx-auto px-6 lg:px-20">
+            <section className="py-16 sm:py-24 bg-[#0a0a0f] border-y border-gray-800/50">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-20">
                     <motion.div {...fadeInUp} className="text-center mb-16">
                         <span className="text-[#deb868] text-sm font-bold tracking-widest uppercase block mb-2">The Crown Jewel</span>
-                        <h2 className="text-4xl md:text-5xl font-bold text-white">Our Flagship Project</h2>
+                        <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white">Our Flagship Project</h2>
                     </motion.div>
                     
                     <motion.div {...fadeInUp} className="relative rounded-3xl overflow-hidden group shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-gray-800">
@@ -178,20 +173,20 @@ const LandingPage = () => {
                         <img 
                             src="/images/landing/project_megha_icon.png" 
                             alt="PVR Megha Icon" 
-                            className="w-full h-[600px] object-cover transition-transform duration-1000 group-hover:scale-105"
+                            className="w-full h-[350px] sm:h-[500px] md:h-[600px] object-cover transition-transform duration-1000 group-hover:scale-105"
                         />
                         
-                        <div className="absolute inset-0 z-20 flex flex-col justify-center p-8 md:p-16 lg:p-24 max-w-4xl">
-                            <h3 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-none tracking-tight">
+                        <div className="absolute inset-0 z-20 flex flex-col justify-center p-5 sm:p-8 md:p-16 lg:p-24 max-w-4xl">
+                            <h3 className="text-3xl sm:text-5xl md:text-7xl font-bold text-white mb-3 sm:mb-6 leading-none tracking-tight">
                                 PVR <br/>
                                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#bf953f] via-[#fcf6ba] to-[#b38728]">Megha Icon</span>
                             </h3>
-                            <p className="text-xl md:text-2xl text-gray-300 font-light mb-8 leading-relaxed">
+                            <p className="text-sm sm:text-xl md:text-2xl text-gray-300 font-light mb-4 sm:mb-8 leading-relaxed">
                                 The <strong>largest residential masterpiece</strong> by PVR Constructions in Andhra Pradesh.
                                 Featuring <strong>900 premium luxury flats</strong> designed for an elevated lifestyle.
                             </p>
                             
-                            <ul className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+                            <ul className="hidden sm:grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-12">
                                 {[
                                     { icon: <FaBuilding/>, text: "900 Premium Flats" },
                                     { icon: <FaAward/>, text: "Luxury Clubhouse" },
@@ -207,7 +202,7 @@ const LandingPage = () => {
                             
                             <button 
                                 onClick={handleEnter}
-                                className="bg-white text-black px-8 py-4 rounded-full font-bold uppercase tracking-wider text-sm hover:bg-[#deb868] transition-colors w-max flex items-center gap-3"
+                                className="bg-white text-black px-6 py-3 sm:px-8 sm:py-4 rounded-full font-bold uppercase tracking-wider text-xs sm:text-sm hover:bg-[#deb868] transition-colors w-max flex items-center gap-3"
                             >
                                 View Project Details <FaArrowRight />
                             </button>
@@ -217,15 +212,15 @@ const LandingPage = () => {
             </section>
 
             {/* SECTION 4 - COMPLETED PROJECTS */}
-            <section className="py-28 px-6 lg:px-20 max-w-7xl mx-auto">
-                <motion.div {...fadeInUp} className="mb-20">
-                    <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">Masterpieces Delivered</h2>
+            <section className="py-16 sm:py-28 px-4 sm:px-6 lg:px-20 max-w-7xl mx-auto">
+                <motion.div {...fadeInUp} className="mb-10 sm:mb-20">
+                    <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">Masterpieces Delivered</h2>
                     <p className="text-gray-400 text-lg max-w-2xl font-light">
                         A showcase of our commitment to quality, timely delivery, and architectural brilliance across Andhra Pradesh.
                     </p>
                 </motion.div>
 
-                <div className="space-y-32">
+                <div className="space-y-16 sm:space-y-32">
                     {[
                         {
                             title: "Prestige Residences",
@@ -258,12 +253,12 @@ const LandingPage = () => {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true, margin: "-100px" }}
                             transition={{ duration: 0.8 }}
-                            className={`flex flex-col ${idx % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'} gap-12 items-center`}
+                            className={`flex flex-col ${idx % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'} gap-8 sm:gap-12 items-center`}
                         >
                             <div className="w-full md:w-1/2 space-y-6">
-                                <span className="text-gray-500 font-bold text-6xl opacity-20 block -mb-8">{project.year}</span>
-                                <h3 className="text-3xl md:text-4xl font-bold text-white">{project.title}</h3>
-                                <p className="text-gray-400 text-lg leading-relaxed font-light">
+                                <span className="text-gray-500 font-bold text-4xl sm:text-6xl opacity-20 block -mb-6 sm:-mb-8">{project.year}</span>
+                                <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">{project.title}</h3>
+                                <p className="text-gray-400 text-base sm:text-lg leading-relaxed font-light">
                                     {project.desc}
                                 </p>
                                 <div className="pt-4">
@@ -289,12 +284,12 @@ const LandingPage = () => {
             </section>
 
             {/* SECTION 5 - ONGOING PROJECTS */}
-            <section className="py-28 bg-[#0a0a0f] border-t border-gray-800/50">
-                <div className="max-w-7xl mx-auto px-6 lg:px-20">
+            <section className="py-16 sm:py-28 bg-[#0a0a0f] border-t border-gray-800/50">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-20">
                     <motion.div {...fadeInUp} className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
                         <div>
                             <span className="text-[#deb868] text-sm font-bold tracking-widest uppercase block mb-2">In Progress</span>
-                            <h2 className="text-4xl md:text-5xl font-bold text-white">Shaping the Future</h2>
+                            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white">Shaping the Future</h2>
                         </div>
                         <button onClick={handleEnter} className="text-sm text-gray-400 hover:text-white flex items-center gap-2 transition-colors">
                             View all ongoing <FaArrowRight className="text-[#deb868]" />
@@ -350,7 +345,7 @@ const LandingPage = () => {
             </section>
 
             {/* SECTION 6 - AWARDS & RECOGNITION */}
-            <section className="py-28 px-6 lg:px-20 max-w-7xl mx-auto">
+            <section className="py-16 sm:py-28 px-4 sm:px-6 lg:px-20 max-w-7xl mx-auto">
                 <motion.div {...fadeInUp} className="text-center mb-16">
                     <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">A Legacy of Excellence</h2>
                     <p className="text-gray-400 max-w-2xl mx-auto font-light leading-relaxed">
@@ -358,7 +353,7 @@ const LandingPage = () => {
                     </p>
                 </motion.div>
 
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
                     {[
                         "Best Luxury Developer 2023",
                         "Excellence in Architecture",
@@ -399,7 +394,7 @@ const LandingPage = () => {
                 </div>
                 
                 <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-20">
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-10 divide-x divide-gray-800">
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-10 lg:divide-x divide-gray-800">
                         {[
                             { value: 15, suffix: "+", label: "Years Experience" },
                             { value: 900, suffix: "+", label: "Flats Constructed" },
@@ -407,7 +402,7 @@ const LandingPage = () => {
                             { value: 25, suffix: "+", label: "Cities Covered" }
                         ].map((stat, idx) => (
                             <div key={idx} className="text-center px-4">
-                                <div className="text-4xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#bf953f] to-[#fcf6ba] mb-2">
+                                <div className="text-3xl sm:text-4xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#bf953f] to-[#fcf6ba] mb-2">
                                     {statsInView ? (
                                         <CountUp end={stat.value} duration={3} />
                                     ) : (
@@ -415,7 +410,7 @@ const LandingPage = () => {
                                     )}
                                     {stat.suffix}
                                 </div>
-                                <div className="text-sm md:text-base text-gray-400 font-medium tracking-wide uppercase">
+                                <div className="text-xs sm:text-sm md:text-base text-gray-400 font-medium tracking-wide uppercase">
                                     {stat.label}
                                 </div>
                             </div>
@@ -425,23 +420,23 @@ const LandingPage = () => {
             </section>
 
             {/* SECTION 8 - FINAL CALL TO ACTION */}
-            <section className="relative py-32 px-6 lg:px-20 overflow-hidden">
+            <section className="relative py-16 sm:py-32 px-4 sm:px-6 lg:px-20 overflow-hidden">
                 <div className="absolute inset-0 z-0 bg-[#050505]">
                     <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&q=80" className="w-full h-full object-cover opacity-20" alt="Luxury home interior" />
                     <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-black/80 to-[#050505]" />
                 </div>
 
-                <div className="relative z-10 max-w-4xl mx-auto text-center backdrop-blur-sm bg-black/30 p-12 md:p-20 rounded-3xl border border-gray-800 shadow-2xl">
+                <div className="relative z-10 max-w-4xl mx-auto text-center backdrop-blur-sm bg-black/30 p-6 sm:p-12 md:p-20 rounded-3xl border border-gray-800 shadow-2xl">
                     <FaRegHandshake className="text-5xl text-[#deb868] mx-auto mb-6" />
-                    <h2 className="text-4xl md:text-6xl font-bold text-white mb-6">Ready to Experience Luxury?</h2>
-                    <p className="text-xl text-gray-300 mb-10 font-light max-w-2xl mx-auto">
+                    <h2 className="text-2xl sm:text-4xl md:text-6xl font-bold text-white mb-4 sm:mb-6">Ready to Experience Luxury?</h2>
+                    <p className="text-base sm:text-xl text-gray-300 mb-6 sm:mb-10 font-light max-w-2xl mx-auto">
                         Join the hundreds of families who have found their dream homes with PVR Constructions. Book a personalized site visit today.
                     </p>
                     
                     <div className="flex flex-col sm:flex-row gap-6 justify-center">
                         <button 
                             onClick={handleEnter}
-                            className="px-10 py-5 rounded-full bg-white text-black font-bold uppercase tracking-wider hover:bg-[#deb868] transition-colors shadow-lg"
+                            className="px-6 py-3 sm:px-10 sm:py-5 rounded-full bg-white text-black font-bold text-sm sm:text-base uppercase tracking-wider hover:bg-[#deb868] transition-colors shadow-lg"
                         >
                             Explore All Properties
                         </button>
@@ -450,7 +445,7 @@ const LandingPage = () => {
                             href="https://wa.me/911234567890" // Replace with actual WhatsApp number
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="px-10 py-5 rounded-full bg-[#25D366] text-white font-bold uppercase tracking-wider hover:bg-[#20bd5a] transition-colors shadow-lg flex items-center justify-center gap-3"
+                            className="px-6 py-3 sm:px-10 sm:py-5 rounded-full bg-[#25D366] text-white font-bold text-sm sm:text-base uppercase tracking-wider hover:bg-[#20bd5a] transition-colors shadow-lg flex items-center justify-center gap-3"
                         >
                             <FaWhatsapp className="text-2xl" /> Book via WhatsApp
                         </a>
