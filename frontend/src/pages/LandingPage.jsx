@@ -105,8 +105,8 @@ const LandingPage = () => {
                     transition={{ delay: 1.5, duration: 1 }}
                     className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
                 >
-                    <span className="text-gray-400 text-xs tracking-widest uppercase">Discover</span>
-                    <div className="w-[1px] h-16 bg-gradient-to-b from-[#deb868] to-transparent animate-pulse" />
+                    <span className="text-[#deb868] text-sm md:text-base font-medium tracking-widest uppercase drop-shadow-[0_0_10px_rgba(222,184,104,0.6)]">Discover</span>
+                    <div className="w-[2px] h-16 bg-gradient-to-b from-[#deb868] to-transparent animate-pulse" />
                 </motion.div>
             </section>
 
