@@ -72,10 +72,10 @@ app.get('/api/health', (req, res) => res.json({ status: 'OK', timestamp: new Dat
 
 // Connect to MongoDB and start server
 const PORT = process.env.PORT || 5000;
+const connectDB = require('./config/db');
 
-mongoose.connect(process.env.MONGODB_URI)
+connectDB()
     .then(async () => {
-        console.log('✅ Connected to MongoDB');
         await seedAdmin();
         server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT} with Socket.io`));
     })

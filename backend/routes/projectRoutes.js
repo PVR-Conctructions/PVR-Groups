@@ -3,48 +3,75 @@ const Project = require('../models/Project');
 const auth = require('../middleware/auth');
 const adminAuth = require('../middleware/adminAuth');
 const upload = require('../middleware/upload');
+const projectController = require('../controllers/projectController');
 const router = express.Router();
 
 // Get all projects (public)
-router.get('/', async (req, res) => {
-    try {
-        const { status } = req.query;
-        const filter = status ? { status } : {};
-        const projects = await Project.find(filter).sort({ createdAt: -1 });
-        res.json(projects);
-    } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
-    }
-});
+router.get('/', projectController.getProjects);
 
 // Get single project (public)
-router.get('/:id', async (req, res) => {
-    try {
-        const project = await Project.findByIdAndUpdate(
-            req.params.id,
-            { $inc: { viewCount: 1 } },
-            { new: true }
-        );
-        if (!project) return res.status(404).json({ message: 'Project not found' });
-        res.json(project);
-    } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
-    }
-});
+router.get('/:id', projectController.getProjectById);
 
+// Upload multiple projects (User facing or general)
+router.post('/upload', upload.array('images', 10), projectController.uploadProject);
 // Create project (admin only)
-router.post('/', auth, adminAuth, upload.array('images', 10), async (req, res) => {
+router.post('/', auth, adminAuth, upload.array('images', 50), async (req, res) => {
     try {
-        const { name, description, status, amenities, location, price, area, units, highlights, mapEmbed } = req.body;
-        const images = req.files ? req.files.map(f => `/uploads/${f.filename}`) : [];
+        const {
+            name, description, status, location, price, area, units, highlights, mapEmbed,
+            amenities, bestFeatures, completionPercentage, imageGroupsData,
+            projectType, totalFloors, configurations, possessionDate,
+            reraNumber, totalLandArea, constructionType, bankApprovals,
+            specFlooring, specDoors, specWindows, specKitchen, specBathroom, specElectrical, specPainting
+        } = req.body;
+        
+        const uploadedFiles = req.files ? req.files.map(f => `/uploads/${f.filename}`) : [];
+        let categorizedImages = [];
+        let allImages = [];
+
+        if (imageGroupsData) {
+            try {
+                const groups = JSON.parse(imageGroupsData);
+                let fileIndex = 0;
+                categorizedImages = groups.map(g => {
+                    const newUrls = uploadedFiles.slice(fileIndex, fileIndex + (g.newFilesCount || 0));
+                    fileIndex += (g.newFilesCount || 0);
+                    const urls = [...(g.existingUrls || []), ...newUrls];
+                    allImages = [...allImages, ...urls];
+                    return { category: g.category, label: g.label, urls };
+                });
+            } catch (e) { console.error('Error parsing imageGroupsData', e); }
+        } else {
+            allImages = uploadedFiles;
+        }
 
         const project = await Project.create({
             name, description, status,
-            images,
+            images: allImages,
+            categorizedImages,
+            completionPercentage: completionPercentage ? Number(completionPercentage) : 0,
             amenities: amenities ? JSON.parse(amenities) : [],
+            bestFeatures: bestFeatures ? JSON.parse(bestFeatures) : [],
             location: { address: location, mapEmbed },
             price, area, units,
             highlights: highlights ? JSON.parse(highlights) : [],
+            projectType: projectType || '',
+            totalFloors: totalFloors || '',
+            configurations: configurations ? JSON.parse(configurations) : [],
+            possessionDate: possessionDate || '',
+            reraNumber: reraNumber || '',
+            totalLandArea: totalLandArea || '',
+            constructionType: constructionType || '',
+            bankApprovals: bankApprovals ? JSON.parse(bankApprovals) : [],
+            specifications: {
+                flooring: specFlooring || '',
+                doors: specDoors || '',
+                windows: specWindows || '',
+                kitchen: specKitchen || '',
+                bathroom: specBathroom || '',
+                electrical: specElectrical || '',
+                painting: specPainting || '',
+            },
         });
 
         res.status(201).json(project);
@@ -54,18 +81,62 @@ router.post('/', auth, adminAuth, upload.array('images', 10), async (req, res) =
 });
 
 // Update project (admin only)
-router.put('/:id', auth, adminAuth, upload.array('images', 10), async (req, res) => {
+router.put('/:id', auth, adminAuth, upload.array('images', 50), async (req, res) => {
     try {
-        const { name, description, status, amenities, location, price, area, units, highlights, mapEmbed } = req.body;
+        const {
+            name, description, status, location, price, area, units, highlights, mapEmbed,
+            amenities, bestFeatures, completionPercentage, imageGroupsData,
+            projectType, totalFloors, configurations, possessionDate,
+            reraNumber, totalLandArea, constructionType, bankApprovals,
+            specFlooring, specDoors, specWindows, specKitchen, specBathroom, specElectrical, specPainting
+        } = req.body;
         const updateData = { name, description, status, price, area, units };
 
+        if (completionPercentage !== undefined) updateData.completionPercentage = Number(completionPercentage);
         if (amenities) updateData.amenities = JSON.parse(amenities);
+        if (bestFeatures) updateData.bestFeatures = JSON.parse(bestFeatures);
         if (highlights) updateData.highlights = JSON.parse(highlights);
         if (location || mapEmbed) updateData.location = { address: location, mapEmbed };
-        if (req.files && req.files.length > 0) {
-            const newImages = req.files.map(f => `/uploads/${f.filename}`);
+        if (configurations) updateData.configurations = JSON.parse(configurations);
+        if (bankApprovals) updateData.bankApprovals = JSON.parse(bankApprovals);
+
+        // Extra project details
+        if (projectType !== undefined) updateData.projectType = projectType;
+        if (totalFloors !== undefined) updateData.totalFloors = totalFloors;
+        if (possessionDate !== undefined) updateData.possessionDate = possessionDate;
+        if (reraNumber !== undefined) updateData.reraNumber = reraNumber;
+        if (totalLandArea !== undefined) updateData.totalLandArea = totalLandArea;
+        if (constructionType !== undefined) updateData.constructionType = constructionType;
+
+        // Specifications
+        updateData.specifications = {
+            flooring: specFlooring || '',
+            doors: specDoors || '',
+            windows: specWindows || '',
+            kitchen: specKitchen || '',
+            bathroom: specBathroom || '',
+            electrical: specElectrical || '',
+            painting: specPainting || '',
+        };
+
+        const uploadedFiles = req.files ? req.files.map(f => `/uploads/${f.filename}`) : [];
+        if (imageGroupsData) {
+            try {
+                const groups = JSON.parse(imageGroupsData);
+                let fileIndex = 0;
+                let allImages = [];
+                updateData.categorizedImages = groups.map(g => {
+                    const newUrls = uploadedFiles.slice(fileIndex, fileIndex + (g.newFilesCount || 0));
+                    fileIndex += (g.newFilesCount || 0);
+                    const urls = [...(g.existingUrls || []), ...newUrls];
+                    allImages = [...allImages, ...urls];
+                    return { category: g.category, label: g.label, urls };
+                });
+                updateData.images = allImages;
+            } catch (e) { console.error('Error parsing imageGroupsData', e); }
+        } else if (req.files && req.files.length > 0) {
             const project = await Project.findById(req.params.id);
-            updateData.images = [...(project?.images || []), ...newImages];
+            updateData.images = [...(project?.images || []), ...uploadedFiles];
         }
 
         const project = await Project.findByIdAndUpdate(req.params.id, updateData, { new: true });
@@ -77,15 +148,8 @@ router.put('/:id', auth, adminAuth, upload.array('images', 10), async (req, res)
     }
 });
 
-// Delete project (admin only)
-router.delete('/:id', auth, adminAuth, async (req, res) => {
-    try {
-        const project = await Project.findByIdAndDelete(req.params.id);
-        if (!project) return res.status(404).json({ message: 'Project not found' });
-        res.json({ message: 'Project deleted successfully' });
-    } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
-    }
-});
+// Delete project (admin only or explicit endpoint matching criteria)
+// Mapping to new controller delete logic ensuring old admin stuff matches if needed:
+router.delete('/:id', projectController.deleteProject);
 
 module.exports = router;

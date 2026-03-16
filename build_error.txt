@@ -1,0 +1,25 @@
+﻿[36mvite v5.4.21 [32mbuilding for production...[36m[39m
+transforming...
+[32mΓ£ô[39m 1568 modules transformed.
+[31mx[39m Build failed in 3.68s
+[31merror during build:
+[31msrc/components/AmenitiesGrid.jsx (9:50): "GiBadmintonRacket" is not exported by "node_modules/react-icons/gi/index.esm.js", imported by "src/components/AmenitiesGrid.jsx".[31m
+file: [36mD:/Projects/PVR Groups/frontend/src/components/AmenitiesGrid.jsx:9:50[31m
+[33m
+ 7: } from 'react-icons/fi';
+ 8: import {
+ 9:     GiTennisBall, GiBasketballBall, GiCricketBat, GiBadmintonRacket
+                                                      ^
+10: } from 'react-icons/gi';
+11: import { MdOutlineElevator, MdOutlineLocalPharmacy, MdOutlineLocalLaundryService, MdOutlineElectricCar, MdOutlineWate...
+[31m
+    at getRollupError (file:///D:/Projects/PVR%20Groups/frontend/node_modules/rollup/dist/es/shared/parseAst.js:402:41)
+    at error (file:///D:/Projects/PVR%20Groups/frontend/node_modules/rollup/dist/es/shared/parseAst.js:398:42)
+    at Module.error (file:///D:/Projects/PVR%20Groups/frontend/node_modules/rollup/dist/es/shared/node-entry.js:17040:16)
+    at Module.traceVariable (file:///D:/Projects/PVR%20Groups/frontend/node_modules/rollup/dist/es/shared/node-entry.js:17452:29)
+    at ModuleScope.findVariable (file:///D:/Projects/PVR%20Groups/frontend/node_modules/rollup/dist/es/shared/node-entry.js:15070:39)
+    at Identifier.bind (file:///D:/Projects/PVR%20Groups/frontend/node_modules/rollup/dist/es/shared/node-entry.js:5447:40)
+    at Property.bind (file:///D:/Projects/PVR%20Groups/frontend/node_modules/rollup/dist/es/shared/node-entry.js:2829:23)
+    at ObjectExpression.bind (file:///D:/Projects/PVR%20Groups/frontend/node_modules/rollup/dist/es/shared/node-entry.js:2825:28)
+    at VariableDeclarator.bind (file:///D:/Projects/PVR%20Groups/frontend/node_modules/rollup/dist/es/shared/node-entry.js:2829:23)
+    at VariableDeclaration.bind (file:///D:/Projects/PVR%20Groups/frontend/node_modules/rollup/dist/es/shared/node-entry.js:2825:28)[39m
