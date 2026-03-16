@@ -17,6 +17,8 @@ router.post('/upload', upload.array('images', 10), projectController.uploadProje
 // Create project (admin only)
 router.post('/', auth, adminAuth, upload.array('images', 50), async (req, res) => {
     try {
+        const cloudinary = require('../config/cloudinary');
+        const fs = require('fs');
         const {
             name, description, status, location, price, area, units, highlights, mapEmbed,
             amenities, bestFeatures, completionPercentage, imageGroupsData,
@@ -24,8 +26,19 @@ router.post('/', auth, adminAuth, upload.array('images', 50), async (req, res) =
             reraNumber, totalLandArea, constructionType, bankApprovals,
             specFlooring, specDoors, specWindows, specKitchen, specBathroom, specElectrical, specPainting
         } = req.body;
-        
-        const uploadedFiles = req.files ? req.files.map(f => `/uploads/${f.filename}`) : [];
+
+        // Upload each file to Cloudinary and collect secure_urls
+        const uploadedUrls = [];
+        if (req.files && req.files.length > 0) {
+            for (const file of req.files) {
+                const result = await cloudinary.uploader.upload(file.path, {
+                    folder: 'construction_projects'
+                });
+                uploadedUrls.push(result.secure_url);
+                fs.unlinkSync(file.path); // remove temp file
+            }
+        }
+
         let categorizedImages = [];
         let allImages = [];
 
@@ -34,7 +47,7 @@ router.post('/', auth, adminAuth, upload.array('images', 50), async (req, res) =
                 const groups = JSON.parse(imageGroupsData);
                 let fileIndex = 0;
                 categorizedImages = groups.map(g => {
-                    const newUrls = uploadedFiles.slice(fileIndex, fileIndex + (g.newFilesCount || 0));
+                    const newUrls = uploadedUrls.slice(fileIndex, fileIndex + (g.newFilesCount || 0));
                     fileIndex += (g.newFilesCount || 0);
                     const urls = [...(g.existingUrls || []), ...newUrls];
                     allImages = [...allImages, ...urls];
@@ -42,12 +55,13 @@ router.post('/', auth, adminAuth, upload.array('images', 50), async (req, res) =
                 });
             } catch (e) { console.error('Error parsing imageGroupsData', e); }
         } else {
-            allImages = uploadedFiles;
+            allImages = uploadedUrls;
         }
 
         const project = await Project.create({
             name, description, status,
             images: allImages,
+            imageUrls: allImages,
             categorizedImages,
             completionPercentage: completionPercentage ? Number(completionPercentage) : 0,
             amenities: amenities ? JSON.parse(amenities) : [],
@@ -119,24 +133,40 @@ router.put('/:id', auth, adminAuth, upload.array('images', 50), async (req, res)
             painting: specPainting || '',
         };
 
-        const uploadedFiles = req.files ? req.files.map(f => `/uploads/${f.filename}`) : [];
+        // Upload new files to Cloudinary and collect secure_urls
+        const cloudinary = require('../config/cloudinary');
+        const fs = require('fs');
+        const uploadedUrls = [];
+        if (req.files && req.files.length > 0) {
+            for (const file of req.files) {
+                const result = await cloudinary.uploader.upload(file.path, {
+                    folder: 'construction_projects'
+                });
+                uploadedUrls.push(result.secure_url);
+                fs.unlinkSync(file.path);
+            }
+        }
+
         if (imageGroupsData) {
             try {
                 const groups = JSON.parse(imageGroupsData);
                 let fileIndex = 0;
                 let allImages = [];
                 updateData.categorizedImages = groups.map(g => {
-                    const newUrls = uploadedFiles.slice(fileIndex, fileIndex + (g.newFilesCount || 0));
+                    const newUrls = uploadedUrls.slice(fileIndex, fileIndex + (g.newFilesCount || 0));
                     fileIndex += (g.newFilesCount || 0);
                     const urls = [...(g.existingUrls || []), ...newUrls];
                     allImages = [...allImages, ...urls];
                     return { category: g.category, label: g.label, urls };
                 });
                 updateData.images = allImages;
+                updateData.imageUrls = allImages;
             } catch (e) { console.error('Error parsing imageGroupsData', e); }
-        } else if (req.files && req.files.length > 0) {
+        } else if (uploadedUrls.length > 0) {
             const project = await Project.findById(req.params.id);
-            updateData.images = [...(project?.images || []), ...uploadedFiles];
+            const merged = [...(project?.images || []), ...uploadedUrls];
+            updateData.images = merged;
+            updateData.imageUrls = merged;
         }
 
         const project = await Project.findByIdAndUpdate(req.params.id, updateData, { new: true });
