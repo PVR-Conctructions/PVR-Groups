@@ -55,9 +55,9 @@ const ProjectCard = ({ project, index, compareSelected = [], onToggleCompare, sh
                     {/* Image */}
                     <div className="relative h-56 overflow-hidden">
                         <img
-                            src={optimizeCloudinaryUrl(project.images?.[0], 600) || 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=600'}
-                            srcSet={cloudinarySrcSet(project.images?.[0])}
-                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                            src={optimizeCloudinaryUrl(project.images?.[0], 3840) || 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=3840'}
+                            srcSet={cloudinarySrcSet(project.images?.[0], [1920, 2560, 3840])}
+                            sizes="100vw"
                             alt={project.name}
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                             loading="lazy"

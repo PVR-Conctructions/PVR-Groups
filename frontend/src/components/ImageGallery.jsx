@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiChevronLeft, FiChevronRight, FiX } from 'react-icons/fi';
-import { cloudinaryGallery, cloudinaryThumb, cloudinaryHero, cloudinarySrcSet } from '../utils/cloudinary';
+import { cloudinaryGallery, cloudinaryThumb, cloudinaryLightbox, cloudinarySrcSet } from '../utils/cloudinary';
 
 const placeholderImages = [
     'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800',
@@ -75,8 +75,8 @@ const ImageGallery = ({ images, categorizedImages }) => {
                 <div className="aspect-video relative">
                     <img
                         src={cloudinaryGallery(currentImg.url)}
-                        srcSet={cloudinarySrcSet(currentImg.url)}
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 75vw, 800px"
+                        srcSet={cloudinarySrcSet(currentImg.url, [1920, 2560, 3840])}
+                        sizes="100vw"
                         alt={`${currentImg.category} - ${currentImg.label}`}
                         className="w-full h-full object-cover cursor-pointer transition-transform duration-500 hover:scale-[1.02]"
                         onClick={() => setLightbox(true)}
@@ -178,9 +178,9 @@ const ImageGallery = ({ images, categorizedImages }) => {
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ duration: 0.2 }}
-                            src={cloudinaryHero(currentImg.url)}
-                            srcSet={cloudinarySrcSet(currentImg.url, [600, 1200])}
-                            sizes="(max-width: 768px) 100vw, 1200px"
+                            src={cloudinaryLightbox(currentImg.url)}
+                            srcSet={cloudinarySrcSet(currentImg.url, [1920, 2560, 3840])}
+                            sizes="100vw"
                             alt="" 
                             className="max-w-full max-h-[80vh] object-contain rounded-lg shadow-2xl" 
                             onClick={(e) => e.stopPropagation()}

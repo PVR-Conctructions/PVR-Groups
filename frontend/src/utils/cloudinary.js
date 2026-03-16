@@ -23,7 +23,7 @@
  * @param {number} width  - Desired width in pixels (default 1200)
  * @returns {string}      - Optimized Cloudinary URL (or original if not Cloudinary)
  */
-export function optimizeCloudinaryUrl(url, width = 1200) {
+export function optimizeCloudinaryUrl(url, width = 3840) {
     if (!url || !url.includes('res.cloudinary.com')) return url;
     // Avoid double-inserting transformations if already optimized
     if (url.includes('/upload/f_auto')) return url;
@@ -35,10 +35,10 @@ export function optimizeCloudinaryUrl(url, width = 1200) {
  * Returns '' for non-Cloudinary URLs so the browser ignores the attribute.
  *
  * @param {string} url - Raw Cloudinary URL
- * @param {number[]} widths - Widths to include (default: [300, 600, 1200])
+ * @param {number[]} widths - Widths to include (default: [800, 1600, 3840])
  * @returns {string}
  */
-export function cloudinarySrcSet(url, widths = [300, 600, 1200]) {
+export function cloudinarySrcSet(url, widths = [1920, 2560, 3840]) {
     if (!url || !url.includes('res.cloudinary.com')) return '';
     return widths
         .map(w => `${optimizeCloudinaryUrl(url, w)} ${w}w`)
@@ -46,6 +46,7 @@ export function cloudinarySrcSet(url, widths = [300, 600, 1200]) {
 }
 
 /** Pre-bound convenience helpers for each visual context */
-export const cloudinaryHero    = (url) => optimizeCloudinaryUrl(url, 1200);
-export const cloudinaryGallery = (url) => optimizeCloudinaryUrl(url, 800);
-export const cloudinaryThumb   = (url) => optimizeCloudinaryUrl(url, 300);
+export const cloudinaryHero     = (url) => optimizeCloudinaryUrl(url, 3840);
+export const cloudinaryGallery  = (url) => optimizeCloudinaryUrl(url, 3840);
+export const cloudinaryLightbox = (url) => optimizeCloudinaryUrl(url, 3840);
+export const cloudinaryThumb    = (url) => optimizeCloudinaryUrl(url, 300);

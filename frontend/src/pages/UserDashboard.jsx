@@ -149,9 +149,9 @@ const UserDashboard = () => {
                                         >
                                             <div className="relative h-40">
                                                 <img
-                                                    src={optimizeCloudinaryUrl(project.images?.[0], 400) || 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400'}
-                                                    srcSet={cloudinarySrcSet(project.images?.[0], [300, 600])}
-                                                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                                                    src={optimizeCloudinaryUrl(project.images?.[0], 3840) || 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=3840'}
+                                                    srcSet={cloudinarySrcSet(project.images?.[0], [1920, 2560, 3840])}
+                                                    sizes="100vw"
                                                     alt={project.name}
                                                     className="w-full h-full object-cover"
                                                     loading="lazy"
