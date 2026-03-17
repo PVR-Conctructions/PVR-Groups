@@ -41,14 +41,13 @@ h6 {
   background: #c4952e;
 }
 
-/* Smooth scroll & prevent horizontal overflow on mobile */
+/* Smooth scroll */
 html {
   scroll-behavior: smooth;
-  overflow-x: hidden;
 }
 
 body {
-  overflow-x: hidden;
+  /* overflow-x has been removed to allow native zooming on mobile */
 }
 
 /* Slow zoom for hero background */

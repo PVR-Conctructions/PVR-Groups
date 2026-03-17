@@ -27,16 +27,18 @@ router.post('/', auth, adminAuth, upload.array('images', 50), async (req, res) =
             specFlooring, specDoors, specWindows, specKitchen, specBathroom, specElectrical, specPainting
         } = req.body;
 
-        // Upload each file to Cloudinary and collect secure_urls
-        const uploadedUrls = [];
+        // Upload files to Cloudinary concurrently and collect secure_urls
+        let uploadedUrls = [];
         if (req.files && req.files.length > 0) {
-            for (const file of req.files) {
-                const result = await cloudinary.uploader.upload(file.path, {
+            const uploadPromises = req.files.map(file => {
+                return cloudinary.uploader.upload(file.path, {
                     folder: 'construction_projects'
+                }).then(result => {
+                    fs.unlinkSync(file.path); // remove temp file
+                    return result.secure_url;
                 });
-                uploadedUrls.push(result.secure_url);
-                fs.unlinkSync(file.path); // remove temp file
-            }
+            });
+            uploadedUrls = await Promise.all(uploadPromises);
         }
 
         let categorizedImages = [];
@@ -133,18 +135,20 @@ router.put('/:id', auth, adminAuth, upload.array('images', 50), async (req, res)
             painting: specPainting || '',
         };
 
-        // Upload new files to Cloudinary and collect secure_urls
+        // Upload new files to Cloudinary concurrently and collect secure_urls
         const cloudinary = require('../config/cloudinary');
         const fs = require('fs');
-        const uploadedUrls = [];
+        let uploadedUrls = [];
         if (req.files && req.files.length > 0) {
-            for (const file of req.files) {
-                const result = await cloudinary.uploader.upload(file.path, {
+            const uploadPromises = req.files.map(file => {
+                return cloudinary.uploader.upload(file.path, {
                     folder: 'construction_projects'
+                }).then(result => {
+                    fs.unlinkSync(file.path);
+                    return result.secure_url;
                 });
-                uploadedUrls.push(result.secure_url);
-                fs.unlinkSync(file.path);
-            }
+            });
+            uploadedUrls = await Promise.all(uploadPromises);
         }
 
         if (imageGroupsData) {

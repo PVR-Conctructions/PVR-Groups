@@ -107,7 +107,7 @@ const ProjectDetailPage = () => {
                 <div className="max-w-7xl mx-auto">
                     <div className="grid lg:grid-cols-3 gap-8">
                         {/* Main Content */}
-                        <div className="lg:col-span-2 space-y-8">
+                        <div className="lg:col-span-2 space-y-8 order-2 lg:order-1">
                             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
                                 <div className="flex items-center justify-between mb-4">
                                     <div className="flex items-center gap-3">
@@ -380,7 +380,7 @@ const ProjectDetailPage = () => {
                         </div>
 
                         {/* Sidebar */}
-                        <div className="space-y-6 sticky top-24 self-start max-h-[calc(100vh-8rem)] overflow-y-auto pr-2 custom-scrollbar">
+                        <div className="space-y-6 sticky top-24 self-start max-h-[calc(100vh-8rem)] overflow-y-auto pr-2 custom-scrollbar order-1 lg:order-2">
                             <div className="bg-white dark:bg-dark-card rounded-2xl p-6 border border-gray-100 dark:border-dark-border">
                                 {project.price && (
                                     <div className="mb-4">
