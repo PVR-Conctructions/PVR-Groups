@@ -103,11 +103,11 @@ const ProjectDetailPage = () => {
     return (
         <div className="bg-gray-50 dark:bg-dark-bg transition-colors">
             <Navbar />
-            <div className="pt-24 pb-20 px-4">
+            <div className="pt-20 sm:pt-24 pb-20 px-4">
                 <div className="max-w-7xl mx-auto">
-                    <div className="grid lg:grid-cols-3 gap-8">
+                    <div className="grid lg:grid-cols-3 gap-6 lg:gap-8">
                         {/* Main Content */}
-                        <div className="lg:col-span-2 space-y-8 order-2 lg:order-1">
+                        <div className="lg:col-span-2 space-y-6 sm:space-y-8 order-2 lg:order-1">
                             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
                                 <div className="flex items-center justify-between mb-4">
                                     <div className="flex items-center gap-3">
@@ -125,10 +125,11 @@ const ProjectDetailPage = () => {
                                         {isFav ? 'Saved' : 'Save'}
                                     </button>
                                 </div>
-                                <h1 className="text-3xl md:text-4xl font-heading font-bold text-gray-900 dark:text-white mb-2">{project.name}</h1>
+                                <h1 className="text-2xl sm:text-3xl md:text-4xl font-heading font-bold text-gray-900 dark:text-white mb-2">{project.name}</h1>
                                 {project.location?.address && (
-                                    <div className="flex items-center text-gray-500 dark:text-gray-400 mb-4">
-                                        <FiMapPin className="mr-2 text-gold-400" size={16} /> {project.location.address}
+                                    <div className="flex items-center text-sm sm:text-base text-gray-500 dark:text-gray-400 mb-4">
+                                        <FiMapPin className="mr-2 text-gold-400 flex-shrink-0" size={16} /> 
+                                        <span className="truncate">{project.location.address}</span>
                                     </div>
                                 )}
                             </motion.div>
@@ -136,7 +137,7 @@ const ProjectDetailPage = () => {
                             {/* Completion Progress Bar (Ongoing Only) */}
                             {project.status === 'ongoing' && project.completionPercentage > 0 && (
                                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-                                    className="bg-white dark:bg-dark-card rounded-2xl p-6 border border-gray-100 dark:border-dark-border">
+                                    className="bg-white dark:bg-dark-card rounded-2xl p-4 sm:p-6 border border-gray-100 dark:border-dark-border">
                                     <div className="flex items-center justify-between mb-3">
                                         <h2 className="text-lg font-heading font-bold text-gray-900 dark:text-white">🏗 Project Progress</h2>
                                         <span className="text-2xl font-bold text-green-500">{project.completionPercentage}%</span>
@@ -165,17 +166,17 @@ const ProjectDetailPage = () => {
 
                             <ImageGallery images={project.images} categorizedImages={project.categorizedImages} />
 
-                            <div className="bg-white dark:bg-dark-card rounded-2xl p-6 border border-gray-100 dark:border-dark-border">
-                                <h2 className="text-xl font-heading font-bold text-gray-900 dark:text-white mb-4">About This Project</h2>
-                                <p className="text-gray-600 dark:text-gray-400 leading-relaxed">{project.description}</p>
+                            <div className="bg-white dark:bg-dark-card rounded-2xl p-4 sm:p-6 border border-gray-100 dark:border-dark-border">
+                                <h2 className="text-lg sm:text-xl font-heading font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">About This Project</h2>
+                                <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 leading-[1.7]">{project.description}</p>
                             </div>
 
                             {/* Project Details Card */}
                             {(project.projectType || project.totalFloors || project.totalLandArea || project.constructionType || project.reraNumber || (project.configurations && project.configurations.length > 0)) && (
                                 <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-                                    className="bg-white dark:bg-dark-card rounded-2xl p-6 border border-gray-100 dark:border-dark-border">
-                                    <h2 className="text-xl font-heading font-bold text-gray-900 dark:text-white mb-6">📋 Project Details</h2>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    className="bg-white dark:bg-dark-card rounded-2xl p-4 sm:p-6 border border-gray-100 dark:border-dark-border">
+                                    <h2 className="text-lg sm:text-xl font-heading font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">📋 Project Details</h2>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                                         {project.projectType && (
                                             <div className="flex items-start gap-3 p-3 rounded-xl bg-gray-50 dark:bg-dark-border/50">
                                                 <FiHome size={18} className="text-gold-400 mt-0.5 shrink-0" />
@@ -247,8 +248,8 @@ const ProjectDetailPage = () => {
                             {/* Best Features */}
                             {project.bestFeatures && project.bestFeatures.length > 0 && (
                                 <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-                                    className="bg-white dark:bg-dark-card rounded-2xl p-6 border border-gray-100 dark:border-dark-border">
-                                    <h2 className="text-xl font-heading font-bold text-gray-900 dark:text-white mb-6">⭐ Best Features</h2>
+                                    className="bg-white dark:bg-dark-card rounded-2xl p-4 sm:p-6 border border-gray-100 dark:border-dark-border">
+                                    <h2 className="text-lg sm:text-xl font-heading font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">⭐ Best Features</h2>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                         {project.bestFeatures.map((feature, i) => (
                                             <motion.div key={i}
@@ -279,8 +280,8 @@ const ProjectDetailPage = () => {
                             {/* Specifications */}
                             {hasSpecs && (
                                 <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-                                    className="bg-white dark:bg-dark-card rounded-2xl p-6 border border-gray-100 dark:border-dark-border">
-                                    <h2 className="text-xl font-heading font-bold text-gray-900 dark:text-white mb-6">🔧 Specifications</h2>
+                                    className="bg-white dark:bg-dark-card rounded-2xl p-4 sm:p-6 border border-gray-100 dark:border-dark-border">
+                                    <h2 className="text-lg sm:text-xl font-heading font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">🔧 Specifications</h2>
                                     <div className="space-y-3">
                                         {[
                                             { label: 'Flooring', value: project.specifications?.flooring, emoji: '🏠' },
@@ -305,8 +306,8 @@ const ProjectDetailPage = () => {
 
                             {/* Location Map */}
                             {(project.coordinates?.lat || project.location?.mapEmbed) && (
-                                <div className="bg-white dark:bg-dark-card rounded-2xl p-6 border border-gray-100 dark:border-dark-border">
-                                    <h2 className="text-xl font-heading font-bold text-gray-900 dark:text-white mb-4">📍 Location</h2>
+                                <div className="bg-white dark:bg-dark-card rounded-2xl p-4 sm:p-6 border border-gray-100 dark:border-dark-border">
+                                    <h2 className="text-lg sm:text-xl font-heading font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">📍 Location</h2>
                                     {project.location?.address && (
                                         <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 flex items-center gap-2">
                                             <FiMapPin size={14} className="text-gold-400" />
@@ -332,8 +333,8 @@ const ProjectDetailPage = () => {
                             )}
 
                             {/* Reviews */}
-                            <div className="bg-white dark:bg-dark-card rounded-2xl p-6 border border-gray-100 dark:border-dark-border">
-                                <h2 className="text-xl font-heading font-bold text-gray-900 dark:text-white mb-6">Customer Reviews</h2>
+                            <div className="bg-white dark:bg-dark-card rounded-2xl p-4 sm:p-6 border border-gray-100 dark:border-dark-border">
+                                <h2 className="text-lg sm:text-xl font-heading font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">Customer Reviews</h2>
 
                                 {feedback.length > 0 ? (
                                     <div className="space-y-4 mb-8">
@@ -381,7 +382,7 @@ const ProjectDetailPage = () => {
 
                         {/* Sidebar */}
                         <div className="space-y-6 sticky top-24 self-start max-h-[calc(100vh-8rem)] overflow-y-auto pr-2 custom-scrollbar order-1 lg:order-2">
-                            <div className="bg-white dark:bg-dark-card rounded-2xl p-6 border border-gray-100 dark:border-dark-border">
+                            <div className="bg-white dark:bg-dark-card rounded-2xl p-5 sm:p-6 border border-gray-100 dark:border-dark-border">
                                 {project.price && (
                                     <div className="mb-4">
                                         <span className="text-sm text-gray-500">Starting from</span>
@@ -389,30 +390,30 @@ const ProjectDetailPage = () => {
                                     </div>
                                 )}
 
-                                <div className="space-y-3 mb-6">
-                                    {project.area && <div className="flex justify-between text-sm"><span className="text-gray-500">Area</span><span className="text-gray-900 dark:text-white font-medium">{project.area}</span></div>}
-                                    {project.units && <div className="flex justify-between text-sm"><span className="text-gray-500">Units</span><span className="text-gray-900 dark:text-white font-medium">{project.units}</span></div>}
-                                    <div className="flex justify-between text-sm"><span className="text-gray-500">Status</span><span className="text-gray-900 dark:text-white font-medium capitalize">{project.status}</span></div>
-                                    {project.projectType && <div className="flex justify-between text-sm"><span className="text-gray-500">Type</span><span className="text-gray-900 dark:text-white font-medium">{project.projectType}</span></div>}
-                                    {project.totalFloors && <div className="flex justify-between text-sm"><span className="text-gray-500">Floors</span><span className="text-gray-900 dark:text-white font-medium">{project.totalFloors}</span></div>}
-                                    {project.possessionDate && <div className="flex justify-between text-sm"><span className="text-gray-500">Possession</span><span className="text-gray-900 dark:text-white font-medium">{project.possessionDate}</span></div>}
+                                <div className="bg-gray-50 dark:bg-dark-border/30 rounded-xl mb-6 border border-gray-100 dark:border-dark-border divide-y divide-gray-100 dark:divide-dark-border">
+                                    {project.area && <div className="flex justify-between items-center p-3 sm:px-4 sm:py-3"><span className="text-xs text-gray-500">Area</span><span className="text-sm text-gray-900 dark:text-white font-medium text-right">{project.area}</span></div>}
+                                    {project.units && <div className="flex justify-between items-center p-3 sm:px-4 sm:py-3"><span className="text-xs text-gray-500">Units</span><span className="text-sm text-gray-900 dark:text-white font-medium text-right">{project.units}</span></div>}
+                                    <div className="flex justify-between items-center p-3 sm:px-4 sm:py-3"><span className="text-xs text-gray-500">Status</span><span className="text-sm text-gray-900 dark:text-white font-medium capitalize text-right">{project.status}</span></div>
+                                    {project.projectType && <div className="flex justify-between items-center p-3 sm:px-4 sm:py-3"><span className="text-xs text-gray-500">Type</span><span className="text-sm text-gray-900 dark:text-white font-medium text-right">{project.projectType}</span></div>}
+                                    {project.totalFloors && <div className="flex justify-between items-center p-3 sm:px-4 sm:py-3"><span className="text-xs text-gray-500">Floors</span><span className="text-sm text-gray-900 dark:text-white font-medium text-right">{project.totalFloors}</span></div>}
+                                    {project.possessionDate && <div className="flex justify-between items-center p-3 sm:px-4 sm:py-3"><span className="text-xs text-gray-500">Possession</span><span className="text-sm text-gray-900 dark:text-white font-medium text-right">{project.possessionDate}</span></div>}
                                 </div>
 
-                                <div className="flex flex-col sm:flex-row lg:flex-col gap-3">
-                                    <button onClick={() => setShowBooking(!showBooking)} className="w-full flex-1 py-3 rounded-xl btn-shimmer text-white font-semibold flex items-center justify-center gap-2">
+                                <div className="flex flex-col gap-2.5 sm:gap-3">
+                                    <button onClick={() => setShowBooking(!showBooking)} className="w-full py-2.5 sm:py-3 rounded-xl btn-shimmer text-white font-semibold flex items-center justify-center gap-2 shadow-lg shadow-gold-400/20 text-sm sm:text-base">
                                         <FiCalendarIcon size={16} /> Book Site Visit
                                     </button>
-                                    <a href="tel:+919876543210" className="w-full flex-1 py-3 rounded-xl border-2 border-gold-400 text-gold-400 font-semibold flex items-center justify-center gap-2 hover:bg-gold-400/10 transition-colors">
+                                    <a href="tel:+919876543210" className="w-full py-2.5 sm:py-3 rounded-xl border-2 border-gold-400 text-gold-400 font-semibold flex items-center justify-center gap-2 hover:bg-gold-400/10 transition-colors text-sm sm:text-base">
                                         <FiPhone size={16} /> Contact Sales
                                     </a>
                                     {project.brochureUrl && (
-                                        <a href={project.brochureUrl} download className="w-full flex-1 py-3 rounded-xl bg-primary-800 text-white font-semibold flex items-center justify-center gap-2 hover:bg-primary-700 transition-colors">
+                                        <a href={project.brochureUrl} download className="w-full py-2.5 sm:py-3 rounded-xl bg-gray-100 dark:bg-dark-border text-gray-800 dark:text-gray-200 font-medium flex items-center justify-center gap-2 hover:bg-gray-200 dark:hover:bg-dark-border/80 transition-colors text-sm sm:text-base">
                                             <FiDownload size={16} /> Download Brochure
                                         </a>
                                     )}
                                     <button
                                         onClick={() => generateProjectPDF(project)}
-                                        className="w-full flex-1 py-3 rounded-xl bg-gradient-to-r from-primary-700 to-primary-900 text-white font-semibold flex items-center justify-center gap-2 hover:from-primary-600 hover:to-primary-800 transition-all duration-200 shadow-lg shadow-primary-900/20"
+                                        className="w-full py-2.5 sm:py-3 rounded-xl bg-gray-100 dark:bg-dark-border text-gray-800 dark:text-gray-200 font-medium flex items-center justify-center gap-2 hover:bg-gray-200 dark:hover:bg-dark-border/80 transition-controls text-sm sm:text-base"
                                     >
                                         <FiShare2 size={16} /> Share as PDF
                                     </button>

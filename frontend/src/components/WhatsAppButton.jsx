@@ -10,9 +10,9 @@ const WhatsAppButton = () => {
             rel="noopener noreferrer"
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
-            className="fixed bottom-6 left-6 w-14 h-14 rounded-full bg-green-500 text-white shadow-lg flex items-center justify-center z-50 hover:bg-green-600 transition-colors animate-pulse-gold"
+            className="fixed bottom-24 right-4 sm:right-6 w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-green-500 text-white shadow-lg flex items-center justify-center z-50 hover:bg-green-600 transition-colors animate-pulse-gold pb-[env(safe-area-inset-bottom)]"
         >
-            <FaWhatsapp size={26} />
+            <FaWhatsapp size={24} className="sm:w-[26px] sm:h-[26px]" />
         </motion.a>
     );
 };

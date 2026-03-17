@@ -145,8 +145,8 @@ const ChatWidget = () => {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 20, scale: 0.9 }}
                         transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-                        className="fixed bottom-24 right-6 w-80 sm:w-96 bg-white dark:bg-dark-card rounded-2xl shadow-2xl border dark:border-dark-border z-50 overflow-hidden flex flex-col"
-                        style={{ maxHeight: '520px' }}
+                        className="fixed bottom-20 right-4 sm:right-6 w-[calc(100%-2rem)] sm:w-96 bg-white dark:bg-dark-card rounded-2xl shadow-2xl border dark:border-dark-border z-[60] overflow-hidden flex flex-col"
+                        style={{ maxHeight: 'calc(100vh - 120px)' }}
                     >
                         {/* Header */}
                         <div className="bg-gradient-to-r from-primary-900 to-primary-800 p-4 flex items-center justify-between flex-shrink-0">
@@ -264,7 +264,7 @@ const ChatWidget = () => {
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={() => setOpen(!open)}
-                className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-gradient-to-br from-primary-700 to-primary-900 text-white shadow-lg flex items-center justify-center z-50 hover:shadow-xl hover:shadow-primary-900/30 transition-shadow"
+                className="fixed bottom-6 right-4 sm:right-6 w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-primary-700 to-primary-900 text-white shadow-lg flex items-center justify-center z-[60] hover:shadow-xl hover:shadow-primary-900/30 transition-shadow mb-[env(safe-area-inset-bottom)]"
             >
                 <AnimatePresence mode="wait">
                     {open ? (

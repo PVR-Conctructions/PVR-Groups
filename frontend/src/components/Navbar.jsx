@@ -46,13 +46,13 @@ const Navbar = () => {
             : 'bg-dark-bg/80 backdrop-blur-md'
             }`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex items-center justify-between h-16 md:h-20">
+                <div className="flex items-center justify-between h-14 md:h-20">
                     {/* Logo */}
                     <Link to="/home" className="flex items-center space-x-2">
-                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-gold-400 to-gold-600 flex items-center justify-center shadow-lg shadow-gold-400/20">
-                            <span className="text-white font-heading font-bold text-lg">P</span>
+                        <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-gradient-to-br from-gold-400 to-gold-600 flex items-center justify-center shadow-lg shadow-gold-400/20">
+                            <span className="text-white font-heading font-bold text-base md:text-lg">P</span>
                         </div>
-                        <span className={`text-xl font-heading font-bold transition-colors ${scrolled ? 'text-gray-900 dark:text-white' : 'text-white'
+                        <span className={`text-lg md:text-xl font-heading font-bold transition-colors ${scrolled ? 'text-gray-900 dark:text-white' : 'text-white'
                             }`}>
                             PVR <span className="text-gold-400">Groups</span>
                         </span>
@@ -82,27 +82,27 @@ const Navbar = () => {
                     </div>
 
                     {/* Right side */}
-                    <div className="flex items-center space-x-3">
-                        <button onClick={toggleTheme} className={`p-2 rounded-lg transition-colors ${scrolled ? 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-border' : 'text-white/80 hover:bg-white/10'
+                    <div className="flex items-center space-x-1 sm:space-x-3">
+                        <button onClick={toggleTheme} className={`p-1.5 sm:p-2 rounded-lg transition-colors ${scrolled ? 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-border' : 'text-white/80 hover:bg-white/10'
                             }`}>
-                            {darkMode ? <FiSun size={20} /> : <FiMoon size={20} />}
+                            {darkMode ? <FiSun size={18} className="sm:w-5 sm:h-5" /> : <FiMoon size={18} className="sm:w-5 sm:h-5" />}
                         </button>
 
                         {/* Language toggle */}
                         <button
                             onClick={() => switchLanguage(language === 'en' ? 'te' : 'en')}
-                            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-colors ${scrolled ? 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-border' : 'text-white/80 hover:bg-white/10'}`}
+                            className={`flex items-center gap-1 px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg text-[10px] sm:text-xs font-bold transition-colors ${scrolled ? 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-border' : 'text-white/80 hover:bg-white/10'}`}
                             title={language === 'en' ? 'Switch to Telugu' : 'Switch to English'}
                         >
-                            <FiGlobe size={14} />
+                            <FiGlobe size={14} className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                             {language === 'en' ? 'TE' : 'EN'}
                         </button>
 
                         {/* Profile dropdown */}
                         <div className="relative">
-                            <button onClick={() => setProfileOpen(!profileOpen)} className="flex items-center space-x-2 p-1.5 rounded-lg hover:bg-white/10 transition-colors">
-                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gold-400 to-gold-600 flex items-center justify-center ring-2 ring-gold-400/30">
-                                    <span className="text-white text-sm font-bold">{user?.name?.charAt(0) || 'U'}</span>
+                            <button onClick={() => setProfileOpen(!profileOpen)} className="flex items-center space-x-1 sm:space-x-2 p-1 sm:p-1.5 rounded-lg hover:bg-white/10 transition-colors">
+                                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-gold-400 to-gold-600 flex items-center justify-center ring-2 ring-gold-400/30">
+                                    <span className="text-white text-xs sm:text-sm font-bold">{user?.name?.charAt(0) || 'U'}</span>
                                 </div>
                                 <span className={`hidden md:block text-sm font-medium transition-colors ${scrolled ? 'text-gray-700 dark:text-gray-300' : 'text-white/90'
                                     }`}>{user?.name?.split(' ')[0]}</span>
@@ -143,9 +143,9 @@ const Navbar = () => {
                         </div>
 
                         {/* Mobile menu button */}
-                        <button onClick={() => setMobileOpen(!mobileOpen)} className={`md:hidden p-2 rounded-lg transition-colors ${scrolled ? 'text-gray-600 dark:text-gray-300' : 'text-white/80'
+                        <button onClick={() => setMobileOpen(!mobileOpen)} className={`md:hidden p-1 sm:p-2 rounded-lg transition-colors ${scrolled ? 'text-gray-600 dark:text-gray-300' : 'text-white/80'
                             }`}>
-                            {mobileOpen ? <FiX size={24} /> : <FiMenu size={24} />}
+                            {mobileOpen ? <FiX size={20} className="sm:w-6 sm:h-6" /> : <FiMenu size={20} className="sm:w-6 sm:h-6" />}
                         </button>
                     </div>
                 </div>

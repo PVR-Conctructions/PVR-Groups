@@ -119,7 +119,12 @@ const ImageGallery = ({ images, categorizedImages }) => {
             )}
 
             {/* Main Slider */}
-            <div className="relative rounded-2xl overflow-hidden group bg-gray-100 dark:bg-dark-card border border-gray-100 dark:border-dark-border w-full">
+            <div 
+                className="relative rounded-2xl overflow-hidden group bg-gray-100 dark:bg-dark-card border border-gray-100 dark:border-dark-border w-full"
+                onTouchStart={onTouchStart}
+                onTouchMove={onTouchMove}
+                onTouchEnd={onTouchEndHandler}
+            >
                 <div className="aspect-video relative w-full h-full">
                     <img
                         src={cloudinaryGallery(currentImg.url)}
@@ -165,12 +170,12 @@ const ImageGallery = ({ images, categorizedImages }) => {
 
             {/* Thumbnails */}
             {filteredImages.length > 1 && (
-                <div className="flex space-x-2 overflow-x-auto pb-2 custom-scrollbar w-full max-w-[100vw]">
+                <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar w-full max-w-[100vw]">
                     {filteredImages.map((img, i) => (
                         <button
                             key={i}
                             onClick={() => setCurrent(i)}
-                            className={`flex-shrink-0 w-24 h-16 rounded-xl overflow-hidden border-2 transition-all relative ${
+                            className={`flex-shrink-0 w-20 h-12 md:w-24 md:h-16 rounded-xl overflow-hidden border-2 transition-all relative ${
                                 i === current ? 'border-gold-400 scale-[1.02] shadow-md' : 'border-transparent opacity-60 hover:opacity-100'
                             }`}
                         >
