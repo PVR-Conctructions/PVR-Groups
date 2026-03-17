@@ -398,21 +398,21 @@ const ProjectDetailPage = () => {
                                     {project.possessionDate && <div className="flex justify-between text-sm"><span className="text-gray-500">Possession</span><span className="text-gray-900 dark:text-white font-medium">{project.possessionDate}</span></div>}
                                 </div>
 
-                                <div className="space-y-3">
-                                    <button onClick={() => setShowBooking(!showBooking)} className="w-full py-3 rounded-xl btn-shimmer text-white font-semibold flex items-center justify-center gap-2">
+                                <div className="flex flex-col sm:flex-row lg:flex-col gap-3">
+                                    <button onClick={() => setShowBooking(!showBooking)} className="w-full flex-1 py-3 rounded-xl btn-shimmer text-white font-semibold flex items-center justify-center gap-2">
                                         <FiCalendarIcon size={16} /> Book Site Visit
                                     </button>
-                                    <a href="tel:+919876543210" className="w-full py-3 rounded-xl border-2 border-gold-400 text-gold-400 font-semibold flex items-center justify-center gap-2 hover:bg-gold-400/10 transition-colors">
+                                    <a href="tel:+919876543210" className="w-full flex-1 py-3 rounded-xl border-2 border-gold-400 text-gold-400 font-semibold flex items-center justify-center gap-2 hover:bg-gold-400/10 transition-colors">
                                         <FiPhone size={16} /> Contact Sales
                                     </a>
                                     {project.brochureUrl && (
-                                        <a href={project.brochureUrl} download className="w-full py-3 rounded-xl bg-primary-800 text-white font-semibold flex items-center justify-center gap-2 hover:bg-primary-700 transition-colors">
+                                        <a href={project.brochureUrl} download className="w-full flex-1 py-3 rounded-xl bg-primary-800 text-white font-semibold flex items-center justify-center gap-2 hover:bg-primary-700 transition-colors">
                                             <FiDownload size={16} /> Download Brochure
                                         </a>
                                     )}
                                     <button
                                         onClick={() => generateProjectPDF(project)}
-                                        className="w-full py-3 rounded-xl bg-gradient-to-r from-primary-700 to-primary-900 text-white font-semibold flex items-center justify-center gap-2 hover:from-primary-600 hover:to-primary-800 transition-all duration-200 shadow-lg shadow-primary-900/20"
+                                        className="w-full flex-1 py-3 rounded-xl bg-gradient-to-r from-primary-700 to-primary-900 text-white font-semibold flex items-center justify-center gap-2 hover:from-primary-600 hover:to-primary-800 transition-all duration-200 shadow-lg shadow-primary-900/20"
                                     >
                                         <FiShare2 size={16} /> Share as PDF
                                     </button>

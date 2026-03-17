@@ -52,7 +52,7 @@ function App() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-dark-bg transition-colors duration-300">
+        <div className="min-h-screen bg-gray-50 dark:bg-dark-bg transition-colors duration-300 w-full max-w-[100vw] overflow-x-hidden relative">
             <Routes>
                 {/* Public routes */}
                 <Route path="/" element={<LandingPage />} />
