@@ -27,6 +27,10 @@ router.post('/', auth, adminAuth, upload.array('images', 50), async (req, res) =
             specFlooring, specDoors, specWindows, specKitchen, specBathroom, specElectrical, specPainting
         } = req.body;
 
+        if (!name || !description || !status) {
+            return res.status(400).json({ message: 'Name, description and status are required' });
+        }
+
         // Upload files to Cloudinary concurrently and collect secure_urls
         let uploadedUrls = [];
         if (req.files && req.files.length > 0) {
@@ -34,8 +38,11 @@ router.post('/', auth, adminAuth, upload.array('images', 50), async (req, res) =
                 return cloudinary.uploader.upload(file.path, {
                     folder: 'construction_projects'
                 }).then(result => {
-                    fs.unlinkSync(file.path); // remove temp file
+                    try { if (fs.existsSync(file.path)) fs.unlinkSync(file.path); } catch (e) { console.error('Unlink error:', e); }
                     return result.secure_url;
+                }).catch(err => {
+                    try { if (fs.existsSync(file.path)) fs.unlinkSync(file.path); } catch (e) {}
+                    throw err;
                 });
             });
             uploadedUrls = await Promise.all(uploadPromises);
@@ -49,15 +56,34 @@ router.post('/', auth, adminAuth, upload.array('images', 50), async (req, res) =
                 const groups = JSON.parse(imageGroupsData);
                 let fileIndex = 0;
                 categorizedImages = groups.map(g => {
-                    const newUrls = uploadedUrls.slice(fileIndex, fileIndex + (g.newFilesCount || 0));
-                    fileIndex += (g.newFilesCount || 0);
+                    const newFilesCount = Number(g.newFilesCount) || 0;
+                    const newUrls = uploadedUrls.slice(fileIndex, fileIndex + newFilesCount);
+                    fileIndex += newFilesCount;
                     const urls = [...(g.existingUrls || []), ...newUrls];
                     allImages = [...allImages, ...urls];
                     return { category: g.category, label: g.label, urls };
                 });
-            } catch (e) { console.error('Error parsing imageGroupsData', e); }
+            } catch (e) { 
+                console.error('Error parsing imageGroupsData', e);
+                // Continue even if group parsing fails, but use all uploaded images
+                allImages = uploadedUrls;
+            }
         } else {
             allImages = uploadedUrls;
+        }
+
+        // Sanitize configurations for numeric fields
+        let parsedConfigs = [];
+        if (configurations) {
+            try {
+                parsedConfigs = JSON.parse(configurations).map(cfg => ({
+                    ...cfg,
+                    bedrooms: cfg.bedrooms === "" ? undefined : Number(cfg.bedrooms),
+                    bathrooms: cfg.bathrooms === "" ? undefined : Number(cfg.bathrooms),
+                    balconies: cfg.balconies === "" ? undefined : Number(cfg.balconies),
+                    parking: cfg.parking === "" ? undefined : Number(cfg.parking)
+                }));
+            } catch (e) { console.error('Error parsing configurations', e); }
         }
 
         const project = await Project.create({
@@ -65,7 +91,7 @@ router.post('/', auth, adminAuth, upload.array('images', 50), async (req, res) =
             images: allImages,
             imageUrls: allImages,
             categorizedImages,
-            completionPercentage: completionPercentage ? Number(completionPercentage) : 0,
+            completionPercentage: completionPercentage !== undefined ? Number(completionPercentage) : 0,
             amenities: amenities ? JSON.parse(amenities) : [],
             bestFeatures: bestFeatures ? JSON.parse(bestFeatures) : [],
             location: { address: location, mapEmbed },
@@ -73,7 +99,7 @@ router.post('/', auth, adminAuth, upload.array('images', 50), async (req, res) =
             highlights: highlights ? JSON.parse(highlights) : [],
             projectType: projectType || '',
             totalFloors: totalFloors || '',
-            configurations: configurations ? JSON.parse(configurations) : [],
+            configurations: parsedConfigs,
             videoId: videoId || '',
             possessionDate: possessionDate || '',
             reraNumber: reraNumber || '',
@@ -93,7 +119,8 @@ router.post('/', auth, adminAuth, upload.array('images', 50), async (req, res) =
 
         res.status(201).json(project);
     } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error('Create Project Error:', error);
+        res.status(500).json({ message: error.message || 'Server error during project creation' });
     }
 });
 
@@ -107,14 +134,38 @@ router.put('/:id', auth, adminAuth, upload.array('images', 50), async (req, res)
             reraNumber, totalLandArea, constructionType, bankApprovals,
             specFlooring, specDoors, specWindows, specKitchen, specBathroom, specElectrical, specPainting
         } = req.body;
-        const updateData = { name, description, status, price, area, units };
+        const updateData = {};
+
+        if (name) updateData.name = name;
+        if (description) updateData.description = description;
+        if (status) updateData.status = status;
+        if (price !== undefined) updateData.price = price;
+        if (area !== undefined) updateData.area = area;
+        if (units !== undefined) updateData.units = units;
 
         if (completionPercentage !== undefined) updateData.completionPercentage = Number(completionPercentage);
         if (amenities) updateData.amenities = JSON.parse(amenities);
         if (bestFeatures) updateData.bestFeatures = JSON.parse(bestFeatures);
         if (highlights) updateData.highlights = JSON.parse(highlights);
-        if (location || mapEmbed) updateData.location = { address: location, mapEmbed };
-        if (configurations) updateData.configurations = JSON.parse(configurations);
+        if (location !== undefined || mapEmbed !== undefined) {
+            updateData.location = { 
+                address: location !== undefined ? location : (await Project.findById(req.params.id))?.location?.address, 
+                mapEmbed: mapEmbed !== undefined ? mapEmbed : (await Project.findById(req.params.id))?.location?.mapEmbed 
+            };
+        }
+        
+        if (configurations) {
+            try {
+                updateData.configurations = JSON.parse(configurations).map(cfg => ({
+                    ...cfg,
+                    bedrooms: cfg.bedrooms === "" ? undefined : Number(cfg.bedrooms),
+                    bathrooms: cfg.bathrooms === "" ? undefined : Number(cfg.bathrooms),
+                    balconies: cfg.balconies === "" ? undefined : Number(cfg.balconies),
+                    parking: cfg.parking === "" ? undefined : Number(cfg.parking)
+                }));
+            } catch (e) { console.error('Error parsing configurations', e); }
+        }
+
         if (videoId !== undefined) updateData.videoId = videoId;
         if (bankApprovals) updateData.bankApprovals = JSON.parse(bankApprovals);
 
@@ -127,15 +178,18 @@ router.put('/:id', auth, adminAuth, upload.array('images', 50), async (req, res)
         if (constructionType !== undefined) updateData.constructionType = constructionType;
 
         // Specifications
-        updateData.specifications = {
-            flooring: specFlooring || '',
-            doors: specDoors || '',
-            windows: specWindows || '',
-            kitchen: specKitchen || '',
-            bathroom: specBathroom || '',
-            electrical: specElectrical || '',
-            painting: specPainting || '',
-        };
+        if (specFlooring || specDoors || specWindows || specKitchen || specBathroom || specElectrical || specPainting) {
+            const existing = await Project.findById(req.params.id);
+            updateData.specifications = {
+                flooring: specFlooring !== undefined ? specFlooring : existing?.specifications?.flooring || '',
+                doors: specDoors !== undefined ? specDoors : existing?.specifications?.doors || '',
+                windows: specWindows !== undefined ? specWindows : existing?.specifications?.windows || '',
+                kitchen: specKitchen !== undefined ? specKitchen : existing?.specifications?.kitchen || '',
+                bathroom: specBathroom !== undefined ? specBathroom : existing?.specifications?.bathroom || '',
+                electrical: specElectrical !== undefined ? specElectrical : existing?.specifications?.electrical || '',
+                painting: specPainting !== undefined ? specPainting : existing?.specifications?.painting || '',
+            };
+        }
 
         // Upload new files to Cloudinary concurrently and collect secure_urls
         const cloudinary = require('../config/cloudinary');
@@ -146,8 +200,11 @@ router.put('/:id', auth, adminAuth, upload.array('images', 50), async (req, res)
                 return cloudinary.uploader.upload(file.path, {
                     folder: 'construction_projects'
                 }).then(result => {
-                    fs.unlinkSync(file.path);
+                    try { if (fs.existsSync(file.path)) fs.unlinkSync(file.path); } catch (e) {}
                     return result.secure_url;
+                }).catch(err => {
+                    try { if (fs.existsSync(file.path)) fs.unlinkSync(file.path); } catch (e) {}
+                    throw err;
                 });
             });
             uploadedUrls = await Promise.all(uploadPromises);
@@ -159,8 +216,9 @@ router.put('/:id', auth, adminAuth, upload.array('images', 50), async (req, res)
                 let fileIndex = 0;
                 let allImages = [];
                 updateData.categorizedImages = groups.map(g => {
-                    const newUrls = uploadedUrls.slice(fileIndex, fileIndex + (g.newFilesCount || 0));
-                    fileIndex += (g.newFilesCount || 0);
+                    const newFilesCount = Number(g.newFilesCount) || 0;
+                    const newUrls = uploadedUrls.slice(fileIndex, fileIndex + newFilesCount);
+                    fileIndex += newFilesCount;
                     const urls = [...(g.existingUrls || []), ...newUrls];
                     allImages = [...allImages, ...urls];
                     return { category: g.category, label: g.label, urls };
@@ -180,7 +238,8 @@ router.put('/:id', auth, adminAuth, upload.array('images', 50), async (req, res)
 
         res.json(project);
     } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error('Update Project Error:', error);
+        res.status(500).json({ message: error.message || 'Server error during project update' });
     }
 });
 

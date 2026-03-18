@@ -5,7 +5,15 @@ const fs = require('fs');
 // Upload project to Cloudinary and save to DB
 exports.uploadProject = async (req, res) => {
     try {
-        const { title, description, location } = req.body;
+        const { 
+            name, title, description, location, status, 
+            completionPercentage, amenities, bestFeatures,
+            price, area, units, projectType, totalFloors,
+            configurations, videoId, possessionDate, reraNumber,
+            totalLandArea, constructionType, bankApprovals,
+            specFlooring, specDoors, specWindows, specKitchen,
+            specBathroom, specElectrical, specPainting
+        } = req.body;
         
         if (!req.files || req.files.length === 0) {
             return res.status(400).json({ message: 'No images uploaded' });
@@ -21,24 +29,56 @@ exports.uploadProject = async (req, res) => {
             uploadedImages.push(result.secure_url);
             
             // Remove from local temporary storage
-            fs.unlinkSync(file.path);
+            try { if (fs.existsSync(file.path)) fs.unlinkSync(file.path); } catch (e) {}
+        }
+
+        // Sanitize configurations
+        let parsedConfigs = [];
+        if (configurations) {
+            try {
+                parsedConfigs = JSON.parse(configurations).map(cfg => ({
+                    ...cfg,
+                    bedrooms: cfg.bedrooms === "" ? undefined : Number(cfg.bedrooms),
+                    bathrooms: cfg.bathrooms === "" ? undefined : Number(cfg.bathrooms),
+                    balconies: cfg.balconies === "" ? undefined : Number(cfg.balconies),
+                    parking: cfg.parking === "" ? undefined : Number(cfg.parking)
+                }));
+            } catch (e) {}
         }
 
         const project = new Project({
-            title,
-            name: title || 'Untitled Project', // mapped for legacy support
+            name: name || title || 'Untitled Project',
+            title: title || name,
             description,
-            location: { address: location }, // mapped for legacy support
+            location: typeof location === 'string' ? { address: location } : location,
             imageUrls: uploadedImages,
-            images: uploadedImages, // mapping as flat array backward compatibility
-            status: 'ongoing' // mapped for legacy support
+            images: uploadedImages,
+            status: status || 'ongoing',
+            completionPercentage: completionPercentage ? Number(completionPercentage) : 0,
+            amenities: amenities ? (typeof amenities === 'string' ? JSON.parse(amenities) : amenities) : [],
+            bestFeatures: bestFeatures ? (typeof bestFeatures === 'string' ? JSON.parse(bestFeatures) : bestFeatures) : [],
+            price, area, units,
+            projectType, totalFloors,
+            configurations: parsedConfigs,
+            videoId, possessionDate, reraNumber,
+            totalLandArea, constructionType,
+            bankApprovals: bankApprovals ? (typeof bankApprovals === 'string' ? JSON.parse(bankApprovals) : bankApprovals) : [],
+            specifications: {
+                flooring: specFlooring || '',
+                doors: specDoors || '',
+                windows: specWindows || '',
+                kitchen: specKitchen || '',
+                bathroom: specBathroom || '',
+                electrical: specElectrical || '',
+                painting: specPainting || '',
+            }
         });
 
         await project.save();
         res.status(201).json(project);
     } catch (error) {
         console.error('Upload Error:', error);
-        res.status(500).json({ message: 'Server error', error: error.message });
+        res.status(500).json({ message: error.message || 'Server error during project creation' });
     }
 };
 

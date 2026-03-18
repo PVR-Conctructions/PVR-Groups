@@ -22,7 +22,7 @@ async function test() {
             highlights: [],
             projectType: "",
             totalFloors: "",
-            configurations: [],
+            configurations: [{ type: "test", bedrooms: "", bathrooms: "", parking: "" }],
             videoId: "",
             possessionDate: "",
             reraNumber: "",
