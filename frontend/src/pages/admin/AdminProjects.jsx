@@ -138,9 +138,9 @@ const AdminProjects = () => {
             });
 
             if (editing) {
-                await api.put(`/projects/${editing}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+                await api.put(`/projects/${editing}`, formData);
             } else {
-                await api.post('/projects', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+                await api.post('/projects', formData);
             }
             fetchProjects();
             resetForm();
