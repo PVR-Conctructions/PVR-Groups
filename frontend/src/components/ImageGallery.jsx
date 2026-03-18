@@ -101,7 +101,7 @@ const ImageGallery = ({ images, categorizedImages }) => {
         <div className="space-y-4 w-full max-w-full overflow-hidden">
             {/* Category Tabs */}
             {categories.length > 1 && (
-                <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar w-full max-w-[100vw]">
+                <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar w-full">
                     {categories.map(cat => (
                         <button
                             key={cat}
@@ -170,7 +170,7 @@ const ImageGallery = ({ images, categorizedImages }) => {
 
             {/* Thumbnails */}
             {filteredImages.length > 1 && (
-                <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar w-full max-w-[100vw]">
+                <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar w-full">
                     {filteredImages.map((img, i) => (
                         <button
                             key={i}

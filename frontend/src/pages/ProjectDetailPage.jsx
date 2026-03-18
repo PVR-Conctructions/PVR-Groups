@@ -26,6 +26,8 @@ const ProjectDetailPage = () => {
     const [bookingLoading, setBookingLoading] = useState(false);
     const [showBooking, setShowBooking] = useState(false);
     const [isFav, setIsFav] = useState(false);
+    const [mediaTab, setMediaTab] = useState('images'); // 'images' | 'video'
+    const [selectedConfigIdx, setSelectedConfigIdx] = useState(0);
 
     useEffect(() => {
         api.get('/favorites').then(res => {
@@ -164,7 +166,31 @@ const ProjectDetailPage = () => {
                                 </motion.div>
                             )}
 
-                            <ImageGallery images={project.images} categorizedImages={project.categorizedImages} />
+                            {project.videoId ? (
+                                <div className="space-y-4">
+                                    <div className="flex gap-2">
+                                        <button onClick={() => setMediaTab('images')} className={`px-5 py-2 rounded-xl text-sm font-semibold transition-all ${mediaTab === 'images' ? 'bg-gold-400 text-white shadow-md' : 'bg-white dark:bg-dark-card text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-dark-border hover:border-gold-400/50'}`}>Images</button>
+                                        <button onClick={() => setMediaTab('video')} className={`px-5 py-2 rounded-xl text-sm font-semibold transition-all ${mediaTab === 'video' ? 'bg-gold-400 text-white shadow-md' : 'bg-white dark:bg-dark-card text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-dark-border hover:border-gold-400/50'}`}>Video</button>
+                                    </div>
+                                    {mediaTab === 'images' ? (
+                                        <ImageGallery images={project.images} categorizedImages={project.categorizedImages} />
+                                    ) : (
+                                        <div className="aspect-video w-full rounded-2xl overflow-hidden border border-gray-100 dark:border-dark-border bg-black">
+                                            <iframe
+                                                width="100%"
+                                                height="100%"
+                                                src={`https://www.youtube.com/embed/${project.videoId}?autoplay=1`}
+                                                title="Project Video"
+                                                frameBorder="0"
+                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                allowFullScreen
+                                            ></iframe>
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                <ImageGallery images={project.images} categorizedImages={project.categorizedImages} />
+                            )}
 
                             <div className="bg-white dark:bg-dark-card rounded-2xl p-4 sm:p-6 border border-gray-100 dark:border-dark-border">
                                 <h2 className="text-lg sm:text-xl font-heading font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">About This Project</h2>
@@ -217,15 +243,63 @@ const ProjectDetailPage = () => {
 
                                     {/* Configurations */}
                                     {project.configurations && project.configurations.length > 0 && (
-                                        <div className="mt-5">
-                                            <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Available Configurations</p>
-                                            <div className="flex flex-wrap gap-2">
-                                                {project.configurations.map((c, i) => (
-                                                    <span key={i} className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-500/10 dark:to-indigo-500/10 border border-blue-200 dark:border-blue-500/20 text-blue-700 dark:text-blue-400 text-sm font-medium">
-                                                        {c}
-                                                    </span>
-                                                ))}
+                                        <div className="mt-6">
+                                            <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Available Configurations</p>
+                                            <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
+                                                {project.configurations.map((c, i) => {
+                                                    const isString = typeof c === 'string';
+                                                    const label = isString ? c : c.type;
+                                                    return (
+                                                        <button 
+                                                            key={i} 
+                                                            onClick={() => setSelectedConfigIdx(i)}
+                                                            className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all flex-shrink-0 ${
+                                                                selectedConfigIdx === i 
+                                                                    ? 'bg-gold-400 text-white shadow-md' 
+                                                                    : 'bg-white dark:bg-dark-card text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-dark-border hover:border-gold-400/50'
+                                                            }`}
+                                                        >
+                                                            {label}
+                                                        </button>
+                                                    );
+                                                })}
                                             </div>
+                                            
+                                            {/* Configuration Details Display */}
+                                            {project.configurations[selectedConfigIdx] && typeof project.configurations[selectedConfigIdx] === 'object' && (
+                                                <motion.div 
+                                                    key={selectedConfigIdx}
+                                                    initial={{ opacity: 0, y: 10 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    className="mt-4 p-4 rounded-xl border border-gray-100 dark:border-dark-border bg-gray-50 dark:bg-dark-border/30"
+                                                >
+                                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-3">
+                                                        {project.configurations[selectedConfigIdx].price && (
+                                                            <div><p className="text-xs text-gray-500">Price</p><p className="font-semibold text-gray-900 dark:text-white">{project.configurations[selectedConfigIdx].price}</p></div>
+                                                        )}
+                                                        {project.configurations[selectedConfigIdx].area && (
+                                                            <div><p className="text-xs text-gray-500">Area</p><p className="font-semibold text-gray-900 dark:text-white">{project.configurations[selectedConfigIdx].area}</p></div>
+                                                        )}
+                                                        {project.configurations[selectedConfigIdx].bedrooms !== undefined && project.configurations[selectedConfigIdx].bedrooms !== '' && (
+                                                            <div><p className="text-xs text-gray-500">Bedrooms</p><p className="font-semibold text-gray-900 dark:text-white">{project.configurations[selectedConfigIdx].bedrooms}</p></div>
+                                                        )}
+                                                        {project.configurations[selectedConfigIdx].bathrooms !== undefined && project.configurations[selectedConfigIdx].bathrooms !== '' && (
+                                                            <div><p className="text-xs text-gray-500">Bathrooms</p><p className="font-semibold text-gray-900 dark:text-white">{project.configurations[selectedConfigIdx].bathrooms}</p></div>
+                                                        )}
+                                                        {project.configurations[selectedConfigIdx].balconies !== undefined && project.configurations[selectedConfigIdx].balconies !== '' && (
+                                                            <div><p className="text-xs text-gray-500">Balconies</p><p className="font-semibold text-gray-900 dark:text-white">{project.configurations[selectedConfigIdx].balconies}</p></div>
+                                                        )}
+                                                        {project.configurations[selectedConfigIdx].parking !== undefined && project.configurations[selectedConfigIdx].parking !== '' && (
+                                                            <div><p className="text-xs text-gray-500">Parking</p><p className="font-semibold text-gray-900 dark:text-white">{project.configurations[selectedConfigIdx].parking}</p></div>
+                                                        )}
+                                                    </div>
+                                                    {project.configurations[selectedConfigIdx].description && (
+                                                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 pt-3 border-t border-gray-200 dark:border-dark-border">
+                                                            {project.configurations[selectedConfigIdx].description}
+                                                        </p>
+                                                    )}
+                                                </motion.div>
+                                            )}
                                         </div>
                                     )}
 
@@ -399,23 +473,23 @@ const ProjectDetailPage = () => {
                                     {project.possessionDate && <div className="flex justify-between items-center p-3 sm:px-4 sm:py-3"><span className="text-xs text-gray-500">Possession</span><span className="text-sm text-gray-900 dark:text-white font-medium text-right">{project.possessionDate}</span></div>}
                                 </div>
 
-                                <div className="flex flex-col gap-2.5 sm:gap-3">
-                                    <button onClick={() => setShowBooking(!showBooking)} className="w-full py-2.5 sm:py-3 rounded-xl btn-shimmer text-white font-semibold flex items-center justify-center gap-2 shadow-lg shadow-gold-400/20 text-sm sm:text-base">
-                                        <FiCalendarIcon size={16} /> Book Site Visit
+                                <div className="flex flex-wrap gap-2.5 sm:gap-3">
+                                    <button onClick={() => setShowBooking(!showBooking)} className="flex-1 min-w-[140px] py-2.5 sm:py-3 rounded-xl btn-shimmer text-white font-semibold flex items-center justify-center gap-2 shadow-lg shadow-gold-400/20 text-sm sm:text-base">
+                                        <FiCalendarIcon size={16} className="shrink-0" /> <span className="truncate">Book Visit</span>
                                     </button>
-                                    <a href="tel:+919876543210" className="w-full py-2.5 sm:py-3 rounded-xl border-2 border-gold-400 text-gold-400 font-semibold flex items-center justify-center gap-2 hover:bg-gold-400/10 transition-colors text-sm sm:text-base">
-                                        <FiPhone size={16} /> Contact Sales
+                                    <a href="tel:+919876543210" className="flex-1 min-w-[140px] py-2.5 sm:py-3 rounded-xl border-2 border-gold-400 text-gold-400 font-semibold flex items-center justify-center gap-2 hover:bg-gold-400/10 transition-colors text-sm sm:text-base">
+                                        <FiPhone size={16} className="shrink-0" /> <span className="truncate">Contact Sales</span>
                                     </a>
                                     {project.brochureUrl && (
-                                        <a href={project.brochureUrl} download className="w-full py-2.5 sm:py-3 rounded-xl bg-gray-100 dark:bg-dark-border text-gray-800 dark:text-gray-200 font-medium flex items-center justify-center gap-2 hover:bg-gray-200 dark:hover:bg-dark-border/80 transition-colors text-sm sm:text-base">
-                                            <FiDownload size={16} /> Download Brochure
+                                        <a href={project.brochureUrl} download className="flex-1 min-w-[140px] py-2.5 sm:py-3 rounded-xl bg-gray-100 dark:bg-dark-border text-gray-800 dark:text-gray-200 font-medium flex items-center justify-center gap-2 hover:bg-gray-200 dark:hover:bg-dark-border/80 transition-colors text-sm sm:text-base">
+                                            <FiDownload size={16} className="shrink-0" /> <span className="truncate">Brochure</span>
                                         </a>
                                     )}
                                     <button
                                         onClick={() => generateProjectPDF(project)}
-                                        className="w-full py-2.5 sm:py-3 rounded-xl bg-gray-100 dark:bg-dark-border text-gray-800 dark:text-gray-200 font-medium flex items-center justify-center gap-2 hover:bg-gray-200 dark:hover:bg-dark-border/80 transition-controls text-sm sm:text-base"
+                                        className="flex-1 min-w-[140px] py-2.5 sm:py-3 rounded-xl bg-gray-100 dark:bg-dark-border text-gray-800 dark:text-gray-200 font-medium flex items-center justify-center gap-2 hover:bg-gray-200 dark:hover:bg-dark-border/80 transition-controls text-sm sm:text-base"
                                     >
-                                        <FiShare2 size={16} /> Share as PDF
+                                        <FiShare2 size={16} className="shrink-0" /> <span className="truncate">Share PDF</span>
                                     </button>
                                 </div>
 

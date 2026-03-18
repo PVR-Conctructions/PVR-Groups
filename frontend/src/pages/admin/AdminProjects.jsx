@@ -31,7 +31,7 @@ const INITIAL_FORM = {
     projectType: '', totalFloors: '', possessionDate: '', reraNumber: '',
     totalLandArea: '', constructionType: '',
     specFlooring: '', specDoors: '', specWindows: '', specKitchen: '',
-    specBathroom: '', specElectrical: '', specPainting: '',
+    specBathroom: '', specElectrical: '', specPainting: '', videoId: '',
 };
 
 const AdminProjects = () => {
@@ -46,7 +46,7 @@ const AdminProjects = () => {
     const [bestFeatures, setBestFeatures] = useState([]);
     const [featureInput, setFeatureInput] = useState('');
     const [configurations, setConfigurations] = useState([]);
-    const [configInput, setConfigInput] = useState('');
+    const [configForm, setConfigForm] = useState({ type: '', price: '', area: '', bedrooms: '', bathrooms: '', balconies: '', parking: '', description: '' });
     const [bankApprovals, setBankApprovals] = useState([]);
     const [bankInput, setBankInput] = useState('');
     const [expandedSections, setExpandedSections] = useState({});
@@ -66,7 +66,7 @@ const AdminProjects = () => {
         setBestFeatures([]);
         setFeatureInput('');
         setConfigurations([]);
-        setConfigInput('');
+        setConfigForm({ type: '', price: '', area: '', bedrooms: '', bathrooms: '', balconies: '', parking: '', description: '' });
         setBankApprovals([]);
         setBankInput('');
         setExpandedSections({});
@@ -84,7 +84,7 @@ const AdminProjects = () => {
             specFlooring: p.specifications?.flooring || '', specDoors: p.specifications?.doors || '',
             specWindows: p.specifications?.windows || '', specKitchen: p.specifications?.kitchen || '',
             specBathroom: p.specifications?.bathroom || '', specElectrical: p.specifications?.electrical || '',
-            specPainting: p.specifications?.painting || '',
+            specPainting: p.specifications?.painting || '', videoId: p.videoId || '',
         });
         setSelectedAmenities(p.amenities || []);
         setBestFeatures(p.bestFeatures || []);
@@ -123,6 +123,7 @@ const AdminProjects = () => {
             formData.append('bestFeatures', JSON.stringify(bestFeatures));
             formData.append('configurations', JSON.stringify(configurations));
             formData.append('bankApprovals', JSON.stringify(bankApprovals));
+            formData.append('videoId', form.videoId);
             
             const imageGroupsMetadata = imageGroups.map(g => ({
                 category: g.category,
@@ -167,6 +168,12 @@ const AdminProjects = () => {
 
     const toggleSection = (section) => {
         setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
+    };
+
+    const extractVideoId = (url) => {
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+        const match = url.match(regExp);
+        return (match && match[2].length === 11) ? match[2] : null;
     };
 
     // reusable section expander
@@ -253,19 +260,43 @@ const AdminProjects = () => {
                                         </div>
                                         <input type="text" value={form.reraNumber} onChange={(e) => setForm({ ...form, reraNumber: e.target.value })} placeholder="RERA Registration Number" className={inputCls} />
 
-                                        {/* Configurations (BHK types) */}
+                                        {/* Configurations */}
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-500 mb-1.5 ml-1">Configurations (e.g., 2 BHK, 3 BHK)</label>
-                                            <div className="flex gap-2">
-                                                <input type="text" value={configInput} onChange={(e) => setConfigInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addItem(configurations, setConfigurations, configInput, setConfigInput))} placeholder="Add configuration..." className={inputCls} />
-                                                <button type="button" onClick={() => addItem(configurations, setConfigurations, configInput, setConfigInput)} className="px-4 py-2 rounded-xl bg-gold-400 text-white text-sm font-medium hover:bg-gold-500 transition-colors shrink-0">Add</button>
+                                            <label className="block text-xs font-medium text-gray-500 mb-2 ml-1">Configurations Details</label>
+                                            <div className="p-4 rounded-xl border border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-border/50 space-y-3">
+                                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                                    <input type="text" value={configForm.type} onChange={(e) => setConfigForm({ ...configForm, type: e.target.value })} placeholder="Type (e.g., 2 BHK)" className={inputCls} />
+                                                    <input type="text" value={configForm.price} onChange={(e) => setConfigForm({ ...configForm, price: e.target.value })} placeholder="Price" className={inputCls} />
+                                                    <input type="text" value={configForm.area} onChange={(e) => setConfigForm({ ...configForm, area: e.target.value })} placeholder="Area (Sq Ft)" className={inputCls} />
+                                                </div>
+                                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                                    <input type="number" value={configForm.bedrooms} onChange={(e) => setConfigForm({ ...configForm, bedrooms: e.target.value })} placeholder="Beds" className={inputCls} />
+                                                    <input type="number" value={configForm.bathrooms} onChange={(e) => setConfigForm({ ...configForm, bathrooms: e.target.value })} placeholder="Baths" className={inputCls} />
+                                                    <input type="number" value={configForm.balconies} onChange={(e) => setConfigForm({ ...configForm, balconies: e.target.value })} placeholder="Balconies" className={inputCls} />
+                                                    <input type="number" value={configForm.parking} onChange={(e) => setConfigForm({ ...configForm, parking: e.target.value })} placeholder="Parking" className={inputCls} />
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    <input type="text" value={configForm.description} onChange={(e) => setConfigForm({ ...configForm, description: e.target.value })} placeholder="Short Description" className={inputCls} />
+                                                    <button type="button" onClick={() => {
+                                                        if (configForm.type) {
+                                                            setConfigurations([...configurations, { ...configForm }]);
+                                                            setConfigForm({ type: '', price: '', area: '', bedrooms: '', bathrooms: '', balconies: '', parking: '', description: '' });
+                                                        } else {
+                                                            alert('Configuration Type is required');
+                                                        }
+                                                    }} className="px-5 py-2 rounded-xl bg-gold-400 text-white text-sm font-medium hover:bg-gold-500 transition-colors shrink-0">Add Config</button>
+                                                </div>
                                             </div>
                                             {configurations.length > 0 && (
-                                                <div className="flex flex-wrap gap-2 mt-2">
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
                                                     {configurations.map((c, i) => (
-                                                        <span key={i} className="px-3 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 text-xs font-medium flex items-center gap-1.5">
-                                                            {c}<button type="button" onClick={() => removeItem(configurations, setConfigurations, i)} className="hover:text-red-500 transition-colors"><FiX size={12} /></button>
-                                                        </span>
+                                                        <div key={i} className="relative p-3 rounded-lg border border-blue-100 dark:border-blue-900/30 bg-blue-50/50 dark:bg-blue-500/5">
+                                                            <button type="button" onClick={() => removeItem(configurations, setConfigurations, i)} className="absolute top-2 right-2 text-gray-400 hover:text-red-500 transition-colors"><FiX size={14} /></button>
+                                                            <p className="font-semibold text-sm text-blue-900 dark:text-blue-400">{c.type}</p>
+                                                            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{c.area} • {c.price}</p>
+                                                            <p className="text-xs text-gray-500 mt-0.5">{c.bedrooms} Beds, {c.bathrooms} Baths, {c.balconies} Balconies, {c.parking} Parking</p>
+                                                            {c.description && <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">{c.description}</p>}
+                                                        </div>
                                                     ))}
                                                 </div>
                                             )}
@@ -353,6 +384,27 @@ const AdminProjects = () => {
                                 {/* Location */}
                                 <input type="text" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} placeholder="Location Address" className={inputCls} />
                                 <textarea value={form.mapEmbed} onChange={(e) => setForm({ ...form, mapEmbed: e.target.value })} rows={2} placeholder="Google Maps Embed Code" className={`${inputCls} font-mono text-xs`} />
+
+                                {/* Project Video URL */}
+                                <input type="text" 
+                                    value={form.videoId ? `https://www.youtube.com/watch?v=${form.videoId}` : ''} 
+                                    onChange={(e) => {
+                                        const raw = e.target.value;
+                                        if (!raw) {
+                                            setForm(prev => ({ ...prev, videoId: '' }));
+                                            return;
+                                        }
+                                        const id = extractVideoId(raw);
+                                        if (id) {
+                                            setForm(prev => ({ ...prev, videoId: id }));
+                                        } else {
+                                            // Handle edge cases later, just store empty if we can't parse or set raw to alert length over
+                                            if (raw.length > 20 && !raw.includes('youtube.com') && !raw.includes('youtu.be')) alert('Invalid YouTube URL');
+                                        }
+                                    }} 
+                                    placeholder="Project Video (YouTube URL)" 
+                                    className={inputCls} 
+                                />
 
                                 {/* Images */}
                                 <SectionHeader title="📸 Categorized Images" section="images" count={imageGroups.length} />

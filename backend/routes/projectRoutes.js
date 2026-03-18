@@ -22,7 +22,7 @@ router.post('/', auth, adminAuth, upload.array('images', 50), async (req, res) =
         const {
             name, description, status, location, price, area, units, highlights, mapEmbed,
             amenities, bestFeatures, completionPercentage, imageGroupsData,
-            projectType, totalFloors, configurations, possessionDate,
+            projectType, totalFloors, configurations, videoId, possessionDate,
             reraNumber, totalLandArea, constructionType, bankApprovals,
             specFlooring, specDoors, specWindows, specKitchen, specBathroom, specElectrical, specPainting
         } = req.body;
@@ -74,6 +74,7 @@ router.post('/', auth, adminAuth, upload.array('images', 50), async (req, res) =
             projectType: projectType || '',
             totalFloors: totalFloors || '',
             configurations: configurations ? JSON.parse(configurations) : [],
+            videoId: videoId || '',
             possessionDate: possessionDate || '',
             reraNumber: reraNumber || '',
             totalLandArea: totalLandArea || '',
@@ -102,7 +103,7 @@ router.put('/:id', auth, adminAuth, upload.array('images', 50), async (req, res)
         const {
             name, description, status, location, price, area, units, highlights, mapEmbed,
             amenities, bestFeatures, completionPercentage, imageGroupsData,
-            projectType, totalFloors, configurations, possessionDate,
+            projectType, totalFloors, configurations, videoId, possessionDate,
             reraNumber, totalLandArea, constructionType, bankApprovals,
             specFlooring, specDoors, specWindows, specKitchen, specBathroom, specElectrical, specPainting
         } = req.body;
@@ -114,6 +115,7 @@ router.put('/:id', auth, adminAuth, upload.array('images', 50), async (req, res)
         if (highlights) updateData.highlights = JSON.parse(highlights);
         if (location || mapEmbed) updateData.location = { address: location, mapEmbed };
         if (configurations) updateData.configurations = JSON.parse(configurations);
+        if (videoId !== undefined) updateData.videoId = videoId;
         if (bankApprovals) updateData.bankApprovals = JSON.parse(bankApprovals);
 
         // Extra project details

@@ -190,7 +190,11 @@ export const generateProjectPDF = (project) => {
         if (project.reraNumber) details.push(['RERA Number', project.reraNumber]);
         if (project.status) details.push(['Status', project.status.charAt(0).toUpperCase() + project.status.slice(1)]);
         if (project.configurations && project.configurations.length > 0) {
-            details.push(['Configurations', project.configurations.join(', ')]);
+            if (typeof project.configurations[0] === 'string') {
+                details.push(['Configurations', project.configurations.join(', ')]);
+            } else {
+                details.push(['Configurations', project.configurations.map(c => c.type).join(', ')]);
+            }
         }
         if (project.bankApprovals && project.bankApprovals.length > 0) {
             details.push(['Bank Approvals', project.bankApprovals.join(', ')]);
@@ -215,6 +219,45 @@ export const generateProjectPDF = (project) => {
                         doc.rect(data.cell.x, data.cell.y, 2, data.cell.height, 'F');
                     }
                 },
+            });
+            y = doc.lastAutoTable.finalY + 8;
+        }
+
+        // ═══════════════════════════════════════════════
+        // AVAILABLE CONFIGURATIONS
+        // ═══════════════════════════════════════════════
+        if (project.configurations && project.configurations.length > 0 && typeof project.configurations[0] === 'object') {
+            y = checkPage(doc, y, 40);
+            drawGoldLine(doc, y, margin, pageWidth);
+            y += 8;
+            y = sectionTitle(doc, 'Available Configurations', y, margin);
+
+            const configEntries = project.configurations.map(c => [
+                c.type || '-',
+                c.price || '-',
+                c.area || '-',
+                c.bedrooms?.toString() || '-',
+                c.bathrooms?.toString() || '-',
+                [
+                    c.balconies ? `${c.balconies} Balc.` : '',
+                    c.parking ? `${c.parking} Pkg.` : ''
+                ].filter(Boolean).join(', ') || '-'
+            ]);
+
+            autoTable(doc, {
+                startY: y,
+                head: [['Type', 'Price', 'Area', 'Beds', 'Baths', 'Extras']],
+                body: configEntries,
+                margin: { left: margin, right: margin },
+                headStyles: {
+                    fillColor: NAVY,
+                    textColor: WHITE,
+                    fontStyle: 'bold',
+                    fontSize: 9,
+                },
+                bodyStyles: { fontSize: 8.5, textColor: DARK },
+                alternateRowStyles: { fillColor: LIGHT_BG },
+                styles: { cellPadding: 4 },
             });
             y = doc.lastAutoTable.finalY + 8;
         }

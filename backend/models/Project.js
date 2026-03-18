@@ -36,7 +36,17 @@ const projectSchema = new mongoose.Schema({
     // Extra project details for customers
     projectType: { type: String },          // e.g., "Residential Apartments", "Villas", "Commercial"
     totalFloors: { type: String },          // e.g., "G+14", "G+5"
-    configurations: [{ type: String }],     // e.g., ["2 BHK", "3 BHK", "4 BHK"]
+    configurations: [{
+        type: { type: String },
+        price: { type: String },
+        area: { type: String },
+        bedrooms: { type: Number },
+        bathrooms: { type: Number },
+        balconies: { type: Number },
+        parking: { type: Number },
+        description: { type: String }
+    }],
+    videoId: { type: String },              // YouTube Video ID
     possessionDate: { type: String },       // e.g., "December 2027"
     reraNumber: { type: String },           // RERA registration number
     totalLandArea: { type: String },        // e.g., "5 Acres"
