@@ -60,7 +60,8 @@ exports.uploadProject = async (req, res) => {
             price, area, units,
             projectType, totalFloors,
             configurations: parsedConfigs,
-            videoId, possessionDate, reraNumber,
+            videoId: Array.isArray(videoId) ? videoId[0] : videoId,
+            possessionDate, reraNumber,
             totalLandArea, constructionType,
             bankApprovals: bankApprovals ? (typeof bankApprovals === 'string' ? JSON.parse(bankApprovals) : bankApprovals) : [],
             specifications: {

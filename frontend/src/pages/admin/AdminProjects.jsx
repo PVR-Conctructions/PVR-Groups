@@ -123,7 +123,7 @@ const AdminProjects = () => {
             formData.append('bestFeatures', JSON.stringify(bestFeatures));
             formData.append('configurations', JSON.stringify(configurations));
             formData.append('bankApprovals', JSON.stringify(bankApprovals));
-            formData.append('videoId', form.videoId);
+
             
             const imageGroupsMetadata = imageGroups.map(g => ({
                 category: g.category,

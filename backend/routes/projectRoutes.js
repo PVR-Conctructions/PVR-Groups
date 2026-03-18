@@ -100,7 +100,7 @@ router.post('/', auth, adminAuth, upload.array('images', 50), async (req, res) =
             projectType: projectType || '',
             totalFloors: totalFloors || '',
             configurations: parsedConfigs,
-            videoId: videoId || '',
+            videoId: Array.isArray(videoId) ? videoId[0] : (videoId || ''),
             possessionDate: possessionDate || '',
             reraNumber: reraNumber || '',
             totalLandArea: totalLandArea || '',
@@ -166,7 +166,7 @@ router.put('/:id', auth, adminAuth, upload.array('images', 50), async (req, res)
             } catch (e) { console.error('Error parsing configurations', e); }
         }
 
-        if (videoId !== undefined) updateData.videoId = videoId;
+        if (videoId !== undefined) updateData.videoId = Array.isArray(videoId) ? videoId[0] : videoId;
         if (bankApprovals) updateData.bankApprovals = JSON.parse(bankApprovals);
 
         // Extra project details
