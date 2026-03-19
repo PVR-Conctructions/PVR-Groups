@@ -67,7 +67,7 @@ const ProjectDetailPage = () => {
 
     const handleBooking = async (e) => {
         e.preventDefault();
-        
+
         if (!bookingForm.preferredDate) {
             setBookingMsg('Please select a Date of Visit.');
             return;
@@ -117,7 +117,9 @@ const ProjectDetailPage = () => {
                                         <button onClick={() => setMediaTab('video')} className={`px-5 py-2 rounded-xl text-sm font-semibold transition-all ${mediaTab === 'video' ? 'bg-gold-400 text-white shadow-md' : 'bg-white dark:bg-dark-card text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-dark-border hover:border-gold-400/50'}`}>Video</button>
                                     </div>
                                     {mediaTab === 'images' ? (
-                                        <ImageGallery images={project.images} categorizedImages={project.categorizedImages} />
+                                        <div className="rounded-2xl overflow-hidden h-[220px] sm:h-[320px] lg:h-auto">
+                                            <ImageGallery images={project.images} categorizedImages={project.categorizedImages} />
+                                        </div>
                                     ) : (
                                         <div className="aspect-video w-full rounded-2xl overflow-hidden border border-gray-100 dark:border-dark-border bg-black">
                                             <iframe
@@ -133,7 +135,9 @@ const ProjectDetailPage = () => {
                                     )}
                                 </div>
                             ) : (
-                                <ImageGallery images={project.images} categorizedImages={project.categorizedImages} />
+                                <div className="rounded-2xl overflow-hidden h-[220px] sm:h-[320px] lg:h-auto">
+                                    <ImageGallery images={project.images} categorizedImages={project.categorizedImages} />
+                                </div>
                             )}
 
                             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
@@ -153,25 +157,25 @@ const ProjectDetailPage = () => {
                                         {isFav ? 'Saved' : 'Save'}
                                     </button>
                                 </div>
-                                <h1 className="text-2xl sm:text-3xl md:text-4xl font-heading font-bold text-gray-900 dark:text-white mb-2">{project.name}</h1>
+                                <h1 className="text-2xl sm:text-3xl font-heading font-bold text-gray-900 dark:text-white mb-1 leading-tight">{project.name}</h1>
                                 {project.location?.address && (
-                                    <div className="flex items-start gap-1.5 text-sm sm:text-base text-gray-500 dark:text-gray-400 mb-4" style={{minWidth: 0}}>
-                                        <FiMapPin className="mt-0.5 text-gold-400 flex-shrink-0" size={16} />
-                                        <span className="flex-1 min-w-0" style={{overflowWrap: 'break-word', wordBreak: 'break-word'}}>{project.location.address}</span>
+                                    <div className="flex items-start gap-1 text-sm text-gray-500 dark:text-gray-400 mb-3" style={{ minWidth: 0 }}>
+                                        <FiMapPin className="mt-0.5 text-gold-400 flex-shrink-0" size={15} />
+                                        <span className="flex-1 min-w-0" style={{ overflowWrap: 'break-word', wordBreak: 'break-word' }}>{project.location.address}</span>
                                     </div>
                                 )}
 
                                 {/* Mobile Actions & Price (Hidden on Desktop) */}
                                 <div className="lg:hidden space-y-4 mb-6">
-                                    <div className="bg-white dark:bg-dark-card rounded-2xl p-4 sm:p-5 border border-gray-100 dark:border-dark-border shadow-sm w-full overflow-hidden">
+                                    <div className="bg-white dark:bg-dark-card rounded-2xl p-5 border border-gray-100 dark:border-dark-border shadow-sm w-full">
                                         {project.price && (
                                             <div className="mb-4">
                                                 <span className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Starting from</span>
-                                                <p className="text-xl sm:text-2xl font-heading font-bold text-gold-400 break-words">{project.price}</p>
+                                                <p className="text-2xl font-heading font-bold text-gold-400">{project.price}</p>
                                             </div>
                                         )}
 
-                                        <div className="grid grid-cols-2 gap-x-3 gap-y-3 border-t border-gray-100 dark:border-dark-border pt-4 mb-5">
+                                        <div className="grid grid-cols-2 gap-4 border-t border-gray-100 dark:border-dark-border pt-4 mb-5">
                                             {project.area && (
                                                 <div>
                                                     <p className="text-[10px] text-gray-400 uppercase font-bold mb-0.5">Area</p>
@@ -208,8 +212,8 @@ const ProjectDetailPage = () => {
                                             )}
                                         </div>
 
-                                        {/* Always show both buttons side by side */}
-                                        <div className="grid grid-cols-2 gap-3">
+                                        {/* Both buttons side by side */}
+                                        <div className="grid grid-cols-2 gap-4">
                                             <button
                                                 onClick={() => setShowBooking(!showBooking)}
                                                 className="py-3 rounded-xl btn-shimmer text-white font-bold flex items-center justify-center gap-1.5 shadow-lg shadow-gold-400/20 text-sm min-w-0"
@@ -287,24 +291,23 @@ const ProjectDetailPage = () => {
                                                     const isString = typeof c === 'string';
                                                     const label = isString ? c : c.type;
                                                     return (
-                                                        <button 
-                                                            key={i} 
+                                                        <button
+                                                            key={i}
                                                             onClick={() => setSelectedConfigIdx(i)}
-                                                            className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all flex-shrink-0 ${
-                                                                selectedConfigIdx === i 
-                                                                    ? 'bg-gold-400 text-white shadow-md' 
+                                                            className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all flex-shrink-0 ${selectedConfigIdx === i
+                                                                    ? 'bg-gold-400 text-white shadow-md'
                                                                     : 'bg-white dark:bg-dark-card text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-dark-border hover:border-gold-400/50'
-                                                            }`}
+                                                                }`}
                                                         >
                                                             {label}
                                                         </button>
                                                     );
                                                 })}
                                             </div>
-                                            
+
                                             {/* Configuration Details Display */}
                                             {project.configurations[selectedConfigIdx] && typeof project.configurations[selectedConfigIdx] === 'object' && (
-                                                <motion.div 
+                                                <motion.div
                                                     key={selectedConfigIdx}
                                                     initial={{ opacity: 0, y: 10 }}
                                                     animate={{ opacity: 1, y: 0 }}
@@ -420,9 +423,9 @@ const ProjectDetailPage = () => {
                                 <div className="bg-white dark:bg-dark-card rounded-2xl p-4 sm:p-6 border border-gray-100 dark:border-dark-border overflow-hidden">
                                     <h2 className="text-lg sm:text-xl font-heading font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">📍 Location</h2>
                                     {project.location?.address && (
-                                        <div className="flex items-start gap-2 mb-4" style={{minWidth: 0}}>
+                                        <div className="flex items-start gap-2 mb-4" style={{ minWidth: 0 }}>
                                             <FiMapPin size={14} className="text-gold-400 flex-shrink-0 mt-0.5" />
-                                            <span className="text-gray-600 dark:text-gray-400 text-sm flex-1 min-w-0" style={{overflowWrap: 'break-word', wordBreak: 'break-word'}}>{project.location.address}</span>
+                                            <span className="text-gray-600 dark:text-gray-400 text-sm flex-1 min-w-0" style={{ overflowWrap: 'break-word', wordBreak: 'break-word' }}>{project.location.address}</span>
                                         </div>
                                     )}
                                     {project.coordinates?.lat ? (

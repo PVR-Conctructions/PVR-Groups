@@ -138,16 +138,15 @@ const ImageGallery = ({ images, categorizedImages }) => {
         <div className="space-y-3 w-full max-w-full overflow-hidden">
             {/* Category Tabs */}
             {categories.length > 1 && (
-                <div className="flex gap-2 overflow-x-auto pb-1 custom-scrollbar w-full" style={{ WebkitOverflowScrolling: 'touch' }}>
+                <div className="flex gap-2 overflow-x-auto pb-1 custom-scrollbar w-full mt-1" style={{ WebkitOverflowScrolling: 'touch' }}>
                     {categories.map(cat => (
                         <button
                             key={cat}
                             onClick={() => setActiveTab(cat)}
-                            className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm font-medium whitespace-nowrap transition-all flex-shrink-0 ${
-                                activeTab === cat
-                                    ? 'bg-gold-400 text-white shadow-md'
-                                    : 'bg-white dark:bg-dark-card text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-dark-border hover:border-gold-400/50'
-                            }`}
+                            className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm font-medium whitespace-nowrap transition-all flex-shrink-0 ${activeTab === cat
+                                ? 'bg-gold-400 text-white shadow-md'
+                                : 'bg-white dark:bg-dark-card text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-dark-border hover:border-gold-400/50'
+                                }`}
                         >
                             {cat}
                         </button>
@@ -157,14 +156,14 @@ const ImageGallery = ({ images, categorizedImages }) => {
 
             {/* Main Slider */}
             <div
-                className="relative rounded-2xl overflow-hidden group bg-gray-100 dark:bg-dark-card border border-gray-100 dark:border-dark-border w-full select-none"
+                className="relative rounded-2xl overflow-hidden group bg-gray-100 dark:bg-dark-card border border-gray-100 dark:border-dark-border w-full select-none shadow-sm"
                 onTouchStart={onMainTouchStart}
                 onTouchMove={onMainTouchMove}
                 onTouchEnd={onMainTouchEnd}
                 style={{ touchAction: 'pan-y' }}
             >
-                {/* Responsive aspect ratio: 3:2 on very small, 16:9 on sm+ */}
-                <div className="aspect-[3/2] sm:aspect-video relative w-full">
+
+                <div className="h-[220px] sm:h-[300px] lg:h-[420px] relative w-full">
                     <AnimatePresence mode="wait" initial={false}>
                         <motion.img
                             key={currentImg.url}
@@ -205,14 +204,14 @@ const ImageGallery = ({ images, categorizedImages }) => {
                     <>
                         <button
                             onClick={(e) => { e.stopPropagation(); prev(); }}
-                            className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-black/50 backdrop-blur-sm text-white flex items-center justify-center transition-all hover:bg-black/70 shadow-lg z-10"
+                            className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-black/50 backdrop-blur-sm text-white flex items-center justify-center transition-all hover:bg-black/70 shadow-lg z-10"
                             aria-label="Previous image"
                         >
                             <FiChevronLeft size={20} />
                         </button>
                         <button
                             onClick={(e) => { e.stopPropagation(); next(); }}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-black/50 backdrop-blur-sm text-white flex items-center justify-center transition-all hover:bg-black/70 shadow-lg z-10"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-black/50 backdrop-blur-sm text-white flex items-center justify-center transition-all hover:bg-black/70 shadow-lg z-10"
                             aria-label="Next image"
                         >
                             <FiChevronRight size={20} />
@@ -251,7 +250,7 @@ const ImageGallery = ({ images, categorizedImages }) => {
                         <button
                             key={i}
                             onClick={() => setCurrent(i)}
-                            className={`flex-shrink-0 min-w-[72px] w-[72px] h-[48px] sm:min-w-[96px] sm:w-24 sm:h-16 rounded-xl overflow-hidden border-2 transition-all ${
+                            className={`flex-shrink-0 min-w-[64px] w-[64px] h-[42px] sm:min-w-[90px] sm:w-[90px] sm:h-[58px] rounded-xl overflow-hidden border-2 transition-all ${
                                 i === current ? 'border-gold-400 shadow-md opacity-100' : 'border-transparent opacity-55 hover:opacity-90'
                             }`}
                         >
