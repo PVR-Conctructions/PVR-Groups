@@ -656,6 +656,26 @@ const ProjectDetailPage = () => {
                 </div>
             )}
 
+            {/* Mobile Sticky CTA */}
+            <div className="lg:hidden fixed bottom-0 left-0 w-full bg-white dark:bg-dark-card border-t border-gray-200 dark:border-dark-border p-3 z-40">
+                <div className="flex gap-3 max-w-7xl mx-auto">
+                    <button
+                        onClick={() => setShowBooking(true)}
+                        className="flex-1 py-3 rounded-xl btn-shimmer text-white font-semibold flex items-center justify-center gap-2"
+                    >
+                        <FiCalendarIcon size={18} />
+                        Book Visit
+                    </button>
+                    <a
+                        href="tel:+919000000000"
+                        className="flex-1 py-3 rounded-xl border-2 border-gold-400 text-gold-400 font-semibold flex items-center justify-center gap-2 hover:bg-gold-400/10"
+                    >
+                        <FiPhone size={18} />
+                        Call
+                    </a>
+                </div>
+            </div>
+
             <Footer />
         </div>
     );

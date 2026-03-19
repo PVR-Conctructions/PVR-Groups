@@ -220,3 +220,17 @@ select:focus {
     text-wrap: balance;
   }
 }
+
+/* keep floating buttons above content but not overlapping cards */
+@media (max-width:640px){
+  .floating-buttons, .whatsapp-button, .chat-button {
+    bottom: 100px !important;
+  }
+}
+
+/* space for sticky mobile CTA */
+@media (max-width:1024px){
+  body {
+    padding-bottom: 80px;
+  }
+}

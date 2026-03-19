@@ -54,6 +54,14 @@ const ImageGallery = ({ images, categorizedImages }) => {
         setCurrent(0);
     }, [activeTab]);
 
+    // Preload next image (smooth swipe)
+    useEffect(() => {
+        if (!filteredImages || filteredImages.length === 0) return;
+        const nextIndex = (current + 1) % filteredImages.length;
+        const img = new Image();
+        img.src = cloudinaryGallery(filteredImages[nextIndex].url);
+    }, [current, filteredImages]);
+
     const next = useCallback(() => {
         setCurrent((prev) => (prev + 1) % filteredImages.length);
         setZoomScale(1);
@@ -114,7 +122,7 @@ const ImageGallery = ({ images, categorizedImages }) => {
     };
 
     const onLbTouchEnd = (e) => {
-        if (zoomScale > 1.05) return; // disable swipe when zoomed in
+        if (zoomScale > 1) return; // disable swipe when zoomed in
         if (lbTouchStartX.current === null) return;
         const endX = e.changedTouches[0].clientX;
         const endY = e.changedTouches[0].clientY;
@@ -170,14 +178,16 @@ const ImageGallery = ({ images, categorizedImages }) => {
                             initial={{ opacity: 0, x: 30 }}
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: -30 }}
-                            transition={{ duration: 0.25 }}
+                            transition={{ type: "spring", stiffness: 260, damping: 25 }}
                             src={cloudinaryGallery(currentImg.url)}
                             srcSet={cloudinarySrcSet(currentImg.url, [1920, 2560, 3840])}
-                            sizes="(max-width: 640px) 100vw, 66vw"
+                            sizes="100vw"
                             alt={`${currentImg.category} - ${currentImg.label}`}
                             className="w-full h-full object-cover cursor-pointer"
                             onClick={() => setLightbox(true)}
-                            loading="lazy"
+                            loading="eager"
+                            fetchPriority="high"
+                            decoding="async"
                             draggable={false}
                         />
                     </AnimatePresence>
@@ -259,6 +269,7 @@ const ImageGallery = ({ images, categorizedImages }) => {
                                 alt={`Thumb ${i + 1}`}
                                 className="w-full h-full object-cover"
                                 loading="lazy"
+                                decoding="async"
                                 draggable={false}
                             />
                         </button>
@@ -310,8 +321,11 @@ const ImageGallery = ({ images, categorizedImages }) => {
                                 initialScale={1}
                                 minScale={1}
                                 maxScale={4}
-                                centerOnInit={true}
+                                centerOnInit
+                                doubleClick={{ mode: "zoomIn", step: 1 }}
+                                pinch={{ step: 5 }}
                                 wheel={{ step: 0.1 }}
+                                panning={{ velocityDisabled: false }}
                                 onTransformed={(ref) => setZoomScale(ref.state.scale)}
                             >
                                 {({ zoomIn, zoomOut, resetTransform }) => (
@@ -321,7 +335,7 @@ const ImageGallery = ({ images, categorizedImages }) => {
                                                 key={currentImg.url}
                                                 initial={{ opacity: 0, scale: 0.96 }}
                                                 animate={{ opacity: 1, scale: 1 }}
-                                                transition={{ duration: 0.2 }}
+                                                transition={{ type: "spring", stiffness: 280, damping: 30 }}
                                                 src={cloudinaryLightbox(currentImg.url)}
                                                 srcSet={cloudinarySrcSet(currentImg.url, [1920, 2560, 3840])}
                                                 sizes="100vw"

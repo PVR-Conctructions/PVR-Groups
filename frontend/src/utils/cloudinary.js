@@ -30,23 +30,28 @@ export function optimizeCloudinaryUrl(url, width = 3840) {
     return url.replace('/upload/', `/upload/f_auto,q_100,dpr_auto,w_${width}/`);
 }
 
-/**
- * Generates a responsive srcSet string for <img srcSet="...">
- * Returns '' for non-Cloudinary URLs so the browser ignores the attribute.
- *
- * @param {string} url - Raw Cloudinary URL
- * @param {number[]} widths - Widths to include (default: [800, 1600, 3840])
- * @returns {string}
- */
-export function cloudinarySrcSet(url, widths = [1920, 2560, 3840]) {
-    if (!url || !url.includes('res.cloudinary.com')) return '';
-    return widths
-        .map(w => `${optimizeCloudinaryUrl(url, w)} ${w}w`)
-        .join(', ');
-}
+export const cloudinaryGallery = (url) => {
+    if (!url || !url.includes('res.cloudinary.com')) return url;
+    const parts = url.split('/upload/');
+    if (parts.length !== 2) return url;
+    return `${parts[0]}/upload/f_auto,q_auto:good,dpr_auto,w_auto,c_limit/${parts[1]}`;
+};
 
-/** Pre-bound convenience helpers for each visual context */
-export const cloudinaryHero     = (url) => optimizeCloudinaryUrl(url, 3840);
-export const cloudinaryGallery  = (url) => optimizeCloudinaryUrl(url, 3840);
-export const cloudinaryLightbox = (url) => optimizeCloudinaryUrl(url, 3840);
-export const cloudinaryThumb    = (url) => optimizeCloudinaryUrl(url, 300);
+export const cloudinaryThumb = (url) => {
+    if (!url || !url.includes('res.cloudinary.com')) return url;
+    const parts = url.split('/upload/');
+    if (parts.length !== 2) return url;
+    return `${parts[0]}/upload/f_auto,q_auto:low,w_300,c_fill/${parts[1]}`;
+};
+
+export const cloudinarySrcSet = (url, sizes = [640, 1280, 1920, 2560, 3840]) => {
+    if (!url || !url.includes('res.cloudinary.com')) return '';
+    const parts = url.split('/upload/');
+    if (parts.length !== 2) return '';
+    return sizes
+        .map(size => `${parts[0]}/upload/f_auto,q_auto,dpr_auto,w_${size}/${parts[1]} ${size}w`)
+        .join(', ');
+};
+
+export const cloudinaryHero = cloudinaryGallery;
+export const cloudinaryLightbox = cloudinaryGallery;
