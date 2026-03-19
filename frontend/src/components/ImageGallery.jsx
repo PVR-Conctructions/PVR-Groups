@@ -135,7 +135,7 @@ const ImageGallery = ({ images, categorizedImages }) => {
     const showCounter = filteredImages.length > 12;
 
     return (
-        <div className="space-y-3 w-full max-w-full overflow-hidden">
+        <div className="w-full max-w-full">
             {/* Category Tabs */}
             {categories.length > 1 && (
                 <div className="flex gap-2 overflow-x-auto pb-1 custom-scrollbar w-full mt-1" style={{ WebkitOverflowScrolling: 'touch' }}>
@@ -156,14 +156,14 @@ const ImageGallery = ({ images, categorizedImages }) => {
 
             {/* Main Slider */}
             <div
-                className="relative rounded-2xl overflow-hidden group bg-gray-100 dark:bg-dark-card border border-gray-100 dark:border-dark-border w-full select-none shadow-sm"
+                className="relative rounded-2xl overflow-hidden group bg-gray-100 dark:bg-dark-card border border-gray-100 dark:border-dark-border w-full select-none shadow-sm h-[220px] sm:h-[320px] lg:h-[420px] mt-3"
                 onTouchStart={onMainTouchStart}
                 onTouchMove={onMainTouchMove}
                 onTouchEnd={onMainTouchEnd}
                 style={{ touchAction: 'pan-y' }}
             >
 
-                <div className="h-[220px] sm:h-[320px] lg:h-[420px] relative w-full">
+                <div className="absolute inset-0 w-full h-full">
                     <AnimatePresence mode="wait" initial={false}>
                         <motion.img
                             key={currentImg.url}
@@ -243,7 +243,7 @@ const ImageGallery = ({ images, categorizedImages }) => {
             {/* Thumbnails */}
             {filteredImages.length > 1 && (
                 <div
-                    className="flex gap-2 overflow-x-auto pb-1 custom-scrollbar w-full"
+                    className="flex gap-2 overflow-x-auto pb-1 custom-scrollbar w-full mt-3"
                     style={{ WebkitOverflowScrolling: 'touch' }}
                 >
                     {filteredImages.map((img, i) => (
