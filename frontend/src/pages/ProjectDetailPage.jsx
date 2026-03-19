@@ -183,7 +183,7 @@ const ProjectDetailPage = () => {
                                         <button onClick={() => setMediaTab('video')} className={`px-5 py-2 rounded-xl text-sm font-semibold transition-all ${mediaTab === 'video' ? 'bg-gold-400 text-white shadow-md' : 'bg-white dark:bg-dark-card text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-dark-border hover:border-gold-400/50'}`}>Video</button>
                                     </div>
                                     {mediaTab === 'images' ? (
-                                        <div className="rounded-2xl overflow-hidden aspect-video w-full relative group">
+                                        <div className="rounded-2xl overflow-hidden w-full relative group">
                                             <ImageGallery images={project.images} categorizedImages={project.categorizedImages} />
                                         </div>
                                     ) : (
@@ -201,7 +201,7 @@ const ProjectDetailPage = () => {
                                     )}
                                 </div>
                             ) : (
-                                <div className="rounded-2xl overflow-hidden aspect-video w-full relative group">
+                                <div className="rounded-2xl overflow-hidden w-full relative group">
                                     <ImageGallery images={project.images} categorizedImages={project.categorizedImages} />
                                 </div>
                             )}
