@@ -102,6 +102,72 @@ const ProjectDetailPage = () => {
 
     const hasSpecs = project.specifications && Object.values(project.specifications).some(v => v);
 
+    const renderBookingForm = () => {
+        if (!showBooking) return null;
+        return (
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-white dark:bg-dark-card rounded-2xl p-5 sm:p-6 border border-gray-100 dark:border-dark-border mt-4 shadow-sm w-full">
+                <h3 className="text-lg font-heading font-bold text-gray-900 dark:text-white mb-4">Book a Site Visit</h3>
+                <form onSubmit={handleBooking} className="space-y-4">
+                    <div>
+                        <label className="block text-xs font-medium text-gray-500 mb-1 ml-1">Full Name</label>
+                        <input type="text" value={bookingForm.name} onChange={(e) => setBookingForm({ ...bookingForm, name: e.target.value })} placeholder="Enter your full name" className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-dark-border border border-gray-200 dark:border-dark-border text-gray-800 dark:text-white text-sm" required />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-medium text-gray-500 mb-1 ml-1">Email Address</label>
+                        <input type="email" value={bookingForm.email} onChange={(e) => setBookingForm({ ...bookingForm, email: e.target.value })} placeholder="Enter your email address" className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-dark-border border border-gray-200 dark:border-dark-border text-gray-800 dark:text-white text-sm" required />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-medium text-gray-500 mb-1 ml-1">Phone Number</label>
+                        <input type="tel" value={bookingForm.phone} onChange={(e) => setBookingForm({ ...bookingForm, phone: e.target.value })} placeholder="Enter your phone number" className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-dark-border border border-gray-200 dark:border-dark-border text-gray-800 dark:text-white text-sm" required />
+                    </div>
+                    <div>
+                        <div className="flex items-center justify-between mb-2 ml-1">
+                            <label className="block text-xs font-medium text-gray-500">Date of Visit</label>
+                            <div className="flex gap-2">
+                                <button type="button" onClick={() => setBookingForm({ ...bookingForm, preferredDate: new Date().toISOString().split('T')[0] })} className="text-xs px-2 py-0.5 rounded bg-gray-100 dark:bg-dark-border text-gray-600 dark:text-gray-300 hover:bg-gold-400 hover:text-white transition-colors">Today</button>
+                                <button type="button" onClick={() => { const tmrp = new Date(); tmrp.setDate(tmrp.getDate() + 1); setBookingForm({ ...bookingForm, preferredDate: tmrp.toISOString().split('T')[0] }) }} className="text-xs px-2 py-0.5 rounded bg-gray-100 dark:bg-dark-border text-gray-600 dark:text-gray-300 hover:bg-gold-400 hover:text-white transition-colors">Tomorrow</button>
+                            </div>
+                        </div>
+                        <div className="bg-white dark:bg-dark-border/50 rounded-xl overflow-hidden custom-calendar-wrapper border border-gray-200 dark:border-dark-border">
+                            <Calendar
+                                onChange={(date) => {
+                                    const d = new Date(date);
+                                    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+                                    setBookingForm({ ...bookingForm, preferredDate: d.toISOString().split('T')[0] });
+                                }}
+                                value={bookingForm.preferredDate ? new Date(bookingForm.preferredDate) : null}
+                                minDate={new Date()}
+                                className="w-full !border-0 font-sans text-sm"
+                            />
+                        </div>
+                        <style>{`
+                            .custom-calendar-wrapper .react-calendar { width: 100%; border: none; background: transparent; font-family: inherit; }
+                            .dark .custom-calendar-wrapper .react-calendar { color: #fff; }
+                            .dark .custom-calendar-wrapper .react-calendar__navigation button { color: #fff; min-width: 44px; background: none; font-size: 16px; margin-top: 8px; }
+                            .dark .custom-calendar-wrapper .react-calendar__navigation button:hover, .dark .custom-calendar-wrapper .react-calendar__navigation button:focus { background-color: rgba(255,255,255,0.1); }
+                            .dark .custom-calendar-wrapper .react-calendar__month-view__weekdays { color: #9ca3af; font-weight: 500; font-size: 0.75em; text-transform: uppercase; }
+                            .dark .custom-calendar-wrapper .react-calendar__month-view__days__day { color: #d1d5db; }
+                            .dark .custom-calendar-wrapper .react-calendar__month-view__days__day:hover, .dark .custom-calendar-wrapper .react-calendar__month-view__days__day:focus { background-color: rgba(255,255,255,0.1); border-radius: 6px; }
+                            .dark .custom-calendar-wrapper .react-calendar__month-view__days__day--weekend { color: #f87171; }
+                            .dark .custom-calendar-wrapper .react-calendar__month-view__days__day--neighboringMonth { color: #4b5563; }
+                            .custom-calendar-wrapper .react-calendar__tile--active { background: #C4A44B !important; color: #0a1628 !important; font-weight: bold; border-radius: 6px; }
+                            .custom-calendar-wrapper .react-calendar__tile--now { background: rgba(196, 164, 75, 0.2); border-radius: 6px; }
+                            .custom-calendar-wrapper .react-calendar__tile { padding: 10px 0.5em; font-size: 14px; }
+                        `}</style>
+                    </div>
+                    <div>
+                        <label className="block text-xs font-medium text-gray-500 mb-1 ml-1">Message (Optional)</label>
+                        <textarea value={bookingForm.message} onChange={(e) => setBookingForm({ ...bookingForm, message: e.target.value })} rows={2} placeholder="Any specific requirements?" className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-dark-border border border-gray-200 dark:border-dark-border text-gray-800 dark:text-white text-sm" />
+                    </div>
+                    <button type="submit" disabled={bookingLoading} className="w-full py-2.5 rounded-xl btn-shimmer text-white font-medium text-sm mt-2 disabled:opacity-50">
+                        {bookingLoading ? 'Processing...' : 'Confirm Booking'}
+                    </button>
+                    {bookingMsg && <p className="text-red-400 text-sm mt-2 text-center">{bookingMsg}</p>}
+                </form>
+            </motion.div>
+        );
+    };
+
     return (
         <div className="bg-gray-50 dark:bg-dark-bg transition-colors">
             <Navbar />
@@ -117,7 +183,7 @@ const ProjectDetailPage = () => {
                                         <button onClick={() => setMediaTab('video')} className={`px-5 py-2 rounded-xl text-sm font-semibold transition-all ${mediaTab === 'video' ? 'bg-gold-400 text-white shadow-md' : 'bg-white dark:bg-dark-card text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-dark-border hover:border-gold-400/50'}`}>Video</button>
                                     </div>
                                     {mediaTab === 'images' ? (
-                                        <div className="rounded-2xl overflow-hidden h-[220px] sm:h-[320px] lg:h-auto">
+                                        <div className="rounded-2xl overflow-hidden aspect-video w-full relative group">
                                             <ImageGallery images={project.images} categorizedImages={project.categorizedImages} />
                                         </div>
                                     ) : (
@@ -135,7 +201,7 @@ const ProjectDetailPage = () => {
                                     )}
                                 </div>
                             ) : (
-                                <div className="rounded-2xl overflow-hidden h-[220px] sm:h-[320px] lg:h-auto">
+                                <div className="rounded-2xl overflow-hidden aspect-video w-full relative group">
                                     <ImageGallery images={project.images} categorizedImages={project.categorizedImages} />
                                 </div>
                             )}
@@ -212,23 +278,35 @@ const ProjectDetailPage = () => {
                                             )}
                                         </div>
 
-                                        {/* Both buttons side by side */}
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <button
-                                                onClick={() => setShowBooking(!showBooking)}
-                                                className="py-3 rounded-xl btn-shimmer text-white font-bold flex items-center justify-center gap-1.5 shadow-lg shadow-gold-400/20 text-sm min-w-0"
-                                            >
-                                                <FiCalendarIcon size={15} className="flex-shrink-0" />
-                                                <span className="truncate">Book Visit</span>
-                                            </button>
+                                        {/* Mobile Buttons */}
+                                        <div className="flex flex-col gap-3">
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <button
+                                                    onClick={() => setShowBooking(!showBooking)}
+                                                    className="py-3 rounded-xl btn-shimmer text-white font-bold flex items-center justify-center gap-1.5 shadow-lg shadow-gold-400/20 text-sm min-w-0"
+                                                >
+                                                    <FiCalendarIcon size={15} className="flex-shrink-0" />
+                                                    <span className="truncate">Book Visit</span>
+                                                </button>
+                                                <button
+                                                    onClick={() => generateProjectPDF(project)}
+                                                    className="py-3 rounded-xl border border-gray-200 dark:border-dark-border text-gray-700 dark:text-gray-300 font-bold flex items-center justify-center gap-1.5 hover:bg-gray-50 dark:hover:bg-dark-border/80 transition-colors text-sm min-w-0"
+                                                >
+                                                    <FiShare2 size={15} className="flex-shrink-0" />
+                                                    <span className="truncate">Share PDF</span>
+                                                </button>
+                                            </div>
                                             <a
                                                 href="tel:+919000000000"
-                                                className="py-3 rounded-xl border-2 border-gold-400 text-gold-400 font-bold flex items-center justify-center gap-1.5 hover:bg-gold-400/10 active:bg-gold-400/20 transition-colors text-sm min-w-0"
+                                                className="w-full py-3 rounded-xl border-2 border-gold-400 text-gold-400 font-bold flex items-center justify-center gap-1.5 hover:bg-gold-400/10 active:bg-gold-400/20 transition-colors text-sm min-w-0"
                                             >
                                                 <FiPhone size={15} className="flex-shrink-0" />
-                                                <span className="truncate">Contact</span>
+                                                <span className="truncate">Contact Sales</span>
                                             </a>
                                         </div>
+
+                                        {/* Inline Mobile Booking Form */}
+                                        {renderBookingForm()}
                                     </div>
                                 </div>
                             </motion.div>
@@ -541,69 +619,7 @@ const ProjectDetailPage = () => {
                             </div>
 
                             {/* Booking Form */}
-                            {showBooking && (
-                                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-white dark:bg-dark-card rounded-2xl p-6 border border-gray-100 dark:border-dark-border">
-                                    <h3 className="text-lg font-heading font-bold text-gray-900 dark:text-white mb-4">Book a Site Visit</h3>
-                                    <form onSubmit={handleBooking} className="space-y-4">
-                                        <div>
-                                            <label className="block text-xs font-medium text-gray-500 mb-1 ml-1">Full Name</label>
-                                            <input type="text" value={bookingForm.name} onChange={(e) => setBookingForm({ ...bookingForm, name: e.target.value })} placeholder="Enter your full name" className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-dark-border border border-gray-200 dark:border-dark-border text-gray-800 dark:text-white text-sm" required />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-medium text-gray-500 mb-1 ml-1">Email Address</label>
-                                            <input type="email" value={bookingForm.email} onChange={(e) => setBookingForm({ ...bookingForm, email: e.target.value })} placeholder="Enter your email address" className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-dark-border border border-gray-200 dark:border-dark-border text-gray-800 dark:text-white text-sm" required />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-medium text-gray-500 mb-1 ml-1">Phone Number</label>
-                                            <input type="tel" value={bookingForm.phone} onChange={(e) => setBookingForm({ ...bookingForm, phone: e.target.value })} placeholder="Enter your phone number" className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-dark-border border border-gray-200 dark:border-dark-border text-gray-800 dark:text-white text-sm" required />
-                                        </div>
-                                        <div>
-                                            <div className="flex items-center justify-between mb-2 ml-1">
-                                                <label className="block text-xs font-medium text-gray-500">Date of Visit</label>
-                                                <div className="flex gap-2">
-                                                    <button type="button" onClick={() => setBookingForm({ ...bookingForm, preferredDate: new Date().toISOString().split('T')[0] })} className="text-xs px-2 py-0.5 rounded bg-gray-100 dark:bg-dark-border text-gray-600 dark:text-gray-300 hover:bg-gold-400 hover:text-white transition-colors">Today</button>
-                                                    <button type="button" onClick={() => { const tmrp = new Date(); tmrp.setDate(tmrp.getDate() + 1); setBookingForm({ ...bookingForm, preferredDate: tmrp.toISOString().split('T')[0] }) }} className="text-xs px-2 py-0.5 rounded bg-gray-100 dark:bg-dark-border text-gray-600 dark:text-gray-300 hover:bg-gold-400 hover:text-white transition-colors">Tomorrow</button>
-                                                </div>
-                                            </div>
-                                            <div className="bg-white dark:bg-dark-border/50 rounded-xl overflow-hidden custom-calendar-wrapper border border-gray-200 dark:border-dark-border">
-                                                <Calendar
-                                                    onChange={(date) => {
-                                                        const d = new Date(date);
-                                                        // adjust for timezone offset
-                                                        d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-                                                        setBookingForm({ ...bookingForm, preferredDate: d.toISOString().split('T')[0] });
-                                                    }}
-                                                    value={bookingForm.preferredDate ? new Date(bookingForm.preferredDate) : null}
-                                                    minDate={new Date()}
-                                                    className="w-full !border-0 font-sans text-sm"
-                                                />
-                                            </div>
-                                            <style>{`
-                                                .custom-calendar-wrapper .react-calendar { width: 100%; border: none; background: transparent; font-family: inherit; }
-                                                .dark .custom-calendar-wrapper .react-calendar { color: #fff; }
-                                                .dark .custom-calendar-wrapper .react-calendar__navigation button { color: #fff; min-width: 44px; background: none; font-size: 16px; margin-top: 8px; }
-                                                .dark .custom-calendar-wrapper .react-calendar__navigation button:hover, .dark .custom-calendar-wrapper .react-calendar__navigation button:focus { background-color: rgba(255,255,255,0.1); }
-                                                .dark .custom-calendar-wrapper .react-calendar__month-view__weekdays { color: #9ca3af; font-weight: 500; font-size: 0.75em; text-transform: uppercase; }
-                                                .dark .custom-calendar-wrapper .react-calendar__month-view__days__day { color: #d1d5db; }
-                                                .dark .custom-calendar-wrapper .react-calendar__month-view__days__day:hover, .dark .custom-calendar-wrapper .react-calendar__month-view__days__day:focus { background-color: rgba(255,255,255,0.1); border-radius: 6px; }
-                                                .dark .custom-calendar-wrapper .react-calendar__month-view__days__day--weekend { color: #f87171; }
-                                                .dark .custom-calendar-wrapper .react-calendar__month-view__days__day--neighboringMonth { color: #4b5563; }
-                                                .custom-calendar-wrapper .react-calendar__tile--active { background: #C4A44B !important; color: #0a1628 !important; font-weight: bold; border-radius: 6px; }
-                                                .custom-calendar-wrapper .react-calendar__tile--now { background: rgba(196, 164, 75, 0.2); border-radius: 6px; }
-                                                .custom-calendar-wrapper .react-calendar__tile { padding: 10px 0.5em; font-size: 14px; }
-                                            `}</style>
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-medium text-gray-500 mb-1 ml-1">Message (Optional)</label>
-                                            <textarea value={bookingForm.message} onChange={(e) => setBookingForm({ ...bookingForm, message: e.target.value })} rows={2} placeholder="Any specific requirements?" className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-dark-border border border-gray-200 dark:border-dark-border text-gray-800 dark:text-white text-sm" />
-                                        </div>
-                                        <button type="submit" disabled={bookingLoading} className="w-full py-2.5 rounded-xl btn-shimmer text-white font-medium text-sm mt-2 disabled:opacity-50">
-                                            {bookingLoading ? 'Processing...' : 'Confirm Booking'}
-                                        </button>
-                                        {bookingMsg && <p className="text-red-400 text-sm mt-2 text-center">{bookingMsg}</p>}
-                                    </form>
-                                </motion.div>
-                            )}
+                            {renderBookingForm()}
                         </div>
                     </div>
                 </div>

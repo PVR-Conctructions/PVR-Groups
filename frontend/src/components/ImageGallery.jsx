@@ -163,7 +163,7 @@ const ImageGallery = ({ images, categorizedImages }) => {
                 style={{ touchAction: 'pan-y' }}
             >
 
-                <div className="h-[220px] sm:h-[300px] lg:h-[420px] relative w-full">
+                <div className="aspect-video relative w-full">
                     <AnimatePresence mode="wait" initial={false}>
                         <motion.img
                             key={currentImg.url}
