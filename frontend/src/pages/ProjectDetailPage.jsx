@@ -105,7 +105,7 @@ const ProjectDetailPage = () => {
     return (
         <div className="bg-gray-50 dark:bg-dark-bg transition-colors">
             <Navbar />
-            <div className="pt-20 sm:pt-24 pb-20 px-4">
+            <div className="pt-16 sm:pt-24 pb-20 px-3 sm:px-4">
                 <div className="max-w-7xl mx-auto">
                     <div className="grid lg:grid-cols-3 gap-6 lg:gap-8">
                         {/* Main Content */}
@@ -155,46 +155,83 @@ const ProjectDetailPage = () => {
                                 </div>
                                 <h1 className="text-2xl sm:text-3xl md:text-4xl font-heading font-bold text-gray-900 dark:text-white mb-2">{project.name}</h1>
                                 {project.location?.address && (
-                                    <div className="flex items-center text-sm sm:text-base text-gray-500 dark:text-gray-400 mb-4">
-                                        <FiMapPin className="mr-2 text-gold-400 flex-shrink-0" size={16} /> 
-                                        <span className="truncate">{project.location.address}</span>
+                                    <div className="flex items-start text-sm sm:text-base text-gray-500 dark:text-gray-400 mb-4">
+                                        <FiMapPin className="mr-2 mt-0.5 text-gold-400 flex-shrink-0" size={16} />
+                                        <span className="break-words leading-snug">{project.location.address}</span>
                                     </div>
                                 )}
 
                                 {/* Mobile Actions & Price (Hidden on Desktop) */}
                                 <div className="lg:hidden space-y-4 mb-6">
-                                    <div className="bg-white dark:bg-dark-card rounded-2xl p-5 border border-gray-100 dark:border-dark-border shadow-sm">
+                                    <div className="bg-white dark:bg-dark-card rounded-2xl p-4 sm:p-5 border border-gray-100 dark:border-dark-border shadow-sm w-full overflow-hidden">
                                         {project.price && (
                                             <div className="mb-4">
                                                 <span className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Starting from</span>
-                                                <p className="text-2xl font-heading font-bold text-gold-400">{project.price}</p>
+                                                <p className="text-xl sm:text-2xl font-heading font-bold text-gold-400 break-words">{project.price}</p>
                                             </div>
                                         )}
 
-                                        <div className="grid grid-cols-2 gap-2 border-t border-gray-100 dark:border-dark-border pt-4 mb-5">
-                                            {project.area && <div className="p-2"><p className="text-[10px] text-gray-400 uppercase font-bold">Area</p><p className="text-sm text-gray-900 dark:text-white font-semibold truncate">{project.area}</p></div>}
-                                            {project.units && <div className="p-2"><p className="text-[10px] text-gray-400 uppercase font-bold">Units</p><p className="text-sm text-gray-900 dark:text-white font-semibold truncate">{project.units}</p></div>}
-                                            <div className="p-2"><p className="text-[10px] text-gray-400 uppercase font-bold">Status</p><p className="text-sm text-gray-900 dark:text-white font-semibold capitalize truncate">{project.status}</p></div>
-                                            {project.projectType && <div className="p-2"><p className="text-[10px] text-gray-400 uppercase font-bold">Type</p><p className="text-sm text-gray-900 dark:text-white font-semibold truncate">{project.projectType}</p></div>}
-                                            {project.totalFloors && <div className="p-2"><p className="text-[10px] text-gray-400 uppercase font-bold">Floors</p><p className="text-sm text-gray-900 dark:text-white font-semibold truncate">{project.totalFloors}</p></div>}
-                                            {project.possessionDate && <div className="p-2"><p className="text-[10px] text-gray-400 uppercase font-bold">Possession</p><p className="text-sm text-gray-900 dark:text-white font-semibold truncate">{project.possessionDate}</p></div>}
+                                        <div className="grid grid-cols-2 gap-x-3 gap-y-3 border-t border-gray-100 dark:border-dark-border pt-4 mb-5">
+                                            {project.area && (
+                                                <div>
+                                                    <p className="text-[10px] text-gray-400 uppercase font-bold mb-0.5">Area</p>
+                                                    <p className="text-sm text-gray-900 dark:text-white font-semibold break-words leading-snug">{project.area}</p>
+                                                </div>
+                                            )}
+                                            {project.units && (
+                                                <div>
+                                                    <p className="text-[10px] text-gray-400 uppercase font-bold mb-0.5">Units</p>
+                                                    <p className="text-sm text-gray-900 dark:text-white font-semibold break-words leading-snug">{project.units}</p>
+                                                </div>
+                                            )}
+                                            <div>
+                                                <p className="text-[10px] text-gray-400 uppercase font-bold mb-0.5">Status</p>
+                                                <p className="text-sm text-gray-900 dark:text-white font-semibold capitalize break-words leading-snug">{project.status}</p>
+                                            </div>
+                                            {project.projectType && (
+                                                <div>
+                                                    <p className="text-[10px] text-gray-400 uppercase font-bold mb-0.5">Type</p>
+                                                    <p className="text-sm text-gray-900 dark:text-white font-semibold break-words leading-snug">{project.projectType}</p>
+                                                </div>
+                                            )}
+                                            {project.totalFloors && (
+                                                <div>
+                                                    <p className="text-[10px] text-gray-400 uppercase font-bold mb-0.5">Floors</p>
+                                                    <p className="text-sm text-gray-900 dark:text-white font-semibold break-words leading-snug">{project.totalFloors}</p>
+                                                </div>
+                                            )}
+                                            {project.possessionDate && (
+                                                <div>
+                                                    <p className="text-[10px] text-gray-400 uppercase font-bold mb-0.5">Possession</p>
+                                                    <p className="text-sm text-gray-900 dark:text-white font-semibold break-words leading-snug">{project.possessionDate}</p>
+                                                </div>
+                                            )}
                                         </div>
 
+                                        {/* Always show both buttons side by side */}
                                         <div className="grid grid-cols-2 gap-3">
-                                            <button onClick={() => setShowBooking(!showBooking)} className="py-3 rounded-xl btn-shimmer text-white font-bold flex items-center justify-center gap-2 shadow-lg shadow-gold-400/20 text-sm">
-                                                <FiCalendarIcon size={16} /> <span className="truncate">Book Visit</span>
+                                            <button
+                                                onClick={() => setShowBooking(!showBooking)}
+                                                className="py-3 rounded-xl btn-shimmer text-white font-bold flex items-center justify-center gap-1.5 shadow-lg shadow-gold-400/20 text-sm min-w-0"
+                                            >
+                                                <FiCalendarIcon size={15} className="flex-shrink-0" />
+                                                <span className="truncate">Book Visit</span>
                                             </button>
-                                            <a href="tel:+919876543210" className="py-3 rounded-xl border-2 border-gold-400 text-gold-400 font-bold flex items-center justify-center gap-2 hover:bg-gold-400/10 transition-colors text-sm text-center">
-                                                <FiPhone size={16} /> <span className="truncate">Contact</span>
+                                            <a
+                                                href="tel:+919000000000"
+                                                className="py-3 rounded-xl border-2 border-gold-400 text-gold-400 font-bold flex items-center justify-center gap-1.5 hover:bg-gold-400/10 active:bg-gold-400/20 transition-colors text-sm min-w-0"
+                                            >
+                                                <FiPhone size={15} className="flex-shrink-0" />
+                                                <span className="truncate">Contact</span>
                                             </a>
                                         </div>
                                     </div>
                                 </div>
                             </motion.div>
 
-                            <div className="bg-white dark:bg-dark-card rounded-2xl p-4 sm:p-6 border border-gray-100 dark:border-dark-border">
+                            <div className="bg-white dark:bg-dark-card rounded-2xl p-4 sm:p-6 border border-gray-100 dark:border-dark-border overflow-hidden">
                                 <h2 className="text-lg sm:text-xl font-heading font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">About This Project</h2>
-                                <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 leading-[1.7]">{project.description}</p>
+                                <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 leading-[1.7] break-words">{project.description}</p>
                             </div>
 
                             {/* Project Details Card */}
@@ -202,41 +239,41 @@ const ProjectDetailPage = () => {
                                 <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
                                     className="bg-white dark:bg-dark-card rounded-2xl p-4 sm:p-6 border border-gray-100 dark:border-dark-border">
                                     <h2 className="text-lg sm:text-xl font-heading font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">📋 Project Details</h2>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 overflow-hidden">
                                         {project.projectType && (
-                                            <div className="flex items-start gap-3 p-3 rounded-xl bg-gray-50 dark:bg-dark-border/50">
+                                            <div className="flex items-start gap-3 p-3 rounded-xl bg-gray-50 dark:bg-dark-border/50 overflow-hidden">
                                                 <FiHome size={18} className="text-gold-400 mt-0.5 shrink-0" />
-                                                <div><p className="text-xs text-gray-500">Project Type</p><p className="text-sm font-medium text-gray-900 dark:text-white">{project.projectType}</p></div>
+                                                <div className="min-w-0"><p className="text-xs text-gray-500">Project Type</p><p className="text-sm font-medium text-gray-900 dark:text-white break-words">{project.projectType}</p></div>
                                             </div>
                                         )}
                                         {project.totalFloors && (
-                                            <div className="flex items-start gap-3 p-3 rounded-xl bg-gray-50 dark:bg-dark-border/50">
+                                            <div className="flex items-start gap-3 p-3 rounded-xl bg-gray-50 dark:bg-dark-border/50 overflow-hidden">
                                                 <FiLayers size={18} className="text-gold-400 mt-0.5 shrink-0" />
-                                                <div><p className="text-xs text-gray-500">Total Floors</p><p className="text-sm font-medium text-gray-900 dark:text-white">{project.totalFloors}</p></div>
+                                                <div className="min-w-0"><p className="text-xs text-gray-500">Total Floors</p><p className="text-sm font-medium text-gray-900 dark:text-white break-words">{project.totalFloors}</p></div>
                                             </div>
                                         )}
                                         {project.totalLandArea && (
-                                            <div className="flex items-start gap-3 p-3 rounded-xl bg-gray-50 dark:bg-dark-border/50">
+                                            <div className="flex items-start gap-3 p-3 rounded-xl bg-gray-50 dark:bg-dark-border/50 overflow-hidden">
                                                 <FiMap size={18} className="text-gold-400 mt-0.5 shrink-0" />
-                                                <div><p className="text-xs text-gray-500">Total Land Area</p><p className="text-sm font-medium text-gray-900 dark:text-white">{project.totalLandArea}</p></div>
+                                                <div className="min-w-0"><p className="text-xs text-gray-500">Total Land Area</p><p className="text-sm font-medium text-gray-900 dark:text-white break-words">{project.totalLandArea}</p></div>
                                             </div>
                                         )}
                                         {project.constructionType && (
-                                            <div className="flex items-start gap-3 p-3 rounded-xl bg-gray-50 dark:bg-dark-border/50">
+                                            <div className="flex items-start gap-3 p-3 rounded-xl bg-gray-50 dark:bg-dark-border/50 overflow-hidden">
                                                 <FiGrid size={18} className="text-gold-400 mt-0.5 shrink-0" />
-                                                <div><p className="text-xs text-gray-500">Construction Type</p><p className="text-sm font-medium text-gray-900 dark:text-white">{project.constructionType}</p></div>
+                                                <div className="min-w-0"><p className="text-xs text-gray-500">Construction Type</p><p className="text-sm font-medium text-gray-900 dark:text-white break-words">{project.constructionType}</p></div>
                                             </div>
                                         )}
                                         {project.possessionDate && (
-                                            <div className="flex items-start gap-3 p-3 rounded-xl bg-gray-50 dark:bg-dark-border/50">
+                                            <div className="flex items-start gap-3 p-3 rounded-xl bg-gray-50 dark:bg-dark-border/50 overflow-hidden">
                                                 <FiClock size={18} className="text-gold-400 mt-0.5 shrink-0" />
-                                                <div><p className="text-xs text-gray-500">Possession Date</p><p className="text-sm font-medium text-gray-900 dark:text-white">{project.possessionDate}</p></div>
+                                                <div className="min-w-0"><p className="text-xs text-gray-500">Possession Date</p><p className="text-sm font-medium text-gray-900 dark:text-white break-words">{project.possessionDate}</p></div>
                                             </div>
                                         )}
                                         {project.reraNumber && (
-                                            <div className="flex items-start gap-3 p-3 rounded-xl bg-gray-50 dark:bg-dark-border/50">
+                                            <div className="flex items-start gap-3 p-3 rounded-xl bg-gray-50 dark:bg-dark-border/50 overflow-hidden">
                                                 <FiShield size={18} className="text-gold-400 mt-0.5 shrink-0" />
-                                                <div><p className="text-xs text-gray-500">RERA Number</p><p className="text-sm font-medium text-gray-900 dark:text-white">{project.reraNumber}</p></div>
+                                                <div className="min-w-0"><p className="text-xs text-gray-500">RERA Number</p><p className="text-sm font-medium text-gray-900 dark:text-white break-words">{project.reraNumber}</p></div>
                                             </div>
                                         )}
                                     </div>
@@ -366,11 +403,11 @@ const ProjectDetailPage = () => {
                                             { label: 'Electrical', value: project.specifications?.electrical, emoji: '⚡' },
                                             { label: 'Painting', value: project.specifications?.painting, emoji: '🎨' },
                                         ].filter(s => s.value).map((spec, i) => (
-                                            <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-gray-50 dark:bg-dark-border/50 hover:bg-gray-100 dark:hover:bg-dark-border transition-colors">
-                                                <span className="text-lg">{spec.emoji}</span>
-                                                <div>
-                                                    <p className="text-xs text-gray-500 font-medium">{spec.label}</p>
-                                                    <p className="text-sm text-gray-800 dark:text-gray-200">{spec.value}</p>
+                                            <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-gray-50 dark:bg-dark-border/50 hover:bg-gray-100 dark:hover:bg-dark-border transition-colors overflow-hidden">
+                                                <span className="text-base flex-shrink-0 mt-0.5">{spec.emoji}</span>
+                                                <div className="min-w-0 flex-1">
+                                                    <p className="text-xs text-gray-500 font-medium mb-0.5">{spec.label}</p>
+                                                    <p className="text-sm text-gray-800 dark:text-gray-200 break-words leading-snug">{spec.value}</p>
                                                 </div>
                                             </div>
                                         ))}
@@ -380,16 +417,16 @@ const ProjectDetailPage = () => {
 
                             {/* Location Map */}
                             {(project.coordinates?.lat || project.location?.mapEmbed) && (
-                                <div className="bg-white dark:bg-dark-card rounded-2xl p-4 sm:p-6 border border-gray-100 dark:border-dark-border">
+                                <div className="bg-white dark:bg-dark-card rounded-2xl p-4 sm:p-6 border border-gray-100 dark:border-dark-border overflow-hidden">
                                     <h2 className="text-lg sm:text-xl font-heading font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">📍 Location</h2>
                                     {project.location?.address && (
-                                        <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 flex items-center gap-2">
-                                            <FiMapPin size={14} className="text-gold-400" />
-                                            {project.location.address}
+                                        <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 flex items-start gap-2">
+                                            <FiMapPin size={14} className="text-gold-400 flex-shrink-0 mt-0.5" />
+                                            <span className="break-words leading-snug">{project.location.address}</span>
                                         </p>
                                     )}
                                     {project.coordinates?.lat ? (
-                                        <div className="rounded-xl overflow-hidden h-72">
+                                        <div className="rounded-xl overflow-hidden h-56 sm:h-72">
                                             <iframe
                                                 title="Project Location"
                                                 width="100%"
@@ -401,7 +438,7 @@ const ProjectDetailPage = () => {
                                             />
                                         </div>
                                     ) : project.location?.mapEmbed ? (
-                                        <div className="rounded-xl overflow-hidden" dangerouslySetInnerHTML={{ __html: project.location.mapEmbed }} />
+                                        <div className="rounded-xl overflow-hidden h-56 sm:h-72" dangerouslySetInnerHTML={{ __html: project.location.mapEmbed }} />
                                     ) : null}
                                 </div>
                             )}
