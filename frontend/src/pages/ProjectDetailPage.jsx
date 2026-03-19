@@ -105,7 +105,7 @@ const ProjectDetailPage = () => {
     const renderBookingForm = () => {
         if (!showBooking) return null;
         return (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-white dark:bg-dark-card rounded-2xl p-5 sm:p-6 border border-gray-100 dark:border-dark-border mt-4 shadow-sm w-full">
+            <motion.div id="booking-form-area" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-white dark:bg-dark-card rounded-2xl p-5 sm:p-6 border border-gray-100 dark:border-dark-border mt-4 shadow-sm w-full">
                 <h3 className="text-lg font-heading font-bold text-gray-900 dark:text-white mb-4">Book a Site Visit</h3>
                 <form onSubmit={handleBooking} className="space-y-4">
                     <div>
@@ -175,7 +175,7 @@ const ProjectDetailPage = () => {
                 <div className="max-w-7xl mx-auto">
                     <div className="grid lg:grid-cols-3 gap-6 lg:gap-8">
                         {/* Main Content */}
-                        <div className="lg:col-span-2 space-y-6 sm:space-y-8 order-1 lg:order-1">
+                        <div className="lg:col-span-2 space-y-6 sm:space-y-8 order-1 lg:order-1 min-w-0">
                             {project.videoId ? (
                                 <div className="space-y-4">
                                     <div className="flex gap-2">
@@ -660,7 +660,12 @@ const ProjectDetailPage = () => {
             <div className="lg:hidden fixed bottom-0 left-0 w-full bg-white dark:bg-dark-card border-t border-gray-200 dark:border-dark-border p-3 z-40">
                 <div className="flex gap-3 max-w-7xl mx-auto">
                     <button
-                        onClick={() => setShowBooking(true)}
+                        onClick={() => {
+                            setShowBooking(true);
+                            setTimeout(() => {
+                                document.getElementById('booking-form-area')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }, 100);
+                        }}
                         className="flex-1 py-3 rounded-xl btn-shimmer text-white font-semibold flex items-center justify-center gap-2"
                     >
                         <FiCalendarIcon size={18} />
