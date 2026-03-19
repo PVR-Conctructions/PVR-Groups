@@ -264,7 +264,7 @@ const ChatWidget = () => {
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={() => setOpen(!open)}
-                className="fixed bottom-6 right-4 sm:right-6 w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-primary-700 to-primary-900 text-white shadow-lg flex items-center justify-center z-[60] hover:shadow-xl hover:shadow-primary-900/30 transition-shadow mb-[env(safe-area-inset-bottom)]"
+                className="fixed bottom-8 right-5 w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-primary-700 to-primary-900 text-white shadow-lg flex items-center justify-center z-[60] hover:shadow-xl hover:shadow-primary-900/30 transition-shadow mb-[env(safe-area-inset-bottom)]"
             >
                 <AnimatePresence mode="wait">
                     {open ? (
