@@ -163,8 +163,8 @@ const ImageGallery = ({ images, categorizedImages }) => {
                 onTouchEnd={onMainTouchEnd}
                 style={{ touchAction: 'pan-y' }}
             >
-                {/* Responsive aspect ratio: taller on mobile, 16:9 on sm+ */}
-                <div className="aspect-[4/3] sm:aspect-video relative w-full">
+                {/* Responsive aspect ratio: 3:2 on very small, 16:9 on sm+ */}
+                <div className="aspect-[3/2] sm:aspect-video relative w-full">
                     <AnimatePresence mode="wait" initial={false}>
                         <motion.img
                             key={currentImg.url}

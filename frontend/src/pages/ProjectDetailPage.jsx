@@ -155,9 +155,9 @@ const ProjectDetailPage = () => {
                                 </div>
                                 <h1 className="text-2xl sm:text-3xl md:text-4xl font-heading font-bold text-gray-900 dark:text-white mb-2">{project.name}</h1>
                                 {project.location?.address && (
-                                    <div className="flex items-start text-sm sm:text-base text-gray-500 dark:text-gray-400 mb-4">
-                                        <FiMapPin className="mr-2 mt-0.5 text-gold-400 flex-shrink-0" size={16} />
-                                        <span className="break-words leading-snug">{project.location.address}</span>
+                                    <div className="flex items-start gap-1.5 text-sm sm:text-base text-gray-500 dark:text-gray-400 mb-4" style={{minWidth: 0}}>
+                                        <FiMapPin className="mt-0.5 text-gold-400 flex-shrink-0" size={16} />
+                                        <span className="flex-1 min-w-0" style={{overflowWrap: 'break-word', wordBreak: 'break-word'}}>{project.location.address}</span>
                                     </div>
                                 )}
 
@@ -420,10 +420,10 @@ const ProjectDetailPage = () => {
                                 <div className="bg-white dark:bg-dark-card rounded-2xl p-4 sm:p-6 border border-gray-100 dark:border-dark-border overflow-hidden">
                                     <h2 className="text-lg sm:text-xl font-heading font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">📍 Location</h2>
                                     {project.location?.address && (
-                                        <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 flex items-start gap-2">
+                                        <div className="flex items-start gap-2 mb-4" style={{minWidth: 0}}>
                                             <FiMapPin size={14} className="text-gold-400 flex-shrink-0 mt-0.5" />
-                                            <span className="break-words leading-snug">{project.location.address}</span>
-                                        </p>
+                                            <span className="text-gray-600 dark:text-gray-400 text-sm flex-1 min-w-0" style={{overflowWrap: 'break-word', wordBreak: 'break-word'}}>{project.location.address}</span>
+                                        </div>
                                     )}
                                     {project.coordinates?.lat ? (
                                         <div className="rounded-xl overflow-hidden h-56 sm:h-72">
