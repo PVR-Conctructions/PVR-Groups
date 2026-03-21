@@ -1,11 +1,10 @@
 const express = require('express');
 const sendEmail = require('../utils/email');
-const User = require('../models/User');
+const supabase = require('../config/supabase');
 const auth = require('../middleware/auth');
 const adminAuth = require('../middleware/adminAuth');
 const router = express.Router();
 
-// In-memory campaign status tracker
 let campaignStatus = {
     running: false,
     sent: 0,
@@ -15,12 +14,10 @@ let campaignStatus = {
     lastUpdated: null
 };
 
-// Get campaign status
 router.get('/campaign/status', auth, adminAuth, (req, res) => {
     res.json(campaignStatus);
 });
 
-// Send bulk email campaign (fire-and-forget)
 router.post('/campaign', auth, adminAuth, async (req, res) => {
     try {
         const { subject, htmlContent, targetGroup, selectedUserIds } = req.body;
@@ -32,22 +29,23 @@ router.post('/campaign', auth, adminAuth, async (req, res) => {
 
         let recipients = [];
         if (targetGroup === 'selected' && selectedUserIds && selectedUserIds.length > 0) {
-            recipients = await User.find({ _id: { $in: selectedUserIds } }).select('email name');
+            const { data } = await supabase.from('users').select('email, name').in('id', selectedUserIds);
+            recipients = data || [];
         } else if (targetGroup === 'all') {
-            recipients = await User.find({}).select('email name');
+            const { data } = await supabase.from('users').select('email, name');
+            recipients = data || [];
         } else if (targetGroup === 'newsletter') {
-            const Newsletter = require('../models/Newsletter');
-            const subs = await Newsletter.find();
-            recipients = subs.map(s => ({ email: s.email, name: 'Subscriber' }));
+            const { data } = await supabase.from('newsletters').select('email');
+            recipients = (data || []).map(s => ({ email: s.email, name: 'Subscriber' }));
         } else {
-            recipients = await User.find({}).select('email name');
+            const { data } = await supabase.from('users').select('email, name');
+            recipients = data || [];
         }
 
         if (recipients.length === 0) {
             return res.json({ message: 'No recipients found', sent: 0, failed: 0, total: 0 });
         }
 
-        // Initialize campaign status
         campaignStatus = {
             running: true,
             sent: 0,
@@ -57,10 +55,8 @@ router.post('/campaign', auth, adminAuth, async (req, res) => {
             lastUpdated: new Date()
         };
 
-        // Respond immediately to the frontend
         res.json({ message: 'Campaign started', sent: 0, failed: 0, total: recipients.length, started: true });
 
-        // Process emails in the background
         (async () => {
             for (const user of recipients) {
                 try {
@@ -72,25 +68,21 @@ router.post('/campaign', auth, adminAuth, async (req, res) => {
                         campaignStatus.failed++;
                     }
                 } catch (err) {
-                    console.error("Failed to send to:", user.email, err.message);
                     campaignStatus.failed++;
                 }
                 campaignStatus.lastUpdated = new Date();
             }
             campaignStatus.running = false;
             campaignStatus.message = 'Campaign completed';
-            console.log(`✅ Campaign finished. Sent: ${campaignStatus.sent}, Failed: ${campaignStatus.failed}`);
         })();
 
     } catch (error) {
-        console.error("Campaign send error:", error);
         campaignStatus.running = false;
         campaignStatus.message = 'Campaign failed';
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 });
 
-// Send welcome email (callable internally)
 router.post('/welcome', async (req, res) => {
     try {
         const { email, name } = req.body;
@@ -128,7 +120,6 @@ router.post('/welcome', async (req, res) => {
     }
 });
 
-// Send reminder email
 router.post('/reminder', auth, adminAuth, async (req, res) => {
     try {
         const { email, name, type, projectName, date } = req.body;

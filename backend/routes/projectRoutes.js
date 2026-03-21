@@ -1,9 +1,10 @@
 const express = require('express');
-const Project = require('../models/Project');
+const supabase = require('../config/supabase');
 const auth = require('../middleware/auth');
 const adminAuth = require('../middleware/adminAuth');
 const upload = require('../middleware/upload');
 const projectController = require('../controllers/projectController');
+const { mapProject } = projectController;
 const router = express.Router();
 
 // Get all projects (public)
@@ -14,6 +15,7 @@ router.get('/:id', projectController.getProjectById);
 
 // Upload multiple projects (User facing or general)
 router.post('/upload', upload.array('images', 10), projectController.uploadProject);
+
 // Create project (admin only)
 router.post('/', auth, adminAuth, upload.array('images', 50), async (req, res) => {
     try {
@@ -31,14 +33,13 @@ router.post('/', auth, adminAuth, upload.array('images', 50), async (req, res) =
             return res.status(400).json({ message: 'Name, description and status are required' });
         }
 
-        // Upload files to Cloudinary concurrently and collect secure_urls
         let uploadedUrls = [];
         if (req.files && req.files.length > 0) {
             const uploadPromises = req.files.map(file => {
                 return cloudinary.uploader.upload(file.path, {
                     folder: 'construction_projects'
                 }).then(result => {
-                    try { if (fs.existsSync(file.path)) fs.unlinkSync(file.path); } catch (e) { console.error('Unlink error:', e); }
+                    try { if (fs.existsSync(file.path)) fs.unlinkSync(file.path); } catch (e) { }
                     return result.secure_url;
                 }).catch(err => {
                     try { if (fs.existsSync(file.path)) fs.unlinkSync(file.path); } catch (e) {}
@@ -64,48 +65,45 @@ router.post('/', auth, adminAuth, upload.array('images', 50), async (req, res) =
                     return { category: g.category, label: g.label, urls };
                 });
             } catch (e) { 
-                console.error('Error parsing imageGroupsData', e);
-                // Continue even if group parsing fails, but use all uploaded images
                 allImages = uploadedUrls;
             }
         } else {
             allImages = uploadedUrls;
         }
 
-        // Sanitize configurations for numeric fields
         let parsedConfigs = [];
         if (configurations) {
             try {
                 parsedConfigs = JSON.parse(configurations).map(cfg => ({
                     ...cfg,
-                    bedrooms: cfg.bedrooms === "" ? undefined : Number(cfg.bedrooms),
-                    bathrooms: cfg.bathrooms === "" ? undefined : Number(cfg.bathrooms),
-                    balconies: cfg.balconies === "" ? undefined : Number(cfg.balconies),
-                    parking: cfg.parking === "" ? undefined : Number(cfg.parking)
+                    bedrooms: cfg.bedrooms === "" ? null : Number(cfg.bedrooms),
+                    bathrooms: cfg.bathrooms === "" ? null : Number(cfg.bathrooms),
+                    balconies: cfg.balconies === "" ? null : Number(cfg.balconies),
+                    parking: cfg.parking === "" ? null : Number(cfg.parking)
                 }));
-            } catch (e) { console.error('Error parsing configurations', e); }
+            } catch (e) { }
         }
 
-        const project = await Project.create({
+        const insertData = {
             name, description, status,
             images: allImages,
-            imageUrls: allImages,
-            categorizedImages,
-            completionPercentage: completionPercentage !== undefined ? Number(completionPercentage) : 0,
+            image_urls: allImages,
+            categorized_images: categorizedImages,
+            completion_percentage: completionPercentage !== undefined ? Number(completionPercentage) : 0,
             amenities: amenities ? JSON.parse(amenities) : [],
-            bestFeatures: bestFeatures ? JSON.parse(bestFeatures) : [],
+            best_features: bestFeatures ? JSON.parse(bestFeatures) : [],
             location: { address: location, mapEmbed },
             price, area, units,
             highlights: highlights ? JSON.parse(highlights) : [],
-            projectType: projectType || '',
-            totalFloors: totalFloors || '',
+            project_type: projectType || '',
+            total_floors: totalFloors || '',
             configurations: parsedConfigs,
-            videoId: Array.isArray(videoId) ? videoId[0] : (videoId || ''),
-            possessionDate: possessionDate || '',
-            reraNumber: reraNumber || '',
-            totalLandArea: totalLandArea || '',
-            constructionType: constructionType || '',
-            bankApprovals: bankApprovals ? JSON.parse(bankApprovals) : [],
+            video_id: Array.isArray(videoId) ? videoId[0] : (videoId || ''),
+            possession_date: possessionDate || '',
+            rera_number: reraNumber || '',
+            total_land_area: totalLandArea || '',
+            construction_type: constructionType || '',
+            bank_approvals: bankApprovals ? JSON.parse(bankApprovals) : [],
             specifications: {
                 flooring: specFlooring || '',
                 doors: specDoors || '',
@@ -115,9 +113,12 @@ router.post('/', auth, adminAuth, upload.array('images', 50), async (req, res) =
                 electrical: specElectrical || '',
                 painting: specPainting || '',
             },
-        });
+        };
 
-        res.status(201).json(project);
+        const { data: project, error } = await supabase.from('projects').insert(insertData).select().single();
+        if (error) throw error;
+
+        res.status(201).json(mapProject(project));
     } catch (error) {
         console.error('Create Project Error:', error);
         res.status(500).json({ message: error.message || 'Server error during project creation' });
@@ -134,6 +135,7 @@ router.put('/:id', auth, adminAuth, upload.array('images', 50), async (req, res)
             reraNumber, totalLandArea, constructionType, bankApprovals,
             specFlooring, specDoors, specWindows, specKitchen, specBathroom, specElectrical, specPainting
         } = req.body;
+        
         const updateData = {};
 
         if (name) updateData.name = name;
@@ -143,14 +145,17 @@ router.put('/:id', auth, adminAuth, upload.array('images', 50), async (req, res)
         if (area !== undefined) updateData.area = area;
         if (units !== undefined) updateData.units = units;
 
-        if (completionPercentage !== undefined) updateData.completionPercentage = Number(completionPercentage);
+        if (completionPercentage !== undefined) updateData.completion_percentage = Number(completionPercentage);
         if (amenities) updateData.amenities = JSON.parse(amenities);
-        if (bestFeatures) updateData.bestFeatures = JSON.parse(bestFeatures);
+        if (bestFeatures) updateData.best_features = JSON.parse(bestFeatures);
         if (highlights) updateData.highlights = JSON.parse(highlights);
+        
+        const { data: existingProject } = await supabase.from('projects').select('*').eq('id', req.params.id).single();
+
         if (location !== undefined || mapEmbed !== undefined) {
             updateData.location = { 
-                address: location !== undefined ? location : (await Project.findById(req.params.id))?.location?.address, 
-                mapEmbed: mapEmbed !== undefined ? mapEmbed : (await Project.findById(req.params.id))?.location?.mapEmbed 
+                address: location !== undefined ? location : existingProject?.location?.address, 
+                mapEmbed: mapEmbed !== undefined ? mapEmbed : existingProject?.location?.mapEmbed 
             };
         }
         
@@ -158,40 +163,36 @@ router.put('/:id', auth, adminAuth, upload.array('images', 50), async (req, res)
             try {
                 updateData.configurations = JSON.parse(configurations).map(cfg => ({
                     ...cfg,
-                    bedrooms: cfg.bedrooms === "" ? undefined : Number(cfg.bedrooms),
-                    bathrooms: cfg.bathrooms === "" ? undefined : Number(cfg.bathrooms),
-                    balconies: cfg.balconies === "" ? undefined : Number(cfg.balconies),
-                    parking: cfg.parking === "" ? undefined : Number(cfg.parking)
+                    bedrooms: cfg.bedrooms === "" ? null : Number(cfg.bedrooms),
+                    bathrooms: cfg.bathrooms === "" ? null : Number(cfg.bathrooms),
+                    balconies: cfg.balconies === "" ? null : Number(cfg.balconies),
+                    parking: cfg.parking === "" ? null : Number(cfg.parking)
                 }));
-            } catch (e) { console.error('Error parsing configurations', e); }
+            } catch (e) { }
         }
 
-        if (videoId !== undefined) updateData.videoId = Array.isArray(videoId) ? videoId[0] : videoId;
-        if (bankApprovals) updateData.bankApprovals = JSON.parse(bankApprovals);
+        if (videoId !== undefined) updateData.video_id = Array.isArray(videoId) ? videoId[0] : videoId;
+        if (bankApprovals) updateData.bank_approvals = JSON.parse(bankApprovals);
 
-        // Extra project details
-        if (projectType !== undefined) updateData.projectType = projectType;
-        if (totalFloors !== undefined) updateData.totalFloors = totalFloors;
-        if (possessionDate !== undefined) updateData.possessionDate = possessionDate;
-        if (reraNumber !== undefined) updateData.reraNumber = reraNumber;
-        if (totalLandArea !== undefined) updateData.totalLandArea = totalLandArea;
-        if (constructionType !== undefined) updateData.constructionType = constructionType;
+        if (projectType !== undefined) updateData.project_type = projectType;
+        if (totalFloors !== undefined) updateData.total_floors = totalFloors;
+        if (possessionDate !== undefined) updateData.possession_date = possessionDate;
+        if (reraNumber !== undefined) updateData.rera_number = reraNumber;
+        if (totalLandArea !== undefined) updateData.total_land_area = totalLandArea;
+        if (constructionType !== undefined) updateData.construction_type = constructionType;
 
-        // Specifications
         if (specFlooring || specDoors || specWindows || specKitchen || specBathroom || specElectrical || specPainting) {
-            const existing = await Project.findById(req.params.id);
             updateData.specifications = {
-                flooring: specFlooring !== undefined ? specFlooring : existing?.specifications?.flooring || '',
-                doors: specDoors !== undefined ? specDoors : existing?.specifications?.doors || '',
-                windows: specWindows !== undefined ? specWindows : existing?.specifications?.windows || '',
-                kitchen: specKitchen !== undefined ? specKitchen : existing?.specifications?.kitchen || '',
-                bathroom: specBathroom !== undefined ? specBathroom : existing?.specifications?.bathroom || '',
-                electrical: specElectrical !== undefined ? specElectrical : existing?.specifications?.electrical || '',
-                painting: specPainting !== undefined ? specPainting : existing?.specifications?.painting || '',
+                flooring: specFlooring !== undefined ? specFlooring : existingProject?.specifications?.flooring || '',
+                doors: specDoors !== undefined ? specDoors : existingProject?.specifications?.doors || '',
+                windows: specWindows !== undefined ? specWindows : existingProject?.specifications?.windows || '',
+                kitchen: specKitchen !== undefined ? specKitchen : existingProject?.specifications?.kitchen || '',
+                bathroom: specBathroom !== undefined ? specBathroom : existingProject?.specifications?.bathroom || '',
+                electrical: specElectrical !== undefined ? specElectrical : existingProject?.specifications?.electrical || '',
+                painting: specPainting !== undefined ? specPainting : existingProject?.specifications?.painting || '',
             };
         }
 
-        // Upload new files to Cloudinary concurrently and collect secure_urls
         const cloudinary = require('../config/cloudinary');
         const fs = require('fs');
         let uploadedUrls = [];
@@ -215,7 +216,7 @@ router.put('/:id', auth, adminAuth, upload.array('images', 50), async (req, res)
                 const groups = JSON.parse(imageGroupsData);
                 let fileIndex = 0;
                 let allImages = [];
-                updateData.categorizedImages = groups.map(g => {
+                updateData.categorized_images = groups.map(g => {
                     const newFilesCount = Number(g.newFilesCount) || 0;
                     const newUrls = uploadedUrls.slice(fileIndex, fileIndex + newFilesCount);
                     fileIndex += newFilesCount;
@@ -224,27 +225,30 @@ router.put('/:id', auth, adminAuth, upload.array('images', 50), async (req, res)
                     return { category: g.category, label: g.label, urls };
                 });
                 updateData.images = allImages;
-                updateData.imageUrls = allImages;
-            } catch (e) { console.error('Error parsing imageGroupsData', e); }
+                updateData.image_urls = allImages;
+            } catch (e) { }
         } else if (uploadedUrls.length > 0) {
-            const project = await Project.findById(req.params.id);
-            const merged = [...(project?.images || []), ...uploadedUrls];
+            const merged = [...(existingProject?.images || []), ...uploadedUrls];
             updateData.images = merged;
-            updateData.imageUrls = merged;
+            updateData.image_urls = merged;
         }
 
-        const project = await Project.findByIdAndUpdate(req.params.id, updateData, { new: true });
-        if (!project) return res.status(404).json({ message: 'Project not found' });
+        const { data: updatedProject, error } = await supabase
+            .from('projects')
+            .update(updateData)
+            .eq('id', req.params.id)
+            .select()
+            .single();
+            
+        if (error || !updatedProject) return res.status(404).json({ message: 'Project not found' });
 
-        res.json(project);
+        res.json(mapProject(updatedProject));
     } catch (error) {
         console.error('Update Project Error:', error);
         res.status(500).json({ message: error.message || 'Server error during project update' });
     }
 });
 
-// Delete project (admin only or explicit endpoint matching criteria)
-// Mapping to new controller delete logic ensuring old admin stuff matches if needed:
 router.delete('/:id', projectController.deleteProject);
 
 module.exports = router;

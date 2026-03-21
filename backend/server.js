@@ -1,12 +1,10 @@
 require('dotenv').config();
 const express = require('express');
-const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
 const http = require('http');
 const { Server } = require('socket.io');
-const seedAdmin = require('./utils/seedAdmin');
-
+// Removed Mongoose seedAdmin requirement
 const app = express();
 const server = http.createServer(app);
 
@@ -79,16 +77,8 @@ app.use((err, req, res, next) => {
     res.status(500).json({ message: err.message || 'Internal Server Error' });
 });
 
-// Connect to MongoDB and start server
+// Start server
 const PORT = process.env.PORT || 5000;
-const connectDB = require('./config/db');
 
-connectDB()
-    .then(async () => {
-        await seedAdmin();
-        server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT} with Socket.io`));
-    })
-    .catch(err => {
-        console.error('❌ MongoDB connection error:', err.message);
-        server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT} (no database)`));
-    });
+server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT} with Socket.io`));
+

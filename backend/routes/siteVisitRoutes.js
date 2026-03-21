@@ -1,7 +1,9 @@
 const express = require('express');
-const SiteVisit = require('../models/SiteVisit');
+const supabase = require('../config/supabase');
 const sendEmail = require('../utils/email');
 const router = express.Router();
+const auth = require('../middleware/auth');
+const adminAuth = require('../middleware/adminAuth');
 
 router.post('/book', async (req, res) => {
     try {
@@ -10,9 +12,16 @@ router.post('/book', async (req, res) => {
             return res.status(400).json({ message: 'Name, email, phone, and preferred date are required' });
         }
 
-        const visit = await SiteVisit.create({ name, email, phone, projectId, preferredDate, message });
+        const insertData = {
+            name, email, phone, 
+            project_id: projectId, 
+            preferred_date: preferredDate, 
+            message
+        };
 
-        // Notify admin asynchronously so it doesn't block the request
+        const { data: visit, error } = await supabase.from('site_visits').insert(insertData).select().single();
+        if (error) throw error;
+
         sendEmail({
             to: process.env.EMAIL_USER || 'pvrgroupsvijayawada@gmail.com',
             subject: 'New Site Visit Booking - PVR Groups',
@@ -21,31 +30,56 @@ router.post('/book', async (req, res) => {
             console.error('Failed to send email notification:', emailErr);
         });
 
-        res.status(201).json({ message: 'Site visit booked successfully!', visit });
+        res.status(201).json({ message: 'Site visit booked successfully!', visit: { ...visit, _id: visit.id } });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 });
 
 // Get user's site visits
-const auth = require('../middleware/auth');
 router.get('/my', auth, async (req, res) => {
     try {
-        const visits = await SiteVisit.find({ email: req.user.email }).populate('projectId', 'name').sort({ createdAt: -1 });
-        res.json(visits);
+        const { data: visits, error } = await supabase
+            .from('site_visits')
+            .select('*, projects(name)')
+            .eq('email', req.user.email)
+            .order('created_at', { ascending: false });
+            
+        if (error) throw error;
+        
+        const formatted = visits.map(v => ({
+            ...v,
+            _id: v.id,
+            projectId: v.projects ? { _id: v.project_id, name: v.projects.name } : v.project_id,
+            preferredDate: v.preferred_date,
+            createdAt: v.created_at
+        }));
+        
+        res.json(formatted);
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 });
 
 // Admin: Get all site visits
-const adminAuth = require('../middleware/adminAuth');
 router.get('/admin/all', auth, adminAuth, async (req, res) => {
     try {
-        const visits = await SiteVisit.find()
-            .populate('projectId', 'name')
-            .sort({ createdAt: -1 });
-        res.json(visits);
+        const { data: visits, error } = await supabase
+            .from('site_visits')
+            .select('*, projects(name)')
+            .order('created_at', { ascending: false });
+            
+        if (error) throw error;
+        
+        const formatted = visits.map(v => ({
+            ...v,
+            _id: v.id,
+            projectId: v.projects ? { _id: v.project_id, name: v.projects.name } : v.project_id,
+            preferredDate: v.preferred_date,
+            createdAt: v.created_at
+        }));
+        
+        res.json(formatted);
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
@@ -54,10 +88,9 @@ router.get('/admin/all', auth, adminAuth, async (req, res) => {
 // Admin: Delete a site visit
 router.delete('/admin/:id', auth, adminAuth, async (req, res) => {
     try {
-        const visit = await SiteVisit.findByIdAndDelete(req.params.id);
-        if (!visit) {
-            return res.status(404).json({ message: 'Site visit not found' });
-        }
+        const { error } = await supabase.from('site_visits').delete().eq('id', req.params.id);
+        if (error) return res.status(404).json({ message: 'Site visit not found' });
+        
         res.json({ message: 'Site visit deleted successfully' });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });

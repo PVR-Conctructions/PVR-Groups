@@ -1,11 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const Message = require('../models/Message');
-const User = require('../models/User');
+const supabase = require('../config/supabase');
 const auth = require('../middleware/auth');
 const sendEmail = require('../utils/email');
 
-// Smart AI auto-replies based on keywords
 const getAutoReply = (message) => {
     const msg = message.toLowerCase();
     if (msg.match(/project|property|flat|apartment|villa|plot/))
@@ -28,10 +26,9 @@ const getAutoReply = (message) => {
         return 'Hello! 👋 Welcome to PVR Groups! I\'m here to help you find your dream property. Feel free to ask about our projects, pricing, site visits, or anything else!';
     if (msg.match(/thank|thanks|ok|okay|great|nice|perfect|good/))
         return 'You\'re welcome! 😊 Is there anything else I can help you with? Our team is always happy to assist!';
-    return null; // No auto-reply — save to DB for admin
+    return null; 
 };
 
-// POST /api/chat/send — user sends message from chat widget
 router.post('/send', auth, async (req, res) => {
     try {
         const { content } = req.body;
@@ -39,46 +36,45 @@ router.post('/send', auth, async (req, res) => {
 
         const autoReply = getAutoReply(content);
 
-        // Always save the user's message
-        const admin = await User.findOne({ role: 'admin' });
-        const userMessage = new Message({
-            sender: req.user._id,
-            receiver: admin?._id,
+        const { data: admin } = await supabase.from('users').select('id, email').eq('role', 'admin').limit(1).single();
+        
+        await supabase.from('messages').insert([{
+            sender_id: req.user.id,
+            receiver_id: admin ? admin.id : null,
             content,
-        });
-        await userMessage.save();
+        }]);
 
-        // If no auto-reply, notify admin via email
         if (!autoReply && admin) {
-            const user = await User.findById(req.user._id).select('name email');
-            sendEmail({
-                to: admin.email,
-                subject: `💬 New Chat Message from ${user.name} — PVR Groups`,
-                html: `
-                    <div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;background:#0a1628;color:#fff;border-radius:12px;overflow:hidden">
-                        <div style="background:linear-gradient(135deg,#C4A44B,#d4b85c);padding:20px;text-align:center">
-                            <h2 style="margin:0;color:#0a1628">New Chat Message</h2>
-                        </div>
-                        <div style="padding:20px">
-                            <p style="color:#C4A44B;font-weight:bold">From: ${user.name} (${user.email})</p>
-                            <div style="background:#1a2a4a;border-left:4px solid #C4A44B;padding:15px;border-radius:8px;margin:15px 0">
-                                <p style="color:#ccc;margin:0">"${content}"</p>
+            const { data: user } = await supabase.from('users').select('name, email').eq('id', req.user.id).single();
+            if (user) {
+                sendEmail({
+                    to: admin.email,
+                    subject: `💬 New Chat Message from ${user.name} — PVR Groups`,
+                    html: `
+                        <div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;background:#0a1628;color:#fff;border-radius:12px;overflow:hidden">
+                            <div style="background:linear-gradient(135deg,#C4A44B,#d4b85c);padding:20px;text-align:center">
+                                <h2 style="margin:0;color:#0a1628">New Chat Message</h2>
                             </div>
-                            <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/admin/messages" style="display:inline-block;background:#C4A44B;color:#0a1628;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;margin-top:10px">Reply in Admin Panel</a>
+                            <div style="padding:20px">
+                                <p style="color:#C4A44B;font-weight:bold">From: ${user.name} (${user.email})</p>
+                                <div style="background:#1a2a4a;border-left:4px solid #C4A44B;padding:15px;border-radius:8px;margin:15px 0">
+                                    <p style="color:#ccc;margin:0">"${content}"</p>
+                                </div>
+                                <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/admin/messages" style="display:inline-block;background:#C4A44B;color:#0a1628;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;margin-top:10px">Reply in Admin Panel</a>
+                            </div>
                         </div>
-                    </div>
-                `
-            }).catch(() => { }); // Don't fail if email fails
+                    `
+                }).catch(() => { });
+            }
         }
 
-        // Notify admin via socket.io
         const io = req.app.get('io');
         const activeUsers = req.app.get('activeUsers');
         if (io && admin) {
-            const adminSocket = activeUsers[admin._id.toString()];
+            const adminSocket = activeUsers[admin.id];
             if (adminSocket) {
                 io.to(adminSocket).emit('new_user_message', {
-                    userId: req.user._id,
+                    userId: req.user.id,
                     userName: req.user.name,
                     content,
                     createdAt: new Date(),
@@ -96,17 +92,23 @@ router.post('/send', auth, async (req, res) => {
     }
 });
 
-// GET /api/chat/replies — poll for admin replies
 router.get('/replies', auth, async (req, res) => {
     try {
         const since = req.query.since ? new Date(req.query.since) : new Date(Date.now() - 86400000);
-        const admin = await User.findOne({ role: 'admin' });
-        const replies = await Message.find({
-            sender: admin?._id,
-            receiver: req.user._id,
-            createdAt: { $gt: since },
-        }).sort({ createdAt: 1 });
-        res.json(replies);
+        const { data: admin } = await supabase.from('users').select('id').eq('role', 'admin').limit(1).single();
+        
+        let query = supabase.from('messages')
+            .select('*')
+            .eq('receiver_id', req.user.id)
+            .gt('created_at', since.toISOString())
+            .order('created_at', { ascending: true });
+            
+        if (admin) query = query.eq('sender_id', admin.id);
+        
+        const { data: replies } = await query;
+        
+        const formatted = (replies || []).map(r => ({ ...r, _id: r.id, createdAt: r.created_at }));
+        res.json(formatted);
     } catch (err) {
         res.status(500).json({ message: 'Error fetching replies' });
     }

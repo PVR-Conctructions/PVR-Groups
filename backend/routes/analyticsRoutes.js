@@ -1,39 +1,39 @@
 const express = require('express');
-const User = require('../models/User');
-const Project = require('../models/Project');
-const Payment = require('../models/Payment');
-const SiteVisit = require('../models/SiteVisit');
-const Feedback = require('../models/Feedback');
+const supabase = require('../config/supabase');
 const auth = require('../middleware/auth');
 const adminAuth = require('../middleware/adminAuth');
 const router = express.Router();
 
-// Monthly user registrations (last 12 months)
 router.get('/registrations', auth, adminAuth, async (req, res) => {
     try {
         const twelveMonthsAgo = new Date();
         twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
 
-        const data = await User.aggregate([
-            { $match: { createdAt: { $gte: twelveMonthsAgo }, role: 'user' } },
-            {
-                $group: {
-                    _id: { year: { $year: '$createdAt' }, month: { $month: '$createdAt' } },
-                    count: { $sum: 1 }
-                }
-            },
-            { $sort: { '_id.year': 1, '_id.month': 1 } }
-        ]);
+        const { data, error } = await supabase
+            .from('users')
+            .select('created_at')
+            .eq('role', 'user')
+            .gte('created_at', twelveMonthsAgo.toISOString());
+
+        if (error) throw error;
 
         const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         const result = [];
+        
+        const grouped = {};
+        for (const row of data) {
+            const d = new Date(row.created_at);
+            const key = `${d.getFullYear()}-${d.getMonth() + 1}`;
+            grouped[key] = (grouped[key] || 0) + 1;
+        }
+
         for (let i = 11; i >= 0; i--) {
             const d = new Date();
             d.setMonth(d.getMonth() - i);
             const m = d.getMonth() + 1;
             const yr = d.getFullYear();
-            const found = data.find(d => d._id.month === m && d._id.year === yr);
-            result.push({ month: months[m - 1] + ' ' + yr, users: found ? found.count : 0 });
+            const key = `${yr}-${m}`;
+            result.push({ month: months[m - 1] + ' ' + yr, users: grouped[key] || 0 });
         }
 
         res.json(result);
@@ -42,49 +42,57 @@ router.get('/registrations', auth, adminAuth, async (req, res) => {
     }
 });
 
-// Most viewed projects
 router.get('/project-views', auth, adminAuth, async (req, res) => {
     try {
-        const projects = await Project.find()
-            .sort({ viewCount: -1 })
-            .limit(10)
-            .select('name viewCount status');
-        res.json(projects);
+        const { data: projects, error } = await supabase
+            .from('projects')
+            .select('id, name, view_count, status')
+            .order('view_count', { ascending: false })
+            .limit(10);
+            
+        if (error) throw error;
+        
+        res.json(projects.map(p => ({ ...p, _id: p.id, viewCount: p.view_count })));
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 });
 
-// Revenue data (from payments)
 router.get('/revenue', auth, adminAuth, async (req, res) => {
     try {
         const twelveMonthsAgo = new Date();
         twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
 
-        const data = await Payment.aggregate([
-            { $match: { createdAt: { $gte: twelveMonthsAgo }, status: 'paid' } },
-            {
-                $group: {
-                    _id: { year: { $year: '$createdAt' }, month: { $month: '$createdAt' } },
-                    revenue: { $sum: '$amount' },
-                    count: { $sum: 1 }
-                }
-            },
-            { $sort: { '_id.year': 1, '_id.month': 1 } }
-        ]);
+        const { data, error } = await supabase
+            .from('payments')
+            .select('amount, created_at')
+            .eq('status', 'paid')
+            .gte('created_at', twelveMonthsAgo.toISOString());
+
+        if (error) throw error;
 
         const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         const result = [];
         let totalRevenue = 0;
+        
+        const grouped = {};
+        for (const row of data) {
+            const d = new Date(row.created_at);
+            const key = `${d.getFullYear()}-${d.getMonth() + 1}`;
+            if (!grouped[key]) grouped[key] = { revenue: 0, count: 0 };
+            grouped[key].revenue += Number(row.amount);
+            grouped[key].count += 1;
+        }
+
         for (let i = 11; i >= 0; i--) {
             const d = new Date();
             d.setMonth(d.getMonth() - i);
             const m = d.getMonth() + 1;
             const yr = d.getFullYear();
-            const found = data.find(d => d._id.month === m && d._id.year === yr);
-            const rev = found ? found.revenue : 0;
-            totalRevenue += rev;
-            result.push({ month: months[m - 1], revenue: rev, transactions: found ? found.count : 0 });
+            const key = `${yr}-${m}`;
+            const revInfo = grouped[key] || { revenue: 0, count: 0 };
+            totalRevenue += revInfo.revenue;
+            result.push({ month: months[m - 1], revenue: revInfo.revenue, transactions: revInfo.count });
         }
 
         res.json({ monthly: result, totalRevenue });
@@ -93,15 +101,19 @@ router.get('/revenue', auth, adminAuth, async (req, res) => {
     }
 });
 
-// Visitor/inquiry stats
 router.get('/visitors', auth, adminAuth, async (req, res) => {
     try {
-        const [totalVisits, totalFeedback, totalInquiries, recentUsers] = await Promise.all([
-            SiteVisit.countDocuments(),
-            Feedback.countDocuments(),
-            require('../models/Message').countDocuments(),
-            User.find({ role: 'user' }).sort({ createdAt: -1 }).limit(5).select('name email createdAt'),
+        const [visitsQ, authQ, messagesQ, usersQ] = await Promise.all([
+            supabase.from('site_visits').select('*', { count: 'exact', head: true }),
+            supabase.from('feedbacks').select('*', { count: 'exact', head: true }),
+            supabase.from('messages').select('*', { count: 'exact', head: true }),
+            supabase.from('users').select('name, email, created_at').eq('role', 'user').order('created_at', { ascending: false }).limit(5)
         ]);
+
+        const totalVisits = visitsQ.count || 0;
+        const totalFeedback = authQ.count || 0;
+        const totalInquiries = messagesQ.count || 0;
+        const recentUsers = usersQ.data ? usersQ.data.map(u => ({ ...u, createdAt: u.created_at })) : [];
 
         res.json({
             totalVisits,

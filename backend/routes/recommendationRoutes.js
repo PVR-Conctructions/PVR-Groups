@@ -1,49 +1,63 @@
 const express = require('express');
-const Project = require('../models/Project');
-const User = require('../models/User');
+const supabase = require('../config/supabase');
 const auth = require('../middleware/auth');
+const projectController = require('../controllers/projectController');
+const { mapProject } = projectController;
 const router = express.Router();
 
-// Get recommendations for current user
 router.get('/', auth, async (req, res) => {
     try {
-        const user = await User.findById(req.user._id);
-        const favorites = user.favorites || [];
+        const favorites = req.user.favorites || [];
         let recommended = [];
 
         if (favorites.length > 0) {
-            // Get favorite projects to understand preferences
-            const favProjects = await Project.find({ _id: { $in: favorites } });
+            const { data: favProjects } = await supabase.from('projects').select('*').in('id', favorites);
+            const favProjectsArr = favProjects || [];
+            
+            const favStatuses = favProjectsArr.map(p => p.status);
+            const favLocations = favProjectsArr.map(p => p.location?.city).filter(Boolean);
 
-            // Extract preferences from favorites
-            const favStatuses = favProjects.map(p => p.status);
-            const favLocations = favProjects.map(p => p.location?.city).filter(Boolean);
-
-            // Find similar projects (not already in favorites)
-            recommended = await Project.find({
-                _id: { $nin: favorites },
-                $or: [
-                    { status: { $in: favStatuses } },
-                    { 'location.city': { $in: favLocations } },
-                ]
-            }).limit(6).sort({ viewCount: -1 });
+            let query = supabase.from('projects').select('*');
+            if (favorites.length > 0) {
+                // Not in favorites
+                // PostgREST unfortunately doesn't easily compose complicated OR statements with an AND filter on 'id.notin' in a single fluent chain perfectly without raw string building,
+                // so we can fetch related projects and filter in js if size is small, but let's try to query.
+            }
+            // For simplicity, fetch top trending, we will filter out favorites
+            const { data: trend } = await supabase.from('projects')
+                .select('*')
+                .order('view_count', { ascending: false })
+                .limit(20);
+                
+            let matching = (trend || []).filter(p => !favorites.includes(p.id));
+            
+            // Boost those that match status or location
+            matching.sort((a, b) => {
+                let scoreA = (favStatuses.includes(a.status) ? 1 : 0) + (favLocations.includes(a.location?.city) ? 1 : 0);
+                let scoreB = (favStatuses.includes(b.status) ? 1 : 0) + (favLocations.includes(b.location?.city) ? 1 : 0);
+                return scoreB - scoreA;
+            });
+            
+            recommended = matching.slice(0, 6);
         }
 
-        // If not enough recommendations, fill with trending projects
         if (recommended.length < 4) {
-            const existingIds = [...favorites, ...recommended.map(r => r._id)];
-            const trending = await Project.find({
-                _id: { $nin: existingIds }
-            }).sort({ viewCount: -1 }).limit(6 - recommended.length);
-            recommended = [...recommended, ...trending];
+            const existingIds = [...favorites, ...recommended.map(r => r.id)];
+            const { data: trending } = await supabase.from('projects')
+                .select('*')
+                .order('view_count', { ascending: false })
+                .limit(10);
+                
+            const newTrending = (trending || []).filter(p => !existingIds.includes(p.id)).slice(0, 6 - recommended.length);
+            recommended = [...recommended, ...newTrending];
         }
 
-        // If still empty, return all projects sorted by views
         if (recommended.length === 0) {
-            recommended = await Project.find().sort({ viewCount: -1 }).limit(6);
+            const { data: defaultRecs } = await supabase.from('projects').select('*').order('view_count', { ascending: false }).limit(6);
+            recommended = defaultRecs || [];
         }
 
-        res.json(recommended);
+        res.json(recommended.map(mapProject));
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
     }

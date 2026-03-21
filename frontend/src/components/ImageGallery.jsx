@@ -18,9 +18,13 @@ const ImageGallery = ({ images, categorizedImages }) => {
     const allImageData = [];
     if (hasCategories) {
         categorizedImages.forEach(group => {
-            group.urls.forEach(url => {
-                allImageData.push({ url, category: group.category, label: group.label });
-            });
+            if (Array.isArray(group.urls)) {
+                group.urls.forEach(url => {
+                    allImageData.push({ url, category: group.category, label: group.label });
+                });
+            } else if (typeof group.url === 'string') {
+                allImageData.push({ url: group.url, category: group.category, label: group.label });
+            }
         });
     } else {
         const flatImages = images?.length ? images : placeholderImages;

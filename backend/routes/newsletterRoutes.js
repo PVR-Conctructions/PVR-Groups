@@ -1,5 +1,5 @@
 const express = require('express');
-const Newsletter = require('../models/Newsletter');
+const supabase = require('../config/supabase');
 const router = express.Router();
 
 router.post('/subscribe', async (req, res) => {
@@ -7,10 +7,12 @@ router.post('/subscribe', async (req, res) => {
         const { email } = req.body;
         if (!email) return res.status(400).json({ message: 'Email is required' });
 
-        const existing = await Newsletter.findOne({ email });
+        const { data: existing } = await supabase.from('newsletters').select('id').eq('email', email).single();
         if (existing) return res.status(400).json({ message: 'Already subscribed' });
 
-        await Newsletter.create({ email });
+        const { error } = await supabase.from('newsletters').insert([{ email }]);
+        if (error) throw error;
+        
         res.status(201).json({ message: 'Subscribed successfully!' });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });

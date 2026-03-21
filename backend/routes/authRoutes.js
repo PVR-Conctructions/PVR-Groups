@@ -1,9 +1,10 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
-const User = require('../models/User');
-const sendEmail = require('../utils/email');
+const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
+const supabase = require('../config/supabase');
+const sendEmail = require('../utils/email');
 const router = express.Router();
 
 // Register
@@ -17,50 +18,61 @@ router.post('/register', [
         const errors = validationResult(req);
         if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
-        const { name, email, phone, password } = req.body;
+        const { name, email, phone, password, referralCode } = req.body;
 
-        const existingUser = await User.findOne({ email });
+        const { data: existingUser } = await supabase
+            .from('users')
+            .select('id')
+            .eq('email', email)
+            .single();
+            
         if (existingUser) return res.status(400).json({ message: 'Email already registered' });
 
         const verificationToken = crypto.randomBytes(32).toString('hex');
-        const user = await User.create({ name, email, phone, password, verificationToken });
+        const hashedPassword = await bcrypt.hash(password, 12);
 
-        // Process referral if code provided
-        const { referralCode } = req.body;
+        let referredBy = null;
         if (referralCode) {
-            try {
-                const Referral = require('../models/Referral');
-                const referrer = await User.findOne({ referralCode });
-                if (referrer) {
-                    await Referral.create({ referrerId: referrer._id, referredUserId: user._id, status: 'completed', rewardPoints: 100 });
-                    referrer.rewardPoints = (referrer.rewardPoints || 0) + 100;
-                    await referrer.save();
-                    user.referredBy = referrer._id;
-                    await user.save();
-                }
-            } catch (refErr) { console.error('Referral processing error:', refErr.message); }
+            const { data: referrer } = await supabase.from('users').select('id, reward_points').eq('referral_code', referralCode).single();
+            if (referrer) {
+                referredBy = referrer.id;
+                await supabase.from('users').update({ reward_points: (referrer.reward_points || 0) + 100 }).eq('id', referrer.id);
+            }
         }
 
-        // Send verification email in background (non-blocking to avoid slow response)
+        const { data: user, error: createError } = await supabase
+            .from('users')
+            .insert({
+                name, email, phone, password: hashedPassword, verification_token: verificationToken, referred_by: referredBy
+            })
+            .select('id, name, email, phone, role')
+            .single();
+
+        if (createError) throw createError;
+
+        if (referredBy) {
+            await supabase.from('referrals').insert({ referrer_id: referredBy, referred_user_id: user.id, status: 'completed', reward_points: 100 });
+        }
+
+        // Send verification email in background
         sendEmail({
             to: email,
             subject: 'Welcome to PVR Groups - Verify Your Email',
             html: `<h1>Welcome to PVR Groups, ${name}!</h1><p>Click <a href="${process.env.FRONTEND_URL}/verify/${verificationToken}">here</a> to verify your email.</p>`
         }).catch(err => console.error('Verification email failed:', err.message));
 
-        // Notify admin in background (non-blocking)
         sendEmail({
             to: 'raintreepark02@gmail.com',
             subject: 'New User Registration - PVR Groups',
             html: `<h2>New User Registered</h2><p>Name: ${name}</p><p>Email: ${email}</p><p>Phone: ${phone}</p>`
         }).catch(err => console.error('Admin notification email failed:', err.message));
 
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
+        const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
 
         res.status(201).json({
             message: 'Registration successful',
             token,
-            user: { id: user._id, name: user.name, email: user.email, phone: user.phone, role: user.role }
+            user: { ...user, _id: user.id }
         });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
@@ -77,21 +89,26 @@ router.post('/login', [
         if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
         const { email, password } = req.body;
-        const user = await User.findOne({ email });
-        if (!user) return res.status(400).json({ message: 'Invalid email or password' });
+        
+        const { data: user, error: findError } = await supabase
+            .from('users')
+            .select('*')
+            .eq('email', email)
+            .single();
+            
+        if (findError || !user) return res.status(400).json({ message: 'Invalid email or password' });
 
-        const isMatch = await user.comparePassword(password);
+        const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(400).json({ message: 'Invalid email or password' });
 
-        user.lastLogin = new Date();
-        await user.save();
+        await supabase.from('users').update({ last_login: new Date().toISOString() }).eq('id', user.id);
 
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
+        const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
 
         res.json({
             message: 'Login successful',
             token,
-            user: { id: user._id, name: user.name, email: user.email, phone: user.phone, role: user.role }
+            user: { id: user.id, _id: user.id, name: user.name, email: user.email, phone: user.phone, role: user.role }
         });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
@@ -102,13 +119,10 @@ router.post('/login', [
 router.post('/verify-email', async (req, res) => {
     try {
         const { token } = req.body;
-        const user = await User.findOne({ verificationToken: token });
+        const { data: user } = await supabase.from('users').select('id').eq('verification_token', token).single();
         if (!user) return res.status(400).json({ message: 'Invalid verification token' });
 
-        user.verified = true;
-        user.verificationToken = undefined;
-        await user.save();
-
+        await supabase.from('users').update({ verified: true, verification_token: null }).eq('id', user.id);
         res.json({ message: 'Email verified successfully' });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
@@ -121,13 +135,16 @@ router.post('/forgot-password', [
 ], async (req, res) => {
     try {
         const { email } = req.body;
-        const user = await User.findOne({ email });
+        const { data: user } = await supabase.from('users').select('id').eq('email', email).single();
         if (!user) return res.status(400).json({ message: 'No account found with this email' });
 
         const resetToken = crypto.randomBytes(32).toString('hex');
-        user.resetPasswordToken = resetToken;
-        user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
-        await user.save();
+        const resetPasswordExpires = new Date(Date.now() + 3600000).toISOString();
+        
+        await supabase.from('users').update({ 
+            reset_password_token: resetToken, 
+            reset_password_expires: resetPasswordExpires 
+        }).eq('id', user.id);
 
         await sendEmail({
             to: email,
@@ -148,16 +165,22 @@ router.post('/reset-password', [
 ], async (req, res) => {
     try {
         const { token, password } = req.body;
-        const user = await User.findOne({
-            resetPasswordToken: token,
-            resetPasswordExpires: { $gt: Date.now() }
-        });
+        const { data: user } = await supabase
+            .from('users')
+            .select('id')
+            .eq('reset_password_token', token)
+            .gte('reset_password_expires', new Date().toISOString())
+            .single();
+            
         if (!user) return res.status(400).json({ message: 'Invalid or expired reset token' });
 
-        user.password = password;
-        user.resetPasswordToken = undefined;
-        user.resetPasswordExpires = undefined;
-        await user.save();
+        const hashedPassword = await bcrypt.hash(password, 12);
+        
+        await supabase.from('users').update({ 
+            password: hashedPassword, 
+            reset_password_token: null, 
+            reset_password_expires: null 
+        }).eq('id', user.id);
 
         res.json({ message: 'Password reset successful' });
     } catch (error) {
@@ -174,11 +197,15 @@ router.get('/me', require('../middleware/auth'), async (req, res) => {
 router.put('/profile', require('../middleware/auth'), async (req, res) => {
     try {
         const { name, phone, language } = req.body;
-        const user = await require('../models/User').findByIdAndUpdate(
-            req.user._id,
-            { name, phone, language },
-            { new: true }
-        ).select('-password');
+        const { data: user, error } = await supabase
+            .from('users')
+            .update({ name, phone, language })
+            .eq('id', req.user.id)
+            .select('id, name, email, phone, role, verified, language, reward_points, notifications_enabled, favorites')
+            .single();
+            
+        if (error) throw error;
+        user._id = user.id; // Map id to _id
         res.json({ user, message: 'Profile updated' });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
