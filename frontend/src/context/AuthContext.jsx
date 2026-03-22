@@ -47,6 +47,18 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (email, password) => {
         const res = await api.post('/auth/login', { email, password });
+        if (res.data.requires2FA) {
+            return res.data;
+        }
+        const { token: newToken, user: userData } = res.data;
+        localStorage.setItem('pvr_token', newToken);
+        setToken(newToken);
+        setUser(userData);
+        return userData;
+    };
+
+    const loginVerify2FA = async (email, password, authCode) => {
+        const res = await api.post('/auth/login-verify', { email, password, token: authCode });
         const { token: newToken, user: userData } = res.data;
         localStorage.setItem('pvr_token', newToken);
         setToken(newToken);
@@ -70,7 +82,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, token, loading, login, register, logout, isAdmin: user?.role === 'admin' }}>
+        <AuthContext.Provider value={{ user, token, loading, login, loginVerify2FA, register, logout, isAdmin: user?.role === 'admin' }}>
             {children}
         </AuthContext.Provider>
     );

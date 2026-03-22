@@ -5,6 +5,7 @@ const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const supabase = require('../config/supabase');
 const sendEmail = require('../utils/email');
+const speakeasy = require('speakeasy');
 const router = express.Router();
 
 // Register
@@ -101,6 +102,10 @@ router.post('/login', [
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(400).json({ message: 'Invalid email or password' });
 
+        if (user.role === 'admin' && user.twofa_enabled) {
+            return res.json({ requires2FA: true, message: 'Authenticator code required' });
+        }
+
         await supabase.from('users').update({ last_login: new Date().toISOString() }).eq('id', user.id);
 
         const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
@@ -108,7 +113,58 @@ router.post('/login', [
         res.json({
             message: 'Login successful',
             token,
-            user: { id: user.id, _id: user.id, name: user.name, email: user.email, phone: user.phone, role: user.role }
+            user: { id: user.id, _id: user.id, name: user.name, email: user.email, phone: user.phone, role: user.role, twofa_enabled: user.twofa_enabled }
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
+
+// Admin 2FA Login Verify
+router.post('/login-verify', [
+    body('email').isEmail().withMessage('Valid email is required'),
+    body('password').notEmpty().withMessage('Password is required'),
+    body('token').notEmpty().withMessage('Authenticator code is required'),
+], async (req, res) => {
+    try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
+        const { email, password, token: totpToken } = req.body;
+
+        const { data: user, error: findError } = await supabase
+            .from('users')
+            .select('*')
+            .eq('email', email)
+            .single();
+
+        if (findError || !user) return res.status(404).json({ message: 'User not found' });
+
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) return res.status(401).json({ message: 'Invalid credentials' });
+
+        if (user.role === 'admin' && user.twofa_enabled) {
+            const verified = speakeasy.totp.verify({
+                secret: user.twofa_secret,
+                encoding: "base32",
+                token: totpToken,
+                window: 1 // allows 30 seconds leeway
+            });
+
+            if (!verified) {
+                return res.status(401).json({ message: 'Invalid authenticator code' });
+            }
+        }
+
+        await supabase.from('users').update({ last_login: new Date().toISOString() }).eq('id', user.id);
+
+        const jwtToken = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
+
+        res.json({
+            success: true,
+            message: 'Login successful',
+            token: jwtToken,
+            user: { id: user.id, _id: user.id, name: user.name, email: user.email, phone: user.phone, role: user.role, twofa_enabled: user.twofa_enabled }
         });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });

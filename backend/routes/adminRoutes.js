@@ -2,6 +2,8 @@ const express = require('express');
 const supabase = require('../config/supabase');
 const auth = require('../middleware/auth');
 const adminAuth = require('../middleware/adminAuth');
+const speakeasy = require('speakeasy');
+const QRCode = require('qrcode');
 const router = express.Router();
 
 // Dashboard stats
@@ -110,6 +112,86 @@ router.get('/site-visits', auth, adminAuth, async (req, res) => {
             createdAt: v.created_at
         }));
         res.json(formatted);
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
+
+// Setup 2FA
+router.post('/setup-2fa', auth, adminAuth, async (req, res) => {
+    try {
+        const secret = speakeasy.generateSecret({
+            name: "PVR Group Admin Login"
+        });
+
+        const { error } = await supabase
+            .from('users')
+            .update({ twofa_secret: secret.base32 })
+            .eq('id', req.user.id);
+            
+        if (error) throw error;
+
+        const qrCode = await QRCode.toDataURL(secret.otpauth_url);
+
+        res.json({
+            qrCode,
+            secret: secret.base32
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
+
+// Verify 2FA Setup
+router.post('/verify-2fa', auth, adminAuth, async (req, res) => {
+    try {
+        const { token } = req.body;
+
+        const { data: user, error: findError } = await supabase
+            .from('users')
+            .select('id, twofa_secret')
+            .eq('id', req.user.id)
+            .single();
+
+        if (findError || !user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const verified = speakeasy.totp.verify({
+            secret: user.twofa_secret,
+            encoding: 'base32',
+            token,
+            window: 1 // allows 30 seconds leeway
+        });
+
+        if (!verified) {
+            return res.status(400).json({ message: 'Invalid or expired 2FA code' });
+        }
+
+        const { error: updateError } = await supabase
+            .from('users')
+            .update({ twofa_enabled: true })
+            .eq('id', user.id);
+
+        if (updateError) throw updateError;
+
+        res.json({ success: true, message: '2FA enabled successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
+
+// Disable 2FA
+router.post('/disable-2fa', auth, adminAuth, async (req, res) => {
+    try {
+        const { error } = await supabase
+            .from('users')
+            .update({ twofa_enabled: false, twofa_secret: null })
+            .eq('id', req.user.id);
+            
+        if (error) throw error;
+        
+        res.json({ success: true, message: '2FA disabled successfully' });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
     }

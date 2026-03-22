@@ -30,6 +30,7 @@ import AdminPayments from './pages/admin/AdminPayments';
 import AdminEmailCampaign from './pages/admin/AdminEmailCampaign';
 import AdminBookings from './pages/admin/AdminBookings';
 import AdminContacts from './pages/admin/AdminContacts';
+import AdminSettings from './pages/admin/AdminSettings';
 
 // Components
 import ProtectedRoute from './components/ProtectedRoute';
@@ -85,6 +86,7 @@ function App() {
                     <Route path="contacts" element={<AdminContacts />} />
                     <Route path="email-campaign" element={<AdminEmailCampaign />} />
                     <Route path="bookings" element={<AdminBookings />} />
+                    <Route path="settings" element={<AdminSettings />} />
                 </Route>
 
                 <Route path="*" element={<Navigate to="/" />} />
