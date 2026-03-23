@@ -23,10 +23,10 @@ const LandingPage = () => {
     };
 
     const fadeInUp = {
-        initial: { opacity: 0, y: 50 },
+        initial: { opacity: 0, y: 40 },
         whileInView: { opacity: 1, y: 0 },
         viewport: { once: true, margin: "-50px" },
-        transition: { duration: 0.8, ease: "easeOut" }
+        transition: { duration: 1, ease: [0.16, 1, 0.3, 1] }
     };
 
     const staggerContainer = {
@@ -54,9 +54,9 @@ const LandingPage = () => {
 
                 <div className="relative z-10 flex flex-col items-center text-center px-6 mt-16 sm:mt-20 max-w-5xl mx-auto">
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
+                        initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 1.2, ease: "easeOut" }}
+                        transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1] }}
                     >
                         <h1 className="text-4xl sm:text-6xl md:text-8xl font-black mb-4 sm:mb-6 tracking-tighter leading-tight drop-shadow-2xl">
                             <span className="text-white">PVR</span> <br className="md:hidden" />
@@ -67,7 +67,7 @@ const LandingPage = () => {
                     <motion.p
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 1, delay: 0.3 }}
+                        transition={{ duration: 1.2, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
                         className="text-base sm:text-xl md:text-3xl text-gray-300 font-light tracking-wide mb-6 sm:mb-10 max-w-3xl drop-shadow-lg px-2"
                     >
                         Building Andhra Pradesh's Future with Trust and Innovation.
@@ -76,7 +76,7 @@ const LandingPage = () => {
                     <motion.div
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 1, delay: 0.6 }}
+                        transition={{ duration: 1.2, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
                         className="flex flex-col sm:flex-row gap-4 sm:gap-6 mt-4 sm:mt-8 mb-16 sm:mb-20 w-full sm:w-auto px-2 sm:px-0"
                     >
                         <button

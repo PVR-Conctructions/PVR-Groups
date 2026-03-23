@@ -37,6 +37,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import AdminLayout from './components/AdminLayout';
 import WhatsAppButton from './components/WhatsAppButton';
 import ChatWidget from './components/ChatWidget';
+import ScrollToTop from './components/ScrollToTop';
 
 function App() {
     const { user, loading } = useAuth();
@@ -54,6 +55,7 @@ function App() {
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-dark-bg transition-colors duration-300 w-full max-w-[100vw] overflow-x-hidden relative">
+            <ScrollToTop />
             <Routes>
                 {/* Public routes */}
                 <Route path="/" element={<LandingPage />} />

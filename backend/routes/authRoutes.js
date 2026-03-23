@@ -102,7 +102,7 @@ router.post('/login', [
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(400).json({ message: 'Invalid email or password' });
 
-        if (user.role === 'admin' && user.twofa_enabled) {
+        if ((user.role === 'admin' || user.role === 'employee') && user.twofa_enabled) {
             return res.json({ requires2FA: true, message: 'Authenticator code required' });
         }
 
@@ -143,7 +143,7 @@ router.post('/login-verify', [
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(401).json({ message: 'Invalid credentials' });
 
-        if (user.role === 'admin' && user.twofa_enabled) {
+        if ((user.role === 'admin' || user.role === 'employee') && user.twofa_enabled) {
             const verified = speakeasy.totp.verify({
                 secret: user.twofa_secret,
                 encoding: "base32",

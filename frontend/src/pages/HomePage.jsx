@@ -29,10 +29,10 @@ const HomePage = () => {
     }, []);
 
     const fadeUp = {
-        initial: { opacity: 0, y: 30 },
+        initial: { opacity: 0, y: 40 },
         whileInView: { opacity: 1, y: 0 },
-        transition: { duration: 0.6 },
-        viewport: { once: true },
+        transition: { duration: 1, ease: [0.16, 1, 0.3, 1] },
+        viewport: { once: true, margin: "-50px" },
     };
 
     return (
@@ -49,9 +49,9 @@ const HomePage = () => {
                 </div>
                 <div className="relative z-10 text-center px-4 max-w-5xl mx-auto">
                     <motion.h1
-                        initial={{ opacity: 0, y: 30 }}
+                        initial={{ opacity: 0, y: 40 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8 }}
+                        transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
                         className="text-4xl md:text-6xl lg:text-7xl font-heading font-bold text-white mb-6 leading-tight"
                     >
                         {language === 'te'
@@ -60,9 +60,9 @@ const HomePage = () => {
                         }
                     </motion.h1>
                     <motion.p
-                        initial={{ opacity: 0, y: 20 }}
+                        initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8, delay: 0.2 }}
+                        transition={{ duration: 1.2, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
                         className="text-lg md:text-xl text-gray-300 mb-8 max-w-2xl mx-auto"
                     >
                         {language === 'te'
@@ -71,9 +71,9 @@ const HomePage = () => {
                         }
                     </motion.p>
                     <motion.div
-                        initial={{ opacity: 0, y: 20 }}
+                        initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8, delay: 0.4 }}
+                        transition={{ duration: 1.2, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
                         className="flex flex-col sm:flex-row gap-4 justify-center"
                     >
                         <Link to="/projects" className="px-8 py-3.5 rounded-xl btn-shimmer text-white font-semibold">

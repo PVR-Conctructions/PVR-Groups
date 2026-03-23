@@ -25,11 +25,11 @@ const LoginPage = () => {
                 if (res?.requires2FA) {
                     setStep(2);
                 } else {
-                    navigate(res.role === 'admin' ? '/admin' : '/home');
+                    navigate(res.role === 'admin' || res.role === 'employee' ? '/admin' : '/home');
                 }
             } else if (step === 2) {
                 const user = await loginVerify2FA(email, password, authCode);
-                navigate(user.role === 'admin' ? '/admin' : '/home');
+                navigate(user.role === 'admin' || user.role === 'employee' ? '/admin' : '/home');
             }
         } catch (err) {
             setError(err.response?.data?.message || 'Login failed');

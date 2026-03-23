@@ -20,6 +20,7 @@ const ProjectDetailPage = () => {
     const [loading, setLoading] = useState(true);
     const [review, setReview] = useState({ rating: 5, comment: '' });
     const [reviewMsg, setReviewMsg] = useState('');
+    const [reviewSuccess, setReviewSuccess] = useState(false);
     const [bookingForm, setBookingForm] = useState({ name: user?.name || '', email: user?.email || '', phone: user?.phone || '', preferredDate: '', message: 'I am interested in this project and would like to learn more.' });
     const [bookingMsg, setBookingMsg] = useState('');
     const [bookingSuccess, setBookingSuccess] = useState(false);
@@ -57,9 +58,8 @@ const ProjectDetailPage = () => {
         e.preventDefault();
         try {
             await api.post('/feedback', { projectId: id, ...review });
-            setReviewMsg('Review submitted for approval!');
+            setReviewSuccess(true);
             setReview({ rating: 5, comment: '' });
-            setTimeout(() => setReviewMsg(''), 3000);
         } catch (err) {
             setReviewMsg(err.response?.data?.message || 'Failed to submit review');
         }
@@ -206,7 +206,7 @@ const ProjectDetailPage = () => {
                                 </div>
                             )}
 
-                            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+                            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}>
                                 <div className="flex items-center justify-between mb-4">
                                     <div className="flex items-center gap-3">
                                         <span className={`px-3 py-1 rounded-full text-xs font-semibold ${project.status === 'ongoing' ? 'bg-green-500/20 text-green-400' : 'bg-gold-400/20 text-gold-400'}`}>
@@ -318,7 +318,7 @@ const ProjectDetailPage = () => {
 
                             {/* Project Details Card */}
                             {(project.projectType || project.totalFloors || project.totalLandArea || project.constructionType || project.reraNumber || (project.configurations && project.configurations.length > 0)) && (
-                                <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+                                <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-50px" }} transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
                                     className="bg-white dark:bg-dark-card rounded-2xl p-4 sm:p-6 border border-gray-100 dark:border-dark-border">
                                     <h2 className="text-lg sm:text-xl font-heading font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">📋 Project Details</h2>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 overflow-hidden">
@@ -439,7 +439,7 @@ const ProjectDetailPage = () => {
 
                             {/* Best Features */}
                             {project.bestFeatures && project.bestFeatures.length > 0 && (
-                                <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+                                <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-50px" }} transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
                                     className="bg-white dark:bg-dark-card rounded-2xl p-4 sm:p-6 border border-gray-100 dark:border-dark-border">
                                     <h2 className="text-lg sm:text-xl font-heading font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">⭐ Best Features</h2>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -471,7 +471,7 @@ const ProjectDetailPage = () => {
 
                             {/* Specifications */}
                             {hasSpecs && (
-                                <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+                                <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-50px" }} transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
                                     className="bg-white dark:bg-dark-card rounded-2xl p-4 sm:p-6 border border-gray-100 dark:border-dark-border">
                                     <h2 className="text-lg sm:text-xl font-heading font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">🔧 Specifications</h2>
                                     <div className="space-y-3">
@@ -651,6 +651,38 @@ const ProjectDetailPage = () => {
                             className="w-full py-2.5 rounded-xl bg-gradient-to-r from-green-500 to-green-600 text-white font-medium hover:from-green-600 hover:to-green-700 transition-colors"
                         >
                             Done
+                        </button>
+                    </motion.div>
+                </div>
+            )}
+
+            {/* Feedback Success Modal */}
+            {reviewSuccess && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        transition={{ duration: 0.4, ease: "easeOut" }}
+                        className="bg-white dark:bg-dark-card rounded-2xl max-w-md w-full p-8 shadow-2xl relative text-center border border-gray-100 dark:border-dark-border"
+                    >
+                        <button
+                            onClick={() => setReviewSuccess(false)}
+                            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors"
+                        >
+                            <FiX size={20} />
+                        </button>
+                        <div className="w-20 h-20 bg-gold-400/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <FiCheckCircle className="text-gold-500" size={40} />
+                        </div>
+                        <h3 className="text-2xl font-heading font-bold text-gray-900 dark:text-white mb-3">Feedback Submitted!</h3>
+                        <p className="text-gray-500 dark:text-gray-400 text-sm mb-8 leading-relaxed">
+                            Thank you for your valuable feedback. It has been securely sent and will be displayed on this page once approved by our administrative team.
+                        </p>
+                        <button
+                            onClick={() => setReviewSuccess(false)}
+                            className="w-full py-3.5 rounded-xl bg-gold-400 text-white font-bold tracking-wide hover:bg-gold-500 transition-colors shadow-lg shadow-gold-400/20"
+                        >
+                            Continue Browsing
                         </button>
                     </motion.div>
                 </div>
