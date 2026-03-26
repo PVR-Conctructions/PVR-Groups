@@ -1,7 +1,13 @@
 const supabase = require('../config/supabase');
-const cloudinary = require('../config/cloudinary');
 const fs = require('fs');
-
+const path = require('path');
+const { 
+    generateOptimizedUrl, 
+    downloadOptimizedImage, 
+    uploadToBunnyStorage, 
+    deleteFromBunnyStorage, 
+    generateBunnyCdnUrl 
+} = require('../utils/imageWorkers');
 // Helper to map DB to what frontend expects 
 const mapProject = (p) => {
     if (!p) return null;
@@ -46,13 +52,34 @@ exports.uploadProject = async (req, res) => {
             return res.status(400).json({ message: 'No images uploaded' });
         }
 
+        const folderName = (name || title || 'unnamed-project').toLowerCase().replace(/[^a-z0-9]/g, '-');
         const uploadedImages = [];
         for (const file of req.files) {
-            const result = await cloudinary.uploader.upload(file.path, {
-                folder: 'construction_projects'
-            });
-            uploadedImages.push(result.secure_url);
-            try { if (fs.existsSync(file.path)) fs.unlinkSync(file.path); } catch (e) {}
+            const filename = path.parse(file.originalname).name.replace(/[^a-zA-Z0-9]/g, '') + '_' + Date.now();
+            const tempBunnyPath = `temp/${folderName}/${filename}${path.extname(file.originalname)}`;
+            const finalBunnyPath = `projects/${folderName}/${filename}.webp`;
+            const optimizedLocalPath = path.join(__dirname, '../optimized', `${filename}.webp`);
+
+            try {
+                // 1. Upload original to Bunny Temp
+                await uploadToBunnyStorage(file.path, tempBunnyPath);
+                
+                // 2. Generate ImageKit URL and Download
+                const ikUrl = generateOptimizedUrl(`${process.env.IMAGEKIT_URL_ENDPOINT}/${tempBunnyPath}`);
+                await downloadOptimizedImage(ikUrl, optimizedLocalPath);
+                
+                // 3. Upload optimized to Bunny
+                await uploadToBunnyStorage(optimizedLocalPath, finalBunnyPath);
+                
+                // 4. Save and Cleanup
+                uploadedImages.push(generateBunnyCdnUrl(finalBunnyPath));
+                await deleteFromBunnyStorage(tempBunnyPath);
+            } catch (err) {
+                console.error("Image Processing Error:", err);
+            } finally {
+                try { if (fs.existsSync(file.path)) fs.unlinkSync(file.path); } catch (e) {}
+                try { if (fs.existsSync(optimizedLocalPath)) fs.unlinkSync(optimizedLocalPath); } catch (e) {}
+            }
         }
 
         let parsedConfigs = [];
@@ -158,10 +185,17 @@ exports.deleteProject = async (req, res) => {
         if (project.image_urls && project.image_urls.length > 0) {
              project.image_urls.forEach(url => {
                 const urlParts = url.split('/');
-                const filenameAndExt = urlParts[urlParts.length - 1];
-                const filename = filenameAndExt.split('.')[0];
-                const publicId = `construction_projects/${filename}`;
-                deletePromises.push(cloudinary.uploader.destroy(publicId));
+                const filenameAndExt = urlParts.pop(); // e.g. livingroom.webp
+                
+                // If the URL contains 'projects', extract the folder path as well
+                let bunnyPath = filenameAndExt;
+                if (url.includes('/projects/')) {
+                    // Extract the path after 'projects/'
+                    const projectsIndex = url.indexOf('/projects/');
+                    bunnyPath = url.substring(projectsIndex + 1); // e.g. "projects/project-1/livingroom.webp"
+                }
+                
+                deletePromises.push(deleteFromBunnyStorage(bunnyPath));
             });
             await Promise.all(deletePromises);
         }

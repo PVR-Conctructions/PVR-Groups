@@ -6,7 +6,6 @@ import Footer from '../components/Footer';
 import { useAuth } from '../context/AuthContext';
 import api from '../hooks/useApi';
 import { FiHeart, FiCalendar, FiBell, FiUser, FiTrash2, FiMapPin, FiArrowRight, FiSave, FiMail, FiPhone } from 'react-icons/fi';
-import { optimizeCloudinaryUrl, cloudinarySrcSet } from '../utils/cloudinary';
 
 const UserDashboard = () => {
     const { user } = useAuth();
@@ -149,9 +148,7 @@ const UserDashboard = () => {
                                         >
                                             <div className="relative h-40">
                                                 <img
-                                                    src={optimizeCloudinaryUrl(project.images?.[0], 3840) || 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=3840'}
-                                                    srcSet={cloudinarySrcSet(project.images?.[0], [1920, 2560, 3840])}
-                                                    sizes="100vw"
+                                                    src={project.images?.[0] || 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=3840'}
                                                     alt={project.name}
                                                     className="w-full h-full object-cover"
                                                     loading="lazy"

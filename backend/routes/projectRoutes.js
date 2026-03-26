@@ -19,8 +19,12 @@ router.post('/upload', upload.array('images', 10), projectController.uploadProje
 // Create project (admin only)
 router.post('/', auth, adminAuth, upload.array('images', 50), async (req, res) => {
     try {
-        const cloudinary = require('../config/cloudinary');
+        const { 
+            generateOptimizedUrl, downloadOptimizedImage, 
+            uploadToBunnyStorage, deleteFromBunnyStorage, generateBunnyCdnUrl 
+        } = require('../utils/imageWorkers');
         const fs = require('fs');
+        const path = require('path');
         const {
             name, description, status, location, price, area, units, highlights, mapEmbed,
             amenities, bestFeatures, completionPercentage, imageGroupsData,
@@ -33,18 +37,29 @@ router.post('/', auth, adminAuth, upload.array('images', 50), async (req, res) =
             return res.status(400).json({ message: 'Name, description and status are required' });
         }
 
+        const folderName = name.toLowerCase().replace(/[^a-z0-9]/g, '-');
         let uploadedUrls = [];
         if (req.files && req.files.length > 0) {
-            const uploadPromises = req.files.map(file => {
-                return cloudinary.uploader.upload(file.path, {
-                    folder: 'construction_projects'
-                }).then(result => {
-                    try { if (fs.existsSync(file.path)) fs.unlinkSync(file.path); } catch (e) { }
-                    return result.secure_url;
-                }).catch(err => {
-                    try { if (fs.existsSync(file.path)) fs.unlinkSync(file.path); } catch (e) {}
+            const uploadPromises = req.files.map(async (file) => {
+                const filename = path.parse(file.originalname).name.replace(/[^a-zA-Z0-9]/g, '') + '_' + Date.now();
+                const tempBunnyPath = `temp/${folderName}/${filename}${path.extname(file.originalname)}`;
+                const finalBunnyPath = `projects/${folderName}/${filename}.webp`;
+                const optimizedLocalPath = path.join(__dirname, '../optimized', `${filename}.webp`);
+
+                try {
+                    await uploadToBunnyStorage(file.path, tempBunnyPath);
+                    const ikUrl = generateOptimizedUrl(`${process.env.IMAGEKIT_URL_ENDPOINT}/${tempBunnyPath}`);
+                    await downloadOptimizedImage(ikUrl, optimizedLocalPath);
+                    await uploadToBunnyStorage(optimizedLocalPath, finalBunnyPath);
+                    await deleteFromBunnyStorage(tempBunnyPath);
+                    return generateBunnyCdnUrl(finalBunnyPath);
+                } catch (err) {
+                    console.error("Image Processing Error:", err);
                     throw err;
-                });
+                } finally {
+                    try { if (fs.existsSync(file.path)) fs.unlinkSync(file.path); } catch (e) {}
+                    try { if (fs.existsSync(optimizedLocalPath)) fs.unlinkSync(optimizedLocalPath); } catch (e) {}
+                }
             });
             uploadedUrls = await Promise.all(uploadPromises);
         }
@@ -193,20 +208,35 @@ router.put('/:id', auth, adminAuth, upload.array('images', 50), async (req, res)
             };
         }
 
-        const cloudinary = require('../config/cloudinary');
+        const { 
+            generateOptimizedUrl, downloadOptimizedImage, 
+            uploadToBunnyStorage, deleteFromBunnyStorage, generateBunnyCdnUrl 
+        } = require('../utils/imageWorkers');
         const fs = require('fs');
+        const path = require('path');
         let uploadedUrls = [];
         if (req.files && req.files.length > 0) {
-            const uploadPromises = req.files.map(file => {
-                return cloudinary.uploader.upload(file.path, {
-                    folder: 'construction_projects'
-                }).then(result => {
-                    try { if (fs.existsSync(file.path)) fs.unlinkSync(file.path); } catch (e) {}
-                    return result.secure_url;
-                }).catch(err => {
-                    try { if (fs.existsSync(file.path)) fs.unlinkSync(file.path); } catch (e) {}
+            const folderName = (name || existingProject?.name || 'unnamed-project').toLowerCase().replace(/[^a-z0-9]/g, '-');
+            const uploadPromises = req.files.map(async (file) => {
+                const filename = path.parse(file.originalname).name.replace(/[^a-zA-Z0-9]/g, '') + '_' + Date.now();
+                const tempBunnyPath = `temp/${folderName}/${filename}${path.extname(file.originalname)}`;
+                const finalBunnyPath = `projects/${folderName}/${filename}.webp`;
+                const optimizedLocalPath = path.join(__dirname, '../optimized', `${filename}.webp`);
+
+                try {
+                    await uploadToBunnyStorage(file.path, tempBunnyPath);
+                    const ikUrl = generateOptimizedUrl(`${process.env.IMAGEKIT_URL_ENDPOINT}/${tempBunnyPath}`);
+                    await downloadOptimizedImage(ikUrl, optimizedLocalPath);
+                    await uploadToBunnyStorage(optimizedLocalPath, finalBunnyPath);
+                    await deleteFromBunnyStorage(tempBunnyPath);
+                    return generateBunnyCdnUrl(finalBunnyPath);
+                } catch (err) {
+                    console.error("Image Processing Error:", err);
                     throw err;
-                });
+                } finally {
+                    try { if (fs.existsSync(file.path)) fs.unlinkSync(file.path); } catch (e) {}
+                    try { if (fs.existsSync(optimizedLocalPath)) fs.unlinkSync(optimizedLocalPath); } catch (e) {}
+                }
             });
             uploadedUrls = await Promise.all(uploadPromises);
         }

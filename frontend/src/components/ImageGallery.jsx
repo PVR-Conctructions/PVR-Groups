@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiChevronLeft, FiChevronRight, FiX, FiZoomIn, FiZoomOut, FiMaximize } from 'react-icons/fi';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
-import { cloudinaryGallery, cloudinaryThumb, cloudinaryLightbox, cloudinarySrcSet } from '../utils/cloudinary';
 
 const placeholderImages = [
     'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800',
@@ -38,6 +37,7 @@ const ImageGallery = ({ images, categorizedImages }) => {
     const [current, setCurrent] = useState(0);
     const [lightbox, setLightbox] = useState(false);
     const [zoomScale, setZoomScale] = useState(1);
+    const [visibleCount, setVisibleCount] = useState(10); // Progressive loading
 
     // Touch/swipe state for main gallery
     const touchStartX = useRef(null);
@@ -56,14 +56,22 @@ const ImageGallery = ({ images, categorizedImages }) => {
     // Reset current image index when changing tabs
     useEffect(() => {
         setCurrent(0);
+        setVisibleCount(10);
     }, [activeTab]);
+
+    // Ensure visibleCount expands if current image is beyond it
+    useEffect(() => {
+        if (current >= visibleCount - 2) {
+            setVisibleCount(prev => Math.min(filteredImages.length, prev + 10));
+        }
+    }, [current, visibleCount, filteredImages.length]);
 
     // Preload next image (smooth swipe)
     useEffect(() => {
         if (!filteredImages || filteredImages.length === 0) return;
         const nextIndex = (current + 1) % filteredImages.length;
         const img = new Image();
-        img.src = cloudinaryGallery(filteredImages[nextIndex].url);
+        img.src = filteredImages[nextIndex].url;
     }, [current, filteredImages]);
 
     const next = useCallback(() => {
@@ -183,9 +191,7 @@ const ImageGallery = ({ images, categorizedImages }) => {
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: -30 }}
                             transition={{ type: "spring", stiffness: 260, damping: 25 }}
-                            src={cloudinaryGallery(currentImg.url)}
-                            srcSet={cloudinarySrcSet(currentImg.url, [1920, 2560, 3840])}
-                            sizes="100vw"
+                            src={currentImg.url}
                             alt={`${currentImg.category} - ${currentImg.label}`}
                             className="w-full h-full object-cover cursor-pointer"
                             onClick={() => setLightbox(true)}
@@ -260,7 +266,7 @@ const ImageGallery = ({ images, categorizedImages }) => {
                     className="flex gap-2 overflow-x-auto pb-1 custom-scrollbar w-full max-w-full mt-3"
                     style={{ WebkitOverflowScrolling: 'touch' }}
                 >
-                    {filteredImages.map((img, i) => (
+                    {filteredImages.slice(0, visibleCount).map((img, i) => (
                         <button
                             key={i}
                             onClick={() => setCurrent(i)}
@@ -269,7 +275,7 @@ const ImageGallery = ({ images, categorizedImages }) => {
                             }`}
                         >
                             <img
-                                src={cloudinaryThumb(img.url)}
+                                src={img.url}
                                 alt={`Thumb ${i + 1}`}
                                 className="w-full h-full object-cover"
                                 loading="lazy"
@@ -278,6 +284,14 @@ const ImageGallery = ({ images, categorizedImages }) => {
                             />
                         </button>
                     ))}
+                    {visibleCount < filteredImages.length && (
+                        <button
+                            onClick={() => setVisibleCount(v => v + 10)}
+                            className="flex-shrink-0 min-w-[64px] w-[64px] h-[42px] sm:min-w-[90px] sm:w-[90px] sm:h-[58px] rounded-xl overflow-hidden border-2 border-dashed border-gray-300 dark:border-gray-600 flex flex-col items-center justify-center bg-gray-50 dark:bg-dark-card hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                        >
+                            <span className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">+ {filteredImages.length - visibleCount}</span>
+                        </button>
+                    )}
                 </div>
             )}
 
@@ -340,9 +354,7 @@ const ImageGallery = ({ images, categorizedImages }) => {
                                                 initial={{ opacity: 0, scale: 0.96 }}
                                                 animate={{ opacity: 1, scale: 1 }}
                                                 transition={{ type: "spring", stiffness: 280, damping: 30 }}
-                                                src={cloudinaryLightbox(currentImg.url)}
-                                                srcSet={cloudinarySrcSet(currentImg.url, [1920, 2560, 3840])}
-                                                sizes="100vw"
+                                                src={currentImg.url}
                                                 alt=""
                                                 className="max-w-full max-h-[80vh] object-contain rounded-lg shadow-2xl mx-auto"
                                                 loading="lazy"
