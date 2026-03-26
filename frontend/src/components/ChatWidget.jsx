@@ -106,8 +106,8 @@ const ChatWidget = () => {
                         }, 1000);
                     }
                 } else {
-                    // Guest — use client-side auto-replies only
-                    const reply = getGuestReply(userMsg);
+                    // Guest — use AI (no DB save)
+                    const reply = await getGuestReply(userMsg);
                     setTyping(false);
                     setMessages(prev => [...prev, { from: 'bot', text: reply, time: new Date() }]);
                 }
@@ -122,13 +122,13 @@ const ChatWidget = () => {
         }, 900);
     };
 
-    const getGuestReply = (msg) => {
-        const m = msg.toLowerCase();
-        if (m.match(/project|property|flat|apartment/)) return 'We have premium projects in Vijayawada! Sign in to explore and get personalized recommendations.';
-        if (m.match(/price|cost|how much|budget/)) return 'Pricing starts from affordable to luxury. Sign in for detailed pricing on specific projects!';
-        if (m.match(/visit|tour|site|book/)) return 'Book a site visit from any project page after signing in. Call us at +91 98765 43210 to schedule immediately!';
-        if (m.match(/hi|hello|hey|good/)) return 'Hello! 👋 I can help you find your dream property. Sign in for personalized assistance or ask me anything!';
-        return 'For detailed information, please sign in or contact us at +91 98765 43210. We\'d love to help you find the perfect property!';
+    const getGuestReply = async (msg) => {
+        try {
+            const res = await api.post('/chat/guest', { content: msg });
+            return res.data?.reply || 'For assistance, please contact us at +91 98765 43210.';
+        } catch {
+            return 'Hello! For immediate help, call us at +91 98765 43210 or visit any project page to book a site visit!';
+        }
     };
 
     const formatTime = (t) => {

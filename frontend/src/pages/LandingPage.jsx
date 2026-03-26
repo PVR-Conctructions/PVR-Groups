@@ -52,7 +52,7 @@ const LandingPage = () => {
                     <div className="absolute inset-0 bg-black/40 mix-blend-multiply" />
                 </div>
 
-                <div className="relative z-10 flex flex-col items-center text-center px-6 mt-16 sm:mt-20 max-w-5xl mx-auto">
+                <div className="relative z-10 flex flex-col items-center text-center px-6 mt-24 sm:mt-20 max-w-5xl mx-auto">
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
