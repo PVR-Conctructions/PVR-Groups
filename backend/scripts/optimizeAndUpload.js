@@ -1,5 +1,5 @@
-require('dotenv').config({ path: '../.env' }); // Load env vars if running from scripts folder
-const path = require("path");
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') }); // Load env vars
 const {
   generateOptimizedUrl,
   downloadOptimizedImage,

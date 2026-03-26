@@ -3,6 +3,7 @@ const fs = require("fs");
 const path = require("path");
 
 const IMAGEKIT_ENDPOINT = process.env.IMAGEKIT_URL_ENDPOINT;
+const STORAGE_HOSTNAME = process.env.BUNNY_STORAGE_HOSTNAME || 'storage.bunnycdn.com';
 const STORAGE_ZONE = process.env.BUNNY_STORAGE_ZONE;
 const ACCESS_KEY = process.env.BUNNY_ACCESS_KEY;
 const CDN_DOMAIN = process.env.BUNNY_CDN_DOMAIN;
@@ -35,7 +36,7 @@ async function uploadToBunnyStorage(filePath, destinationPath) {
   const fileSize = fs.statSync(filePath).size;
 
   await axios.put(
-    `https://storage.bunnycdn.com/${STORAGE_ZONE}/${destinationPath}`,
+    `https://${STORAGE_HOSTNAME}/${STORAGE_ZONE}/${destinationPath}`,
     fileStream,
     {
       headers: {
@@ -52,7 +53,7 @@ async function uploadToBunnyStorage(filePath, destinationPath) {
 async function deleteFromBunnyStorage(destinationPath) {
   try {
     await axios.delete(
-      `https://storage.bunnycdn.com/${STORAGE_ZONE}/${destinationPath}`,
+      `https://${STORAGE_HOSTNAME}/${STORAGE_ZONE}/${destinationPath}`,
       {
         headers: { AccessKey: ACCESS_KEY }
       }
