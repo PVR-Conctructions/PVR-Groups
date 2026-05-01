@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -7,7 +7,7 @@ import ImageGallery from '../components/ImageGallery';
 import AmenitiesGrid from '../components/AmenitiesGrid';
 import api from '../hooks/useApi';
 import { useAuth } from '../context/AuthContext';
-import { FiMapPin, FiStar, FiCalendar as FiCalendarIcon, FiPhone, FiDownload, FiHeart, FiShare2, FiCheckCircle, FiX, FiAward, FiHome, FiLayers, FiGrid, FiClock, FiShield, FiMapPin as FiMap } from 'react-icons/fi';
+import { FiMapPin, FiStar, FiCalendar as FiCalendarIcon, FiPhone, FiDownload, FiHeart, FiShare2, FiCheckCircle, FiX, FiAward, FiHome, FiLayers, FiGrid, FiClock, FiShield, FiMapPin as FiMap, FiArrowLeft } from 'react-icons/fi';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import { generateProjectPDF } from '../utils/generateProjectPDF';
@@ -29,6 +29,7 @@ const ProjectDetailPage = () => {
     const [isFav, setIsFav] = useState(false);
     const [mediaTab, setMediaTab] = useState('images'); // 'images' | 'video'
     const [selectedConfigIdx, setSelectedConfigIdx] = useState(0);
+    const navigate = useNavigate();
 
     useEffect(() => {
         api.get('/favorites').then(res => {
@@ -173,6 +174,12 @@ const ProjectDetailPage = () => {
             <Navbar />
             <div className="pt-16 sm:pt-24 pb-20 px-3 sm:px-4">
                 <div className="max-w-7xl mx-auto">
+                    <button 
+                        onClick={() => navigate(-1)} 
+                        className="flex items-center gap-2 text-gray-500 hover:text-gold-400 mb-6 transition-colors font-medium text-sm w-fit"
+                    >
+                        <FiArrowLeft size={16} /> Back
+                    </button>
                     <div className="grid lg:grid-cols-3 gap-6 lg:gap-8">
                         {/* Main Content */}
                         <div className="lg:col-span-2 space-y-6 sm:space-y-8 order-1 lg:order-1 min-w-0">

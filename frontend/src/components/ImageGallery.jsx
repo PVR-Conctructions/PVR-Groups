@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiChevronLeft, FiChevronRight, FiX, FiZoomIn, FiZoomOut, FiMaximize } from 'react-icons/fi';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
+import CdnImage from './CdnImage';
 
 const placeholderImages = [
     'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800',
@@ -184,23 +185,26 @@ const ImageGallery = ({ images, categorizedImages }) => {
             >
 
                 <div className="absolute inset-0 w-full h-full">
-                    <AnimatePresence mode="wait" initial={false}>
-                        <motion.img
-                            key={currentImg.url}
-                            initial={{ opacity: 0, x: 30 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -30 }}
-                            transition={{ type: "spring", stiffness: 260, damping: 25 }}
-                            src={currentImg.url}
-                            alt={`${currentImg.category} - ${currentImg.label}`}
-                            className="w-full h-full object-cover cursor-pointer"
-                            onClick={() => setLightbox(true)}
-                            loading="eager"
-                            fetchPriority="high"
-                            decoding="async"
-                            draggable={false}
-                        />
-                    </AnimatePresence>
+                        <AnimatePresence mode="wait" initial={false}>
+                            <motion.div
+                                key={currentImg.url}
+                                initial={{ opacity: 0, x: 30 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -30 }}
+                                transition={{ type: "spring", stiffness: 260, damping: 25 }}
+                                className="w-full h-full"
+                            >
+                                <CdnImage
+                                    src={currentImg.url}
+                                    alt={`${currentImg.category} - ${currentImg.label}`}
+                                    className="w-full h-full object-cover cursor-pointer"
+                                    priority={current === 0}
+                                    loading={current === 0 ? 'eager' : 'lazy'}
+                                    onClick={() => setLightbox(true)}
+                                    style={{ opacity: 1 }}
+                                />
+                            </motion.div>
+                        </AnimatePresence>
 
                     {/* Image Label Overlay */}
                     {currentImg.label && (
@@ -274,13 +278,12 @@ const ImageGallery = ({ images, categorizedImages }) => {
                                 i === current ? 'border-gold-400 shadow-md opacity-100' : 'border-transparent opacity-55 hover:opacity-90'
                             }`}
                         >
-                            <img
+                            <CdnImage
                                 src={img.url}
                                 alt={`Thumb ${i + 1}`}
                                 className="w-full h-full object-cover"
                                 loading="lazy"
-                                decoding="async"
-                                draggable={false}
+                                style={{ opacity: 1 }}
                             />
                         </button>
                     ))}

@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
-import { FiSun, FiMoon, FiMenu, FiX, FiUser, FiLogOut, FiSettings, FiHeart, FiGlobe } from 'react-icons/fi';
+import { FiSun, FiMoon, FiMenu, FiX, FiUser, FiLogOut, FiSettings, FiHeart, FiGlobe, FiCalendar, FiHome, FiLayers, FiGrid, FiPieChart, FiBox, FiPhone, FiBell, FiMessageSquare } from 'react-icons/fi';
 
 const Navbar = () => {
     const { user, logout, isAdmin } = useAuth();
@@ -23,14 +23,14 @@ const Navbar = () => {
     }, []);
 
     const navLinks = [
-        { to: '/home', label: t('home') },
-        { to: '/projects', label: t('projects') },
-        { to: '/dashboard', label: t('dashboard') },
-        { to: '/emi-calculator', label: t('emiCalculator') },
-        { to: '/virtual-tour', label: t('virtualTour') },
-        { to: '/contact', label: t('contact') },
-        { to: '/announcements', label: t('announcements') },
-        { to: '/messages', label: t('messages') },
+        { to: '/home', label: t('home'), icon: <FiHome className="w-5 h-5" /> },
+        { to: '/projects', label: t('projects'), icon: <FiLayers className="w-5 h-5" /> },
+        { to: '/dashboard', label: t('dashboard'), icon: <FiGrid className="w-5 h-5" /> },
+        { to: '/emi-calculator', label: t('emiCalculator'), icon: <FiPieChart className="w-5 h-5" /> },
+        { to: '/virtual-tour', label: t('virtualTour'), icon: <FiBox className="w-5 h-5" /> },
+        { to: '/contact', label: t('contact'), icon: <FiPhone className="w-5 h-5" /> },
+        { to: '/announcements', label: t('announcements'), icon: <FiBell className="w-5 h-5" /> },
+        { to: '/messages', label: t('messages'), icon: <FiMessageSquare className="w-5 h-5" /> },
     ];
 
     const handleLogout = () => {
@@ -45,7 +45,7 @@ const Navbar = () => {
             ? 'bg-white/95 dark:bg-dark-bg/95 backdrop-blur-xl shadow-lg shadow-black/5 dark:shadow-black/20'
             : 'bg-dark-bg/80 backdrop-blur-md'
             }`}>
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-[1536px] mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-14 md:h-20">
                     {/* Logo */}
                     <Link to="/home" className="flex items-center space-x-2">
@@ -97,6 +97,14 @@ const Navbar = () => {
                             <FiGlobe size={14} className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                             {language === 'en' ? 'TE' : 'EN'}
                         </button>
+
+                        {/* Book Site Visit Button */}
+                        <Link 
+                            to="/contact" 
+                            className="hidden lg:flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-gold-400 to-gold-600 text-black font-bold text-sm hover:shadow-[0_0_15px_rgba(212,168,67,0.4)] transition-all ml-2"
+                        >
+                            <FiCalendar className="w-4 h-4" /> Book Site Visit
+                        </Link>
 
                         {/* Profile dropdown */}
                         <div className="relative">
@@ -151,33 +159,82 @@ const Navbar = () => {
                 </div>
             </div>
 
-            {/* Mobile menu */}
+            {/* Mobile menu overlay */}
             <AnimatePresence>
                 {mobileOpen && (
                     <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        className="md:hidden overflow-hidden bg-white/95 dark:bg-dark-bg/95 backdrop-blur-lg border-t dark:border-dark-border"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setMobileOpen(false)}
+                        className="fixed inset-0 bg-black/60 z-[90] md:hidden"
+                    />
+                )}
+            </AnimatePresence>
+
+            {/* Mobile Sidebar */}
+            <AnimatePresence>
+                {mobileOpen && (
+                    <motion.div
+                        initial={{ x: '-100%' }}
+                        animate={{ x: 0 }}
+                        exit={{ x: '-100%' }}
+                        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                        className="fixed top-0 left-0 w-72 h-[100dvh] bg-[#0A1220] z-[100] shadow-2xl md:hidden flex flex-col border-r border-gray-800"
                     >
-                        <div className="px-4 py-3 space-y-1">
-                            {navLinks.map(link => (
-                                <Link
-                                    key={link.to}
-                                    to={link.to}
-                                    onClick={() => setMobileOpen(false)}
-                                    className={`block px-4 py-3 rounded-lg font-medium transition-colors ${isActive(link.to)
-                                        ? 'text-gold-400 bg-gold-400/10'
-                                        : 'text-gray-700 dark:text-gray-300 hover:bg-gold-400/10 hover:text-gold-400'
-                                        }`}
-                                >
-                                    {link.label}
-                                </Link>
-                            ))}
+                        <div className="flex items-center justify-between p-5 border-b border-gray-800">
+                            <Link to="/home" className="flex items-center space-x-2" onClick={() => setMobileOpen(false)}>
+                                <div className="w-8 h-8 rounded-lg bg-gold-400 flex items-center justify-center">
+                                    <span className="text-black font-heading font-bold text-base">P</span>
+                                </div>
+                                <span className="text-lg font-heading font-bold text-white">
+                                    PVR <span className="text-gold-400">Groups</span>
+                                </span>
+                            </Link>
+                            <button onClick={() => setMobileOpen(false)} className="text-gray-400 hover:text-white p-2">
+                                <FiX size={20} />
+                            </button>
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
+                            {navLinks.map(link => {
+                                const active = isActive(link.to);
+                                return (
+                                    <Link
+                                        key={link.to}
+                                        to={link.to}
+                                        onClick={() => setMobileOpen(false)}
+                                        className={`flex items-center gap-4 px-4 py-3 rounded-xl font-medium transition-colors ${active
+                                            ? 'text-gold-400 bg-[#121C2D] border border-gray-800'
+                                            : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                            }`}
+                                    >
+                                        <span className={active ? 'text-gold-400' : 'text-gray-500'}>
+                                            {link.icon}
+                                        </span>
+                                        {link.label}
+                                    </Link>
+                                );
+                            })}
+                            
                             {isAdmin && (
-                                <Link to="/admin" onClick={() => setMobileOpen(false)} className="block px-4 py-3 rounded-lg text-gold-400 hover:bg-gold-400/10 font-medium">
+                                <Link to="/admin" onClick={() => setMobileOpen(false)} className="flex items-center gap-4 px-4 py-3 rounded-xl text-gold-400 hover:bg-white/5 font-medium mt-4">
+                                    <FiSettings className="w-5 h-5 text-gold-400" />
                                     Admin Panel
                                 </Link>
+                            )}
+                        </div>
+
+                        <div className="p-4 border-t border-gray-800 space-y-2 pb-8">
+                            <button onClick={() => { switchLanguage(language === 'en' ? 'te' : 'en'); setMobileOpen(false); }} className="flex items-center gap-4 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 font-medium w-full text-left">
+                                <FiGlobe className="w-5 h-5 text-gray-500" />
+                                {language === 'en' ? 'Switch to Telugu' : 'Switch to English'}
+                            </button>
+                            {user && (
+                                <button onClick={handleLogout} className="flex items-center gap-4 px-4 py-3 rounded-xl text-red-400 hover:text-red-300 hover:bg-red-500/10 font-medium w-full text-left">
+                                    <FiLogOut className="w-5 h-5 text-red-500" />
+                                    {t('logout')}
+                                </button>
                             )}
                         </div>
                     </motion.div>

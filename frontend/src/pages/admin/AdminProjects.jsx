@@ -40,6 +40,7 @@ const AdminProjects = () => {
     const [showForm, setShowForm] = useState(false);
     const [editing, setEditing] = useState(null);
     const [form, setForm] = useState(INITIAL_FORM);
+    const [isHighlighted, setIsHighlighted] = useState(false);
     const [imageGroups, setImageGroups] = useState([]);
     const [saving, setSaving] = useState(false);
     const [selectedAmenities, setSelectedAmenities] = useState([]);
@@ -61,6 +62,7 @@ const AdminProjects = () => {
         setForm(INITIAL_FORM);
         setImageGroups([]);
         setEditing(null);
+        setIsHighlighted(false);
         setShowForm(false);
         setSelectedAmenities([]);
         setBestFeatures([]);
@@ -137,11 +139,18 @@ const AdminProjects = () => {
                 g.files.forEach(f => formData.append('images', f));
             });
 
+            let projectId = editing;
             if (editing) {
                 await api.put(`/projects/${editing}`, formData);
             } else {
-                await api.post('/projects', formData);
+                const res = await api.post('/projects', formData);
+                projectId = res.data._id;
             }
+            
+            if (isHighlighted && projectId) {
+                await api.post('/settings', { highlightedProjectId: projectId });
+            }
+
             fetchProjects();
             resetForm();
         } catch (err) {
@@ -211,6 +220,15 @@ const AdminProjects = () => {
                                 {/* Basic Info */}
                                 <input type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Project Name" className={inputCls} required />
                                 <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} placeholder="Project Description" className={inputCls} required />
+                                
+                                <label className="flex items-center gap-3 p-4 rounded-xl border border-gold-400/30 bg-gold-400/5 cursor-pointer hover:bg-gold-400/10 transition-colors">
+                                    <input type="checkbox" checked={isHighlighted} onChange={(e) => setIsHighlighted(e.target.checked)} className="w-5 h-5 rounded border-gold-400 text-gold-400 focus:ring-gold-400 bg-transparent" />
+                                    <div>
+                                        <p className="text-sm font-bold text-gold-400">Highlight this Project</p>
+                                        <p className="text-xs text-gray-500">This will feature the project prominently on the Home and Projects pages.</p>
+                                    </div>
+                                </label>
+
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })} className={inputCls}>
                                         <option value="ongoing">Ongoing</option>

@@ -30,7 +30,7 @@ router.post('/register', [
         if (existingUser) return res.status(400).json({ message: 'Email already registered' });
 
         const verificationToken = crypto.randomBytes(32).toString('hex');
-        const hashedPassword = await bcrypt.hash(password, 12);
+        const hashedPassword = await bcrypt.hash(password, 10);
 
         let referredBy = null;
         if (referralCode) {
@@ -230,7 +230,7 @@ router.post('/reset-password', [
             
         if (!user) return res.status(400).json({ message: 'Invalid or expired reset token' });
 
-        const hashedPassword = await bcrypt.hash(password, 12);
+        const hashedPassword = await bcrypt.hash(password, 10);
         
         await supabase.from('users').update({ 
             password: hashedPassword, 

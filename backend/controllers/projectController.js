@@ -1,14 +1,14 @@
 const supabase = require('../config/supabase');
-const fs = require('fs');
 const path = require('path');
-const { 
-    generateOptimizedUrl, 
-    downloadOptimizedImage, 
-    uploadToBunnyStorage, 
-    deleteFromBunnyStorage, 
-    generateBunnyCdnUrl 
+const os = require('os');
+const fs = require('fs');
+const {
+    processAndUploadImage,
+    deleteFromBunnyStorage,
+    generateBunnyCdnUrl,
 } = require('../utils/imageWorkers');
-// Helper to map DB to what frontend expects 
+
+// ─── DB row → frontend shape ─────────────────────────────────────────────────
 const mapProject = (p) => {
     if (!p) return null;
     return {
@@ -31,66 +31,60 @@ const mapProject = (p) => {
         constructionType: p.construction_type,
         bankApprovals: p.bank_approvals,
         createdAt: p.created_at,
-        updatedAt: p.updated_at
+        updatedAt: p.updated_at,
     };
 };
 
-// Upload project to Cloudinary and save to DB
+// ─── Helper: write buffer to a temp file, process + upload, cleanup ──────────
+async function processSingleFile(file, folderName) {
+    const ext = path.extname(file.originalname) || '.jpg';
+    const baseName = path.parse(file.originalname).name.replace(/[^a-zA-Z0-9]/g, '') || 'img';
+    const filename = `${baseName}_${Date.now()}`;
+    const finalBunnyPath = `projects/${folderName}/${filename}.webp`;
+
+    // Write buffer to a temp file (Sharp needs a file path or buffer)
+    const tmpPath = path.join(os.tmpdir(), `pvr_${filename}${ext}`);
+    fs.writeFileSync(tmpPath, file.buffer);
+
+    try {
+        const cdnUrl = await processAndUploadImage(tmpPath, finalBunnyPath);
+        return cdnUrl;
+    } finally {
+        try { fs.unlinkSync(tmpPath); } catch (_) {}
+    }
+}
+
+// ─── Upload project ──────────────────────────────────────────────────────────
 exports.uploadProject = async (req, res) => {
     try {
-        const { 
-            name, title, description, location, status, 
+        const {
+            name, title, description, location, status,
             completionPercentage, amenities, bestFeatures,
             price, area, units, projectType, totalFloors,
             configurations, videoId, possessionDate, reraNumber,
             totalLandArea, constructionType, bankApprovals,
             specFlooring, specDoors, specWindows, specKitchen,
-            specBathroom, specElectrical, specPainting
+            specBathroom, specElectrical, specPainting,
         } = req.body;
-        
+
         if (!req.files || req.files.length === 0) {
             return res.status(400).json({ message: 'No images uploaded' });
         }
 
         const folderName = (name || title || 'unnamed-project').toLowerCase().replace(/[^a-z0-9]/g, '-');
-        const uploadedImages = [];
-        for (const file of req.files) {
-            const filename = path.parse(file.originalname).name.replace(/[^a-zA-Z0-9]/g, '') + '_' + Date.now();
-            const tempBunnyPath = `temp/${folderName}/${filename}${path.extname(file.originalname)}`;
-            const finalBunnyPath = `projects/${folderName}/${filename}.webp`;
-            const optimizedLocalPath = path.join(__dirname, '../optimized', `${filename}.webp`);
-
-            try {
-                // 1. Upload original to Bunny Temp
-                await uploadToBunnyStorage(file.path, tempBunnyPath);
-                
-                // 2. Generate ImageKit URL and Download
-                const ikUrl = generateOptimizedUrl(`${process.env.IMAGEKIT_URL_ENDPOINT}/${tempBunnyPath}`);
-                await downloadOptimizedImage(ikUrl, optimizedLocalPath);
-                
-                // 3. Upload optimized to Bunny
-                await uploadToBunnyStorage(optimizedLocalPath, finalBunnyPath);
-                
-                // 4. Save and Cleanup
-                uploadedImages.push(generateBunnyCdnUrl(finalBunnyPath));
-                await deleteFromBunnyStorage(tempBunnyPath);
-            } catch (err) {
-                console.error("Image Processing Error:", err);
-            } finally {
-                try { if (fs.existsSync(file.path)) fs.unlinkSync(file.path); } catch (e) {}
-                try { if (fs.existsSync(optimizedLocalPath)) fs.unlinkSync(optimizedLocalPath); } catch (e) {}
-            }
-        }
+        const uploadedImages = await Promise.all(
+            req.files.map((file) => processSingleFile(file, folderName))
+        );
 
         let parsedConfigs = [];
         if (configurations) {
             try {
-                parsedConfigs = JSON.parse(configurations).map(cfg => ({
+                parsedConfigs = JSON.parse(configurations).map((cfg) => ({
                     ...cfg,
-                    bedrooms: cfg.bedrooms === "" ? null : Number(cfg.bedrooms),
-                    bathrooms: cfg.bathrooms === "" ? null : Number(cfg.bathrooms),
-                    balconies: cfg.balconies === "" ? null : Number(cfg.balconies),
-                    parking: cfg.parking === "" ? null : Number(cfg.parking)
+                    bedrooms: cfg.bedrooms === '' ? null : Number(cfg.bedrooms),
+                    bathrooms: cfg.bathrooms === '' ? null : Number(cfg.bathrooms),
+                    balconies: cfg.balconies === '' ? null : Number(cfg.balconies),
+                    parking: cfg.parking === '' ? null : Number(cfg.parking),
                 }));
             } catch (e) {}
         }
@@ -107,13 +101,13 @@ exports.uploadProject = async (req, res) => {
             amenities: amenities ? (typeof amenities === 'string' ? JSON.parse(amenities) : amenities) : [],
             best_features: bestFeatures ? (typeof bestFeatures === 'string' ? JSON.parse(bestFeatures) : bestFeatures) : [],
             price, area, units,
-            project_type: projectType, 
+            project_type: projectType,
             total_floors: totalFloors,
             configurations: parsedConfigs,
             video_id: Array.isArray(videoId) ? videoId[0] : videoId,
-            possession_date: possessionDate, 
+            possession_date: possessionDate,
             rera_number: reraNumber,
-            total_land_area: totalLandArea, 
+            total_land_area: totalLandArea,
             construction_type: constructionType,
             bank_approvals: bankApprovals ? (typeof bankApprovals === 'string' ? JSON.parse(bankApprovals) : bankApprovals) : [],
             specifications: {
@@ -124,12 +118,12 @@ exports.uploadProject = async (req, res) => {
                 bathroom: specBathroom || '',
                 electrical: specElectrical || '',
                 painting: specPainting || '',
-            }
+            },
         };
 
         const { data: project, error } = await supabase.from('projects').insert(insertData).select().single();
         if (error) throw error;
-        
+
         res.status(201).json(mapProject(project));
     } catch (error) {
         console.error('Upload Error:', error);
@@ -137,37 +131,36 @@ exports.uploadProject = async (req, res) => {
     }
 };
 
-// Fetch all projects (including existing logic)
+// ─── Get all projects ────────────────────────────────────────────────────────
 exports.getProjects = async (req, res) => {
     try {
         const { status } = req.query;
         let query = supabase.from('projects').select('*').order('created_at', { ascending: false });
-        if (status) {
-            query = query.eq('status', status);
-        }
-        
+        if (status) query = query.eq('status', status);
+
         const { data: projects, error } = await query;
         if (error) throw error;
-        
+
         res.status(200).json(projects.map(mapProject));
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
 
-// Fetch a single project by ID (including view count logic)
+// ─── Get single project ──────────────────────────────────────────────────────
 exports.getProjectById = async (req, res) => {
     try {
-        const { data: existing } = await supabase.from('projects').select('view_count').eq('id', req.params.id).single();
+        const { data: existing } = await supabase
+            .from('projects').select('view_count').eq('id', req.params.id).single();
         if (!existing) return res.status(404).json({ message: 'Project not found' });
-        
+
         const { data: project, error } = await supabase
             .from('projects')
             .update({ view_count: (existing.view_count || 0) + 1 })
             .eq('id', req.params.id)
             .select()
             .single();
-            
+
         if (error) throw error;
         res.status(200).json(mapProject(project));
     } catch (error) {
@@ -175,38 +168,32 @@ exports.getProjectById = async (req, res) => {
     }
 };
 
-// Delete project and Cloudinary images based on dynamic route or ID
+// ─── Delete project and its Bunny images ─────────────────────────────────────
 exports.deleteProject = async (req, res) => {
     try {
-        const { data: project } = await supabase.from('projects').select('image_urls').eq('id', req.params.id).single();
+        const { data: project } = await supabase
+            .from('projects').select('image_urls').eq('id', req.params.id).single();
         if (!project) return res.status(404).json({ message: 'Project not found' });
 
-        const deletePromises = [];
-        if (project.image_urls && project.image_urls.length > 0) {
-             project.image_urls.forEach(url => {
-                const urlParts = url.split('/');
-                const filenameAndExt = urlParts.pop(); // e.g. livingroom.webp
-                
-                // If the URL contains 'projects', extract the folder path as well
-                let bunnyPath = filenameAndExt;
+        if (project.image_urls?.length > 0) {
+            const deletePromises = project.image_urls.map((url) => {
+                let bunnyPath = url.split('/').pop();
                 if (url.includes('/projects/')) {
-                    // Extract the path after 'projects/'
-                    const projectsIndex = url.indexOf('/projects/');
-                    bunnyPath = url.substring(projectsIndex + 1); // e.g. "projects/project-1/livingroom.webp"
+                    bunnyPath = url.substring(url.indexOf('/projects/') + 1);
                 }
-                
-                deletePromises.push(deleteFromBunnyStorage(bunnyPath));
+                return deleteFromBunnyStorage(bunnyPath);
             });
             await Promise.all(deletePromises);
         }
 
         const { error } = await supabase.from('projects').delete().eq('id', req.params.id);
         if (error) throw error;
-        
+
         res.json({ message: 'Project and associated images deleted successfully' });
     } catch (error) {
         console.error('Delete Error:', error);
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
+
 exports.mapProject = mapProject;

@@ -19,7 +19,7 @@ const ChatWidget = () => {
     ]);
     const [input, setInput] = useState('');
     const [typing, setTyping] = useState(false);
-    const [lastChecked, setLastChecked] = useState(new Date());
+    const lastCheckedRef = useRef(new Date());
     const messagesEndRef = useRef(null);
     const pollRef = useRef(null);
 
@@ -51,12 +51,12 @@ const ChatWidget = () => {
             }]);
         });
 
-        // Poll every 10s for admin replies (fallback)
+        // Poll every 15s for admin replies (fallback)
         pollRef.current = setInterval(async () => {
             try {
-                const res = await api.get(`/chat/replies?since=${lastChecked.toISOString()}`);
+                const res = await api.get(`/chat/replies?since=${lastCheckedRef.current.toISOString()}`);
                 if (res.data.length > 0) {
-                    setLastChecked(new Date());
+                    lastCheckedRef.current = new Date();
                     res.data.forEach(msg => {
                         setMessages(prev => {
                             const alreadyExists = prev.some(m => m._id === msg._id);
@@ -72,7 +72,7 @@ const ChatWidget = () => {
                     });
                 }
             } catch { }
-        }, 10000);
+        }, 15000);
 
         return () => {
             socket?.off('new_reply');
@@ -264,16 +264,16 @@ const ChatWidget = () => {
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={() => setOpen(!open)}
-                className="fixed bottom-8 right-5 w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-primary-700 to-primary-900 text-white shadow-lg flex items-center justify-center z-[60] hover:shadow-xl hover:shadow-primary-900/30 transition-shadow mb-[env(safe-area-inset-bottom)]"
+                className="fixed bottom-[65px] lg:bottom-8 right-4 lg:right-5 w-10 h-10 lg:w-14 lg:h-14 rounded-full bg-gradient-to-br from-[#1E293B] to-[#0A1220] border border-gray-700 text-white shadow-lg flex items-center justify-center z-[90] hover:border-gold-400 transition-colors mb-[env(safe-area-inset-bottom)]"
             >
                 <AnimatePresence mode="wait">
                     {open ? (
                         <motion.div key="x" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }}>
-                            <FiX size={22} />
+                            <FiX className="w-5 h-5 lg:w-[22px] lg:h-[22px]" />
                         </motion.div>
                     ) : (
                         <motion.div key="chat" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }}>
-                            <FiMessageCircle size={22} />
+                            <FiMessageCircle className="w-5 h-5 lg:w-[22px] lg:h-[22px]" />
                         </motion.div>
                     )}
                 </AnimatePresence>

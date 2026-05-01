@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import api from '../../hooks/useApi';
 import { useAuth } from '../../context/AuthContext';
 import { motion } from 'framer-motion';
-import { FiShield, FiCheck, FiX } from 'react-icons/fi';
+import { FiShield, FiCheck, FiX, FiImage } from 'react-icons/fi';
 
 const AdminSettings = () => {
     const { user, setUser } = useAuth();
@@ -12,6 +12,27 @@ const AdminSettings = () => {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
+
+    const [heroImageUrl, setHeroImageUrl] = useState('');
+    const [settingsLoading, setSettingsLoading] = useState(true);
+
+    React.useEffect(() => {
+        api.get('/settings')
+            .then(res => {
+                if (res.data.heroImageUrl) setHeroImageUrl(res.data.heroImageUrl);
+                setSettingsLoading(false);
+            })
+            .catch(() => setSettingsLoading(false));
+    }, []);
+
+    const handleSaveSettings = async () => {
+        try {
+            await api.post('/settings', { heroImageUrl });
+            alert('Settings saved successfully!');
+        } catch (err) {
+            alert('Failed to save settings.');
+        }
+    };
 
     const handleSetup2FA = async () => {
         setLoading(true);
@@ -150,6 +171,39 @@ const AdminSettings = () => {
                                 </div>
                             </motion.div>
                         )}
+                    </div>
+                )}
+            </div>
+
+            <div className="bg-white dark:bg-dark-card rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-dark-border mt-6">
+                <div className="flex items-center space-x-3 mb-6">
+                    <div className="p-3 bg-blue-500/20 rounded-xl text-blue-500">
+                        <FiImage size={24} />
+                    </div>
+                    <div>
+                        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Homepage Settings</h2>
+                        <p className="text-gray-500 text-sm">Customize the appearance of the main website.</p>
+                    </div>
+                </div>
+                
+                {settingsLoading ? (
+                    <p className="text-gray-500">Loading settings...</p>
+                ) : (
+                    <div className="space-y-4 max-w-2xl">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Homepage Hero Image URL</label>
+                            <input 
+                                type="text" 
+                                value={heroImageUrl} 
+                                onChange={(e) => setHeroImageUrl(e.target.value)}
+                                placeholder="https://example.com/image.jpg"
+                                className="w-full px-4 py-3 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-xl text-gray-900 dark:text-white focus:border-gold-400 focus:ring-1 focus:ring-gold-400"
+                            />
+                            <p className="text-xs text-gray-500 mt-2">Provide a direct link to an image. This will replace the default background image on the homepage hero section.</p>
+                        </div>
+                        <button onClick={handleSaveSettings} className="px-6 py-2.5 bg-gold-400 hover:bg-gold-500 text-white font-medium rounded-xl transition-colors">
+                            Save Homepage Settings
+                        </button>
                     </div>
                 )}
             </div>

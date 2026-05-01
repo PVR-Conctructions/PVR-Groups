@@ -4,30 +4,46 @@ const sendEmail = require('../utils/email');
 const router = express.Router();
 const auth = require('../middleware/auth');
 const adminAuth = require('../middleware/adminAuth');
+const { body, validationResult } = require('express-validator');
 
-router.post('/book', async (req, res) => {
+// ─── Validation rules for site visit booking ─────────────────────────────────
+const bookingValidation = [
+    body('name').trim().notEmpty().withMessage('Name is required').isLength({ max: 100 }).escape(),
+    body('email').trim().isEmail().withMessage('Valid email is required').normalizeEmail(),
+    body('phone').trim().notEmpty().withMessage('Phone is required')
+        .matches(/^[0-9+\-\s()]{7,20}$/).withMessage('Invalid phone number'),
+    body('preferredDate').notEmpty().withMessage('Preferred date is required').isISO8601().withMessage('Invalid date format'),
+    body('message').optional().trim().isLength({ max: 1000 }).escape(),
+    body('projectId').optional().isString(),
+];
+
+router.post('/book', bookingValidation, async (req, res) => {
+    // Check validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ message: errors.array()[0].msg, errors: errors.array() });
+    }
+
     try {
         const { name, email, phone, projectId, preferredDate, message } = req.body;
-        if (!name || !email || !phone || !preferredDate) {
-            return res.status(400).json({ message: 'Name, email, phone, and preferred date are required' });
-        }
 
         const insertData = {
-            name, email, phone, 
-            project_id: projectId, 
-            preferred_date: preferredDate, 
-            message
+            name, email, phone,
+            project_id: projectId,
+            preferred_date: preferredDate,
+            message: message || null,
         };
 
         const { data: visit, error } = await supabase.from('site_visits').insert(insertData).select().single();
         if (error) throw error;
 
+        // Fire-and-forget email — don't block the response
         sendEmail({
             to: process.env.EMAIL_USER || 'pvrgroupsvijayawada@gmail.com',
             subject: 'New Site Visit Booking - PVR Groups',
-            html: `<h2>New Site Visit Request</h2><p>Name: ${name}</p><p>Email: ${email}</p><p>Phone: ${phone}</p><p>Date: ${preferredDate}</p><p>Message: ${message || 'N/A'}</p>`
-        }).catch(emailErr => {
-            console.error('Failed to send email notification:', emailErr);
+            html: `<h2>New Site Visit Request</h2><p>Name: ${name}</p><p>Email: ${email}</p><p>Phone: ${phone}</p><p>Date: ${preferredDate}</p><p>Message: ${message || 'N/A'}</p>`,
+        }).catch((emailErr) => {
+            console.error('Failed to send email notification:', emailErr.message);
         });
 
         res.status(201).json({ message: 'Site visit booked successfully!', visit: { ...visit, _id: visit.id } });
