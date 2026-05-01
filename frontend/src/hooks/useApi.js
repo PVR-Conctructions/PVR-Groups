@@ -10,7 +10,6 @@ const BASE_URL = import.meta.env.VITE_BACKEND_URL
 const api = axios.create({
     baseURL: BASE_URL,
     timeout: 30000,
-    headers: { 'Accept-Encoding': 'gzip, deflate, br' }, // Accept compressed responses
 });
 
 // ── Request interceptor: attach JWT ──────────────────────────────────────────

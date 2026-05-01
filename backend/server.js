@@ -106,16 +106,26 @@ if (compression) {
 
 // 5. CORS — production: Vercel URL only; dev: localhost too
 const allowedOrigins = [
-    FRONTEND_URL,
+    FRONTEND_URL.replace(/\/$/, ''), // remove trailing slash
     'http://localhost:5173',
     'http://localhost:3000',
 ];
 app.use(cors({
     origin: (origin, callback) => {
-        if (!origin || allowedOrigins.some((o) => origin.startsWith(o))) {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        
+        // Strip trailing slash from origin just in case
+        const normalizedOrigin = origin.replace(/\/$/, '');
+        
+        if (allowedOrigins.some((o) => normalizedOrigin === o || normalizedOrigin.startsWith(o))) {
+            callback(null, true);
+        } else if (normalizedOrigin.includes('pvr-groups.vercel.app')) {
+            // Also allow any vercel preview deployments that match the project name
             callback(null, true);
         } else {
-            callback(new Error(`CORS blocked for origin: ${origin}`));
+            console.warn(`[CORS] Blocked request from origin: ${origin}`);
+            callback(null, false);
         }
     },
     credentials: true,
