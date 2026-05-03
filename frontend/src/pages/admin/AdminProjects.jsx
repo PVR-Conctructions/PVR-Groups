@@ -154,7 +154,16 @@ const AdminProjects = () => {
             fetchProjects();
             resetForm();
         } catch (err) {
-            alert(err.response?.data?.message || 'Failed to save project');
+            console.error('Submit Error:', err);
+            let errorMessage = 'Failed to save project';
+            if (err.response?.data?.errors) {
+                errorMessage = err.response.data.errors.map(e => e.msg).join(', ');
+            } else if (err.response?.data?.message) {
+                errorMessage = err.response.data.message;
+            } else if (err.message) {
+                errorMessage = err.message;
+            }
+            alert(`Error: ${errorMessage}`);
         } finally {
             setSaving(false);
         }

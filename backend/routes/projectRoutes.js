@@ -84,9 +84,10 @@ router.post('/',
             let uploadedUrls = [];
 
             if (req.files?.length > 0) {
-                uploadedUrls = await Promise.all(
-                    req.files.map((file) => processSingleFile(file, folderName))
-                );
+                for (const file of req.files) {
+                    const url = await processSingleFile(file, folderName);
+                    uploadedUrls.push(url);
+                }
             }
 
             // Build categorized image groups
@@ -245,9 +246,10 @@ router.put('/:id',
             let uploadedUrls = [];
             if (req.files?.length > 0) {
                 const folderName = (name || existingProject?.name || 'unnamed').toLowerCase().replace(/[^a-z0-9]/g, '-');
-                uploadedUrls = await Promise.all(
-                    req.files.map((file) => processSingleFile(file, folderName))
-                );
+                for (const file of req.files) {
+                    const url = await processSingleFile(file, folderName);
+                    uploadedUrls.push(url);
+                }
             }
 
             if (imageGroupsData) {

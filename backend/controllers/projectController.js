@@ -72,9 +72,10 @@ exports.uploadProject = async (req, res) => {
         }
 
         const folderName = (name || title || 'unnamed-project').toLowerCase().replace(/[^a-z0-9]/g, '-');
-        const uploadedImages = await Promise.all(
-            req.files.map((file) => processSingleFile(file, folderName))
-        );
+        const uploadedImages = [];
+        for (const file of req.files) {
+            uploadedImages.push(await processSingleFile(file, folderName));
+        }
 
         let parsedConfigs = [];
         if (configurations) {

@@ -6,7 +6,7 @@ const path = require('path');
 const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
-    const allowed = /jpeg|jpg|png|gif|webp|pdf/;
+    const allowed = /jpeg|jpg|png|gif|webp|pdf|avif/;
     const ext = allowed.test(path.extname(file.originalname).toLowerCase());
     const mime = allowed.test(file.mimetype);
     if (ext && mime) cb(null, true);
