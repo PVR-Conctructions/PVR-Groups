@@ -36,7 +36,7 @@ const ChatWidget = () => {
         if (!socket) {
             const socketUrl = import.meta.env.PROD
                 ? 'https://pvr-groups-1.onrender.com'
-                : 'http://localhost:5001';
+                : 'http://localhost:5000';
             socket = io(socketUrl, { transports: ['websocket'] });
         }
         socket.emit('register', user._id);

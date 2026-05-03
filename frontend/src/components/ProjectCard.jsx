@@ -55,7 +55,7 @@ const ProjectCard = ({ project, index, compareSelected = [], onToggleCompare, sh
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: index * 0.1 }}
             viewport={{ once: true }}
-            className={`card-hover group ${isHighlighted ? 'ring-2 ring-gold-400 ring-offset-2 ring-offset-[#050B14] shadow-[0_0_20px_rgba(212,168,67,0.3)] rounded-2xl' : ''}`}
+            className={`card-hover group w-full min-w-0 ${isHighlighted ? 'ring-2 ring-gold-400 ring-offset-2 ring-offset-[#050B14] shadow-[0_0_20px_rgba(212,168,67,0.3)] rounded-2xl' : ''}`}
         >
             <Link to={`/projects/${project._id}`}>
                 <div className={`bg-[#0A1220] rounded-2xl overflow-hidden shadow-xl border transition-colors flex flex-col h-full ${isHighlighted ? 'border-gold-400' : 'border-gray-800 hover:border-gold-400/50'}`}>
@@ -93,35 +93,35 @@ const ProjectCard = ({ project, index, compareSelected = [], onToggleCompare, sh
                     </div>
 
                     {/* Content */}
-                    <div className="p-5 flex-1 flex flex-col">
-                        <h3 className="text-lg font-heading font-bold text-white mb-1 group-hover:text-gold-400 transition-colors truncate">
+                    <div className="p-5 flex-1 flex flex-col min-w-0">
+                        <h3 className="text-lg font-heading font-bold text-white mb-1 group-hover:text-gold-400 transition-colors truncate min-w-0">
                             {project.name}
                         </h3>
-                        <div className="flex items-center space-x-1.5 text-gray-400 text-xs mb-4">
-                            <FiMapPin size={12} className="text-gold-400" />
-                            <span className="truncate">{project.location?.address || 'Vijayawada'}</span>
+                        <div className="flex items-center gap-1.5 text-gray-400 text-xs mb-4 min-w-0">
+                            <FiMapPin size={12} className="text-gold-400 flex-shrink-0" />
+                            <span className="truncate flex-1 min-w-0">{project.location?.address || 'Vijayawada'}</span>
                         </div>
                         
                         {/* Amenities mockup since it's in the design */}
-                        <div className="flex items-center gap-3 text-xs text-gray-400 mb-6">
+                        <div className="flex items-center flex-wrap gap-y-2 gap-x-3 text-xs text-gray-400 mb-6">
                             <div className="flex items-center gap-1.5"><span className="text-gold-400">⌘</span> Clubhouse</div>
                             <div className="flex items-center gap-1.5"><span className="text-gold-400">≈</span> Pool</div>
                             <div className="text-xs text-gray-500 bg-gray-800 px-1.5 py-0.5 rounded">+8</div>
                         </div>
 
-                        <div className="mt-auto">
-                            <div className="flex items-center justify-between mb-4">
-                                <span className="text-gold-400 font-bold text-base">{project.price || 'Contact for Price'}</span>
-                                <span className="flex items-center text-xs text-gold-400 font-medium group-hover:translate-x-1 transition-transform">
+                        <div className="mt-auto min-w-0">
+                            <div className="flex items-center justify-between gap-2 mb-4 min-w-0">
+                                <span className="text-gold-400 font-bold text-base truncate flex-1 min-w-0">{project.price || 'Contact for Price'}</span>
+                                <span className="flex items-center flex-shrink-0 text-xs text-gold-400 font-medium group-hover:translate-x-1 transition-transform">
                                     View Details <FiArrowRight className="ml-1" size={12} />
                                 </span>
                             </div>
 
                             {/* Bottom Actions Bar */}
-                            <div className="flex items-center justify-between pt-4 border-t border-gray-800">
+                            <div className="flex items-center justify-between pt-4 border-t border-gray-800 gap-2">
                                 <button
                                     onClick={handleCompareClick}
-                                    className={`flex items-center gap-2 text-xs font-medium transition-colors ${isCompared ? 'text-gold-400' : 'text-gray-400 hover:text-white'}`}
+                                    className={`flex items-center flex-shrink-0 gap-2 text-xs font-medium transition-colors ${isCompared ? 'text-gold-400' : 'text-gray-400 hover:text-white'}`}
                                 >
                                     {isCompared ? <FiCheckSquare size={16} /> : <FiSquare size={16} />}
                                     Compare
@@ -132,7 +132,7 @@ const ProjectCard = ({ project, index, compareSelected = [], onToggleCompare, sh
                                         e.preventDefault();
                                         // Handle virtual tour click if needed
                                     }}
-                                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-700 text-gray-300 text-xs hover:border-gold-400 hover:text-gold-400 transition-colors"
+                                    className="flex items-center flex-shrink-0 gap-2 px-3 py-1.5 rounded-lg border border-gray-700 text-gray-300 text-xs hover:border-gold-400 hover:text-gold-400 transition-colors"
                                 >
                                     <FiBox size={14} /> Virtual Tour
                                 </button>

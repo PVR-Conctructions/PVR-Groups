@@ -205,7 +205,7 @@ const ProjectsPage = () => {
                             <div className="w-12 h-12 border-4 border-gold-400 border-t-transparent rounded-full animate-spin"></div>
                         </div>
                     ) : filtered.length > 0 ? (
-                        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                             {filtered
                                 .sort((a, b) => {
                                     if (a._id === settings.highlightedProjectId) return -1;

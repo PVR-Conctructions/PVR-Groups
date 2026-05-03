@@ -23,13 +23,13 @@ router.get('/dashboard', auth, adminAuth, async (req, res) => {
         const [usersQ, projectsQ, ongoingQ, completedQ, feedbackQ, pendingFeedbackQ, newsletterQ, siteVisitsQ] = queries;
 
         res.json({
-            totalUsers: usersQ.count || 0, 
-            totalProjects: projectsQ.count || 0, 
-            ongoingProjects: ongoingQ.count || 0, 
+            totalUsers: usersQ.count || 0,
+            totalProjects: projectsQ.count || 0,
+            ongoingProjects: ongoingQ.count || 0,
             completedProjects: completedQ.count || 0,
-            totalFeedback: feedbackQ.count || 0, 
-            pendingFeedback: pendingFeedbackQ.count || 0, 
-            totalNewsletterSubs: newsletterQ.count || 0, 
+            totalFeedback: feedbackQ.count || 0,
+            pendingFeedback: pendingFeedbackQ.count || 0,
+            totalNewsletterSubs: newsletterQ.count || 0,
             totalSiteVisits: siteVisitsQ.count || 0
         });
     } catch (error) {
@@ -45,9 +45,9 @@ router.get('/users', auth, adminAuth, async (req, res) => {
             .select('id, name, email, phone, role, verified, created_at, last_login')
             .eq('role', 'user')
             .order('created_at', { ascending: false });
-            
+
         if (error) throw error;
-        
+
         const formatted = users.map(u => ({ ...u, _id: u.id, createdAt: u.created_at, lastLogin: u.last_login }));
         res.json(formatted);
     } catch (error) {
@@ -63,7 +63,7 @@ router.get('/announcements', async (req, res) => {
             .select('*')
             .eq('active', true)
             .order('created_at', { ascending: false });
-            
+
         if (error) throw error;
         const formatted = announcements.map(a => ({ ...a, _id: a.id, createdAt: a.created_at }));
         res.json(formatted);
@@ -80,7 +80,7 @@ router.post('/announcements', auth, adminAuth, async (req, res) => {
             .insert([{ title, content }])
             .select()
             .single();
-            
+
         if (error) throw error;
         res.status(201).json({ ...announcement, _id: announcement.id });
     } catch (error) {
@@ -104,7 +104,7 @@ router.get('/site-visits', auth, adminAuth, async (req, res) => {
             .from('site_visits')
             .select('*, projects(name)')
             .order('created_at', { ascending: false });
-            
+
         if (error) throw error;
         const formatted = visits.map(v => ({
             ...v, _id: v.id,
@@ -128,7 +128,7 @@ router.post('/setup-2fa', auth, adminAuth, async (req, res) => {
             .from('users')
             .update({ twofa_secret: secret.base32 })
             .eq('id', req.user.id);
-            
+
         if (error) throw error;
 
         const qrCode = await QRCode.toDataURL(secret.otpauth_url);
@@ -188,9 +188,9 @@ router.post('/disable-2fa', auth, adminAuth, async (req, res) => {
             .from('users')
             .update({ twofa_enabled: false, twofa_secret: null })
             .eq('id', req.user.id);
-            
+
         if (error) throw error;
-        
+
         res.json({ success: true, message: '2FA disabled successfully' });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
@@ -198,3 +198,6 @@ router.post('/disable-2fa', auth, adminAuth, async (req, res) => {
 });
 
 module.exports = router;
+
+
+//{"status":"OK","timestamp":"2026-05-03T09:17:39.121Z","uptime":"6775s","redis":"connected"}//

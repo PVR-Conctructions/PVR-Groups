@@ -39,7 +39,7 @@ const CdnImage = ({
             alt={alt}
             loading={loadAttr}
             decoding="async"
-            fetchPriority={priority ? 'high' : 'auto'}
+            fetchpriority={priority ? 'high' : 'auto'}
             className={className}
             style={{
                 opacity: loaded ? 1 : 0,

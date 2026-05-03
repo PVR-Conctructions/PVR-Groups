@@ -317,7 +317,7 @@ const HomePage = () => {
                     </div>
 
                     {/* Projects Grid */}
-                    <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         {filtered.length > 0 ? (
                             filtered
                                 .sort((a, b) => {
